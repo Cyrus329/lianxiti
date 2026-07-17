@@ -1,0 +1,22 @@
+{
+  "name": "专升本题库训练中心 v38 校正与错题规划版",
+  "short_name": "题库 v38",
+  "description": "7.16第1天题库，共136道，支持标准数学公式、图文/纯文字切换、错题规划和自动类似题。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#147a7e",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
