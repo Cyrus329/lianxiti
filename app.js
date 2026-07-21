@@ -2,16 +2,16 @@ const DB_NAME = "zsb-question-bank-trainer-v34-empty";
 const DB_VERSION = 1;
 const QUESTION_STORE = "questions";
 const PROGRESS_STORE = "progress";
-const BUNDLED_DATA_URL = "question-bank-data.json";
+const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 question-bank-data.js
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260717-v39-backup-import";
+const FORCE_CLEAN_VERSION = "20260721-v40-assignment-groups";
 const FORCE_EMPTY_BANK = false;
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
 const MISTAKE_REASON_KEY = "zsb-question-bank-empty-v34:mistake-reasons-v29";
 const CONCEPT_WRONG_STREAK_KEY = "zsb-question-bank-empty-v34:concept-wrong-streak-v29";
-const LOCAL_BACKUP_SCHEMA = "question-bank-local-backup-v39-backup-import";
+const LOCAL_BACKUP_SCHEMA = "question-bank-local-backup-v40-assignment-groups";
 const MISTAKE_REASON_LABELS = {
   unknown: "不会",
   careless: "粗心",
@@ -47,6 +47,7 @@ const GENERATED_VARIANTS_KEY = "zsb-question-bank-v38:generated-variants";
 
 const els = {
   searchInput: document.querySelector("#searchInput"),
+  assignmentFilter: document.querySelector("#assignmentFilter"),
   subjectFilter: document.querySelector("#subjectFilter"),
   chapterFilter: document.querySelector("#chapterFilter"),
   sourceFilter: document.querySelector("#sourceFilter"),
@@ -421,6 +422,10 @@ async function loadBundledQuestions() {
 }
 
 function updateFilters() {
+  if (els.assignmentFilter) {
+    const assignmentValues = QuestionBankCore.uniqueValues(state.questions.map((question) => question.assignmentGroup || "课后作业"));
+    refillSelect(els.assignmentFilter, ["all", ...assignmentValues], "全部作业");
+  }
   refillSelect(els.subjectFilter, ["all", ...QuestionBankCore.uniqueValues(state.questions.map((question) => question.subject))], "全部");
   const selectedSubject = els.subjectFilter.value || "all";
   refillSelect(els.chapterFilter, ["all", ...QuestionBankCore.availableChapters(state.questions, selectedSubject)], "全部");
@@ -455,6 +460,7 @@ function applyFilters() {
   const auditStatusList = ["auditQueue", "auditFeedback", "auditLocked", "auditReference", "auditAnswerOnly", "auditMissing"];
   const coreStatus = ["dueReview", "weakChapter", "mastered", "answerReview", ...auditStatusList].includes(status) ? "all" : status;
   const difficulty = els.difficultyFilter ? els.difficultyFilter.value : "all";
+  const assignment = els.assignmentFilter ? els.assignmentFilter.value : "all";
   const source = els.sourceFilter ? els.sourceFilter.value : "all";
   const day = els.dayFilter ? els.dayFilter.value : "all";
   const weakKeys = new Set(getWeakChapterStats().map((item) => item.key));
@@ -466,6 +472,7 @@ function applyFilters() {
     status: coreStatus,
     progressById: state.progressById
   })
+    .filter((question) => assignment === "all" || String(question.assignmentGroup || "课后作业") === assignment)
     .filter((question) => source === "all" || String(question.source || "题库") === source)
     .filter((question) => day === "all" || getQuestionDayLabel(question) === day)
     .filter((question) => difficulty === "all" || String(question.difficulty) === difficulty)
@@ -831,7 +838,16 @@ function renderMasteryRow(item) {
 
 function renderList(page) {
   const fragment = document.createDocumentFragment();
+  let previousAssignment = "";
   page.items.forEach((question) => {
+    const assignment = String(question.assignmentGroup || "课后作业");
+    if (assignment !== previousAssignment) {
+      const heading = document.createElement("div");
+      heading.className = "assignment-group-heading";
+      heading.innerHTML = `<span>大标题</span><strong>${escapeHtml(assignment)}</strong>`;
+      fragment.append(heading);
+      previousAssignment = assignment;
+    }
     const progress = readProgress(question.id);
     const button = document.createElement("button");
     button.type = "button";
@@ -839,6 +855,7 @@ function renderList(page) {
     button.dataset.id = question.id;
     button.innerHTML = `
       <div class="meta-line">
+        <span class="badge assignment-badge">${escapeHtml(question.assignmentGroup || "课后作业")}</span>
         <span class="badge">${escapeHtml(question.subject)}</span>
         <span>${escapeHtml(question.chapter)}</span>
         <span>${escapeHtml(question.type)}</span>
@@ -999,7 +1016,7 @@ function renderDetail() {
   els.detailPanel.innerHTML = `
     <article class="question-detail">
       <header class="detail-header">
-        <p class="eyebrow">${escapeHtml(question.source)} · ${escapeHtml(getQuestionDayLabel(question))} · ${escapeHtml(question.subject)} · ${escapeHtml(question.chapter)}</p>
+        <p class="eyebrow">${escapeHtml(question.assignmentGroup || "课后作业")} · ${escapeHtml(question.source)} · ${escapeHtml(getQuestionDayLabel(question))} · ${escapeHtml(question.subject)} · ${escapeHtml(question.chapter)}</p>
         <h2><span class="desktop-question-title">原题 ${escapeHtml(getQuestionDisplayNo(question))} · ${escapeHtml(question.type)}</span><span class="mobile-question-title">第 ${currentPosition} 题</span></h2>
         <div class="mobile-question-topnav">
           <button class="secondary-button nav-button" id="mobilePrevQuestionButton" type="button" aria-label="上一题"${canGoPrev ? "" : " disabled"}>←</button>
@@ -1145,7 +1162,7 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260717-v38-corrected-planner";
+const IMAGE_VERSION = "20260721-v40-assignment-groups";
 const IMAGE_PACK_SCRIPTS = [
   { prefix: "question-images/official-answer-crops/comp_scan/", file: "image-pack-comp.js" },
   { prefix: "question-images/wrongbook-math/", files: ["image-pack-wrongbook-01.js", "image-pack-wrongbook-02.js", "image-pack-wrongbook-03.js", "image-pack-wrongbook-04.js"] },
@@ -3515,6 +3532,8 @@ async function createGeneratedSimilarQuestion(baseQuestion, index = 0) {
     studyDate: new Date().toISOString().slice(0, 10),
     studyDay: baseQuestion.studyDay || 1,
     dayLabel: '错题同类训练',
+    assignmentGroup: baseQuestion.assignmentGroup || '课后作业',
+    assignmentOrder: Number(baseQuestion.assignmentOrder || 1),
     importOrder: Math.max(0, ...state.questions.map((q) => Number(q.importOrder || 0))) + 1,
     titleLabel: '自动生成的错题同类练习',
     textStatus: 'generated_verified',
@@ -3565,7 +3584,7 @@ function bindEvents() {
     state.page = 1;
     applyFilters();
   });
-  [els.chapterFilter, els.sourceFilter, els.dayFilter, els.statusFilter, els.difficultyFilter].filter(Boolean).forEach((select) => {
+  [els.assignmentFilter, els.chapterFilter, els.sourceFilter, els.dayFilter, els.statusFilter, els.difficultyFilter].filter(Boolean).forEach((select) => {
     select.addEventListener("change", () => {
       state.page = 1;
       applyFilters();

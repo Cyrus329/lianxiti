@@ -122,7 +122,9 @@
       importOrder: Number(source.importOrder || 0),
       sourceOrder: Number(source.sourceOrder || 0),
       sourceRecognition: String(source.sourceRecognition || "auto").trim(),
-      titleLabel: String(source.titleLabel || "").trim()
+      titleLabel: String(source.titleLabel || "").trim(),
+      assignmentGroup: String(source.assignmentGroup || "课后作业").trim(),
+      assignmentOrder: Number(source.assignmentOrder || 1)
     };
   }
 
@@ -202,6 +204,7 @@
       question.studyDate,
       question.dayLabel,
       question.source,
+      question.assignmentGroup,
       ...(question.options || []),
       ...(question.tags || [])
     ].join(" ").toLowerCase();

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v39 备份导入修正版</title>
+  <title>专升本题库训练中心｜v41 轻量版</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260717-v39-backup-import">
+  <link rel="stylesheet" href="styles.css?v=20260721-v41-lite">
 </head>
 <body>
   <div class="app-shell">
@@ -66,6 +66,12 @@
       <label class="field search-field">
         <span>搜索</span>
         <input id="searchInput" type="search" placeholder="题号、考点、关键词">
+      </label>
+      <label class="field">
+        <span>作业大标题</span>
+        <select id="assignmentFilter">
+          <option value="all">全部作业</option>
+        </select>
       </label>
       <label class="field">
         <span>科目</span>
@@ -224,7 +230,7 @@
         <div class="empty-detail">
           <p class="eyebrow">Detail</p>
           <h2>当前题库为空</h2>
-          <p>当前已导入 7.16 第1天原题；题源按全方位与蓝色森林分开，答案和解析等待后续补充。</p>
+          <p>题库已按“课后作业”和“暑假集训的作业”两个大标题归类；题源、日期和章节仍可继续筛选。</p>
         </div>
       </section>
     </main>
@@ -254,7 +260,7 @@
   </script>
   <script defer src="mathjax/tex-chtml-full.js"></script>
   <script src="core.js"></script>
-  <script src="question-bank-data.js?v=20260717-v39-backup-import"></script>
-  <script src="app.js?v=20260717-v39-backup-import"></script>
+  <script src="question-bank-data.js?v=20260721-v41-lite"></script>
+  <script src="app.js?v=20260721-v41-lite"></script>
 </body>
 </html>
