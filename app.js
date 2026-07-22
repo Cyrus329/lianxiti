@@ -6,12 +6,12 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260721-v40-assignment-groups";
+const FORCE_CLEAN_VERSION = "20260722-v43-extra-complete-dedup";
 const FORCE_EMPTY_BANK = false;
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
 const MISTAKE_REASON_KEY = "zsb-question-bank-empty-v34:mistake-reasons-v29";
 const CONCEPT_WRONG_STREAK_KEY = "zsb-question-bank-empty-v34:concept-wrong-streak-v29";
-const LOCAL_BACKUP_SCHEMA = "question-bank-local-backup-v40-assignment-groups";
+const LOCAL_BACKUP_SCHEMA = "question-bank-local-backup-v42-mobile-text-extra";
 const MISTAKE_REASON_LABELS = {
   unknown: "不会",
   careless: "粗心",
@@ -393,7 +393,7 @@ async function ensureBundledQuestionsCurrent() {
     await replaceQuestions(expectedQuestions, { silent: true });
     await pruneProgressForMissingQuestions();
     localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
-    showToast(`题库已更新：错误导入已替换，手动题源设置已保留`);
+    showToast(`题库已更新：新增题目已导入，重复题已省略，手动题源设置已保留`);
     return true;
   }
 
@@ -1162,7 +1162,7 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260721-v40-assignment-groups";
+const IMAGE_VERSION = "20260722-v43-extra-jpg";
 const IMAGE_PACK_SCRIPTS = [
   { prefix: "question-images/official-answer-crops/comp_scan/", file: "image-pack-comp.js" },
   { prefix: "question-images/wrongbook-math/", files: ["image-pack-wrongbook-01.js", "image-pack-wrongbook-02.js", "image-pack-wrongbook-03.js", "image-pack-wrongbook-04.js"] },
@@ -1250,7 +1250,11 @@ window.handleQuestionImageError = async function handleQuestionImageError(img) {
     img.src = packed;
     return;
   }
-  img.src = `./${raw}`;
+  const fallbackCandidates = [];
+  if (/\.jpg$/i.test(raw)) fallbackCandidates.push(raw.replace(/\.jpg$/i, ".webp"), raw.replace(/\.jpg$/i, ".png"));
+  if (/\.webp$/i.test(raw)) fallbackCandidates.push(raw.replace(/\.webp$/i, ".jpg"), raw.replace(/\.webp$/i, ".png"));
+  const next = fallbackCandidates.find((candidate) => candidate && candidate !== raw);
+  img.src = next ? `./${next}?v=${IMAGE_VERSION}` : `./${raw}`;
 };
 
 function renderImages(images, label = "原题图片") {
