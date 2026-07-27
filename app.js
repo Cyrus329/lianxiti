@@ -6,7 +6,7 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260725-v45-extra-batch4";
+const FORCE_CLEAN_VERSION = "20260727-v50-mobile-math-compact";
 const FORCE_EMPTY_BANK = false;
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
 const MISTAKE_REASON_KEY = "zsb-question-bank-empty-v34:mistake-reasons-v29";
@@ -1079,7 +1079,7 @@ function renderDetail() {
         </div>
         <div class="detail-actions">
           <button class="secondary-button" id="hintButton" type="button">${progress.hintVisible ? "隐藏公式提示" : "公式提示"}</button>
-          <button class="secondary-button" id="revealButton" type="button"${hasSolution ? "" : " disabled"}>${hasSolution ? (visible ? "隐藏答案解析" : "查看答案解析") : "答案待补充"}</button>
+          <button class="secondary-button" id="revealButton" type="button"${hasSolution ? "" : " disabled"}>${hasSolution ? (visible ? "隐藏解析" : "答案解析") : "答案待补"}</button>
           <button class="primary-button" id="correctButton" type="button">做对了</button>
           <button class="secondary-button" id="wrongButton" type="button">做错了</button>
           <button class="secondary-button" id="addWrongBookButton" type="button">${inWrongBook ? "取消错题本" : "加入错题本"}</button>
@@ -1186,7 +1186,7 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260726-v48-bf-math-function";
+const IMAGE_VERSION = "20260727-v50-mobile-math-compact";
 const IMAGE_PACK_SCRIPTS = [
   { prefix: "question-images/day-11-0726-bf-math-function/", file: "image-pack-bf-math-function.js" },
   { prefix: "question-images/day-06-0721-summer/", file: "image-pack-summer.js" },
@@ -3041,13 +3041,7 @@ function renderSimilarQuestions(question) {
 }
 
 function typesetMathSoon() {
-  if (!window.MathJax || !window.MathJax.typesetPromise) {
-    return;
-  }
-  window.clearTimeout(typesetMathSoon.timer);
-  typesetMathSoon.timer = window.setTimeout(() => {
-    window.MathJax.typesetPromise([els.detailPanel, els.questionsList]).catch(() => {});
-  }, 60);
+  // v50: formulas are pre-rendered locally, so mobile browsers never expose raw TeX source.
 }
 
 
@@ -3057,13 +3051,65 @@ function renderRichText(value) {
   let cursor = 0;
   const parts = [];
   text.replace(mathPattern, (segment, _match, offset) => {
-    if (offset > cursor) parts.push(prettifyMathHtml(escapeHtml(text.slice(cursor, offset))));
-    parts.push(escapeHtml(segment));
+    if (offset > cursor) parts.push(renderLooseTextChunk(text.slice(cursor, offset)));
+    parts.push(renderMathSegment(segment));
     cursor = offset + segment.length;
     return segment;
   });
-  if (cursor < text.length) parts.push(prettifyMathHtml(escapeHtml(text.slice(cursor))));
+  if (cursor < text.length) parts.push(renderLooseTextChunk(text.slice(cursor)));
   return parts.join("").replace(/\r?\n/g, "<br>");
+}
+
+function renderMathSegment(segment) {
+  const cache = window.PRE_RENDERED_MATH || {};
+  if (cache[segment]) return cache[segment];
+  let inner = String(segment || "");
+  if ((inner.startsWith("\\(") && inner.endsWith("\\)")) || (inner.startsWith("\\[") && inner.endsWith("\\]"))) {
+    inner = inner.slice(2, -2);
+  } else if (inner.startsWith("$") && inner.endsWith("$")) {
+    inner = inner.slice(1, -1);
+  }
+  return `<span class="math-render-fallback">${renderLatexFallback(inner)}</span>`;
+}
+
+function renderLooseTextChunk(value) {
+  const text = String(value || "");
+  if (!/\\[A-Za-z]+/.test(text)) return prettifyMathHtml(escapeHtml(text));
+  return `<span class="math-render-fallback">${renderLatexFallback(text)}</span>`;
+}
+
+function renderLatexFallback(value) {
+  let text = escapeHtml(String(value || ""));
+  text = text
+    .replace(/\\displaystyle\s*/g, "")
+    .replace(/\\left|\\right/g, "")
+    .replace(/\\(?:,|;|!|quad|qquad)\s*/g, " ")
+    .replace(/\\infty/g, "∞")
+    .replace(/\\cup/g, "∪")
+    .replace(/\\cap/g, "∩")
+    .replace(/\\leq?|\\le/g, "≤")
+    .replace(/\\geq?|\\ge/g, "≥")
+    .replace(/\\neq?|\\ne/g, "≠")
+    .replace(/\\to/g, "→")
+    .replace(/\\pm/g, "±")
+    .replace(/\\cdot/g, "·")
+    .replace(/\\ldots|\\cdots/g, "…")
+    .replace(/\\pi/g, "π")
+    .replace(/\\varphi/g, "φ")
+    .replace(/\\mathbb\\{R\\}/g, "ℝ")
+    .replace(/\\(arccos|arcsin|arctan|sin|cos|tan|cot|sec|ln|lg|log|max|lim|int)\b/g, "$1")
+    .replace(/\\sqrt\\[3\\]\\{([^{}]+)\\}/g, "∛($1)")
+    .replace(/\\sqrt\\[5\\]\\{([^{}]+)\\}/g, "⁵√($1)")
+    .replace(/\\sqrt\\{([^{}]+)\\}/g, "√($1)")
+    .replace(/\\(?:d?frac)\\{([^{}]+)\\}\\{([^{}]+)\\}/g, "$1/$2")
+    .replace(/\\underline\\{([^{}]+)\\}/g, "$1")
+    .replace(/\\begin\\{cases\\}/g, "{")
+    .replace(/\\end\\{cases\\}/g, "")
+    .replace(/&amp;/g, " ")
+    .replace(/\\\\/g, "; ")
+    .replace(/\\([A-Za-z]+)/g, "$1")
+    .replace(/[{}]/g, "");
+  return prettifyMathHtml(text);
 }
 
 function prettifyMathHtml(html, depth = 0) {
@@ -3767,7 +3813,6 @@ async function registerServiceWorker() {
 }
 
 async function init() {
-  window.addEventListener("mathjax-ready", typesetMathSoon);
   bindEvents();
   state.db = await openDatabase();
   await loadState();

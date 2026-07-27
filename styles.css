@@ -2123,3 +2123,31 @@ mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-
 .practice-section-heading span {font-size:12px; color:#64758d; letter-spacing:.08em;}
 .practice-section-heading strong {font-size:17px;}
 .practice-section-heading em {font-style:normal; font-size:13px; color:#5e6f84;}
+
+
+/* v50: compact mobile actions and stable pre-rendered formulas */
+.math-render-fallback{font-family:Georgia,"Times New Roman",serif;color:inherit;}
+.pure-text-stem mjx-container,.option-choice mjx-container,.solution-box mjx-container,.analysis-box mjx-container{color:inherit;}
+@media (max-width: 760px){
+  .pure-text-formula-proof{display:none!important;}
+  .detail-action-dock{
+    left:8px;right:8px;bottom:calc(62px + env(safe-area-inset-bottom));
+    padding:5px;border-radius:14px;background:rgba(255,255,255,.96);
+    box-shadow:0 -5px 18px rgba(24,36,32,.08);
+  }
+  .detail-actions{display:grid;grid-template-columns:1.28fr 1fr 1fr;gap:5px;}
+  .detail-actions #hintButton,
+  .detail-actions #addWrongBookButton,
+  .detail-actions #generateSimilarButton,
+  .detail-actions #auditFeedbackButton,
+  .detail-actions #auditDeskButton{display:none!important;}
+  .detail-actions #revealButton,
+  .detail-actions #correctButton,
+  .detail-actions #wrongButton{display:block!important;min-height:42px!important;padding:0 6px!important;font-size:14px!important;border-radius:11px!important;white-space:nowrap;}
+  .detail-actions #revealButton{order:1;grid-column:auto;}
+  .detail-actions #correctButton{order:2;}
+  .detail-actions #wrongButton{order:3;}
+  .question-detail{padding-bottom:68px!important;}
+  .pure-text-stem{overflow-wrap:anywhere;}
+  .pure-text-stem mjx-container[jax="CHTML"],.option-choice mjx-container[jax="CHTML"]{font-size:.96em;max-width:100%;}
+}

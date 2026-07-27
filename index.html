@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v49 蓝色森林函数课后练习完整顺序版</title>
+  <title>专升本题库训练中心｜v50 手机公式修复精简版</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260726-v49">
+  <link rel="stylesheet" href="styles.css?v=20260727-v50">
+  <link rel="stylesheet" href="math-prerender.css?v=20260727-v50">
 </head>
 <body>
   <div class="app-shell">
@@ -246,23 +247,11 @@
 
   <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
 
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
-      chtml: { scale: 1 },
-      startup: {
-        ready: () => {
-          MathJax.startup.defaultReady();
-          MathJax.startup.promise.then(() => window.dispatchEvent(new Event('mathjax-ready')));
-        }
-      }
-    };
-  </script>
-  <script defer src="mathjax/tex-chtml-full.js"></script>
+  <script src="math-render-cache.js?v=20260727-v50"></script>
   <script src="core.js"></script>
   <script src="image-pack-summer.js"></script>
   <script src="image-pack-bf-math-function.js"></script>
-  <script src="question-bank-data.js?v=20260726-v49-bf-math-function-order"></script>
-  <script src="app.js?v=20260726-v49-bf-math-function-order"></script>
+  <script src="question-bank-data.js?v=20260727-v50-mobile-math"></script>
+  <script src="app.js?v=20260727-v50-mobile-math"></script>
 </body>
 </html>
