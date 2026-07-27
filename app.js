@@ -6,7 +6,7 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260722-v43-extra-complete-dedup";
+const FORCE_CLEAN_VERSION = "20260725-v45-extra-batch4";
 const FORCE_EMPTY_BANK = false;
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
 const MISTAKE_REASON_KEY = "zsb-question-bank-empty-v34:mistake-reasons-v29";
@@ -839,6 +839,7 @@ function renderMasteryRow(item) {
 function renderList(page) {
   const fragment = document.createDocumentFragment();
   let previousAssignment = "";
+  let previousPracticeSection = "";
   page.items.forEach((question) => {
     const assignment = String(question.assignmentGroup || "课后作业");
     if (assignment !== previousAssignment) {
@@ -847,6 +848,15 @@ function renderList(page) {
       heading.innerHTML = `<span>大标题</span><strong>${escapeHtml(assignment)}</strong>`;
       fragment.append(heading);
       previousAssignment = assignment;
+      previousPracticeSection = "";
+    }
+    const practiceSection = String(question.practiceSection || "");
+    if (question.practiceSetId && practiceSection && practiceSection !== previousPracticeSection) {
+      const sectionHeading = document.createElement("div");
+      sectionHeading.className = "practice-section-heading";
+      sectionHeading.innerHTML = `<span>题型分区</span><strong>${escapeHtml(practiceSection)}</strong><em>${escapeHtml(question.practiceSetTitle || "")}</em>`;
+      fragment.append(sectionHeading);
+      previousPracticeSection = practiceSection;
     }
     const progress = readProgress(question.id);
     const button = document.createElement("button");
@@ -974,13 +984,27 @@ function renderQuestionViewSwitch() {
 
 function renderQuestionBody(question, progress) {
   if (state.questionView === "text") {
+    if (question && question.forceImageTextFallback) {
+      return `
+        <div class="pure-text-question pure-text-image-fallback">
+          <div class="ocr-protection-note"><strong>已自动避开乱码文字</strong><span>本题直接显示清晰原题图，题干和选项不再使用错误OCR文本。</span></div>
+          ${renderImages(question.images, "原题")}
+        </div>`;
+    }
     const options = getQuestionTextOptions(question);
     const noOptions = !options.length && !isJudgmentQuestion(question)
       ? `<p class="pure-text-no-options">本题原资料没有选择项，按题目要求作答。</p>`
       : "";
+    const formulaProof = question.textFormulaImage
+      ? `<div class="pure-text-formula-proof">
+          <p class="pure-text-formula-label">公式原式（用于核对根号、分式、上下标等符号）</p>
+          ${renderImages([question.textFormulaImage], "公式原式")}
+        </div>`
+      : "";
     return `
       <div class="pure-text-question">
         <div class="pure-text-stem">${renderRichText(getQuestionTextStem(question))}</div>
+        ${formulaProof}
         ${renderOptions(options, question, progress)}
         ${noOptions}
       </div>`;
@@ -1162,8 +1186,10 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260722-v43-extra-jpg";
+const IMAGE_VERSION = "20260726-v48-bf-math-function";
 const IMAGE_PACK_SCRIPTS = [
+  { prefix: "question-images/day-11-0726-bf-math-function/", file: "image-pack-bf-math-function.js" },
+  { prefix: "question-images/day-06-0721-summer/", file: "image-pack-summer.js" },
   { prefix: "question-images/official-answer-crops/comp_scan/", file: "image-pack-comp.js" },
   { prefix: "question-images/wrongbook-math/", files: ["image-pack-wrongbook-01.js", "image-pack-wrongbook-02.js", "image-pack-wrongbook-03.js", "image-pack-wrongbook-04.js"] },
   { prefix: "question-images/official-answer-crops/math_func/", file: "image-pack-math-eng.js" },
@@ -1177,10 +1203,14 @@ function normalizeImagePath(path) {
   return String(path || "").trim().replace(/^\.\//, "").replace(/\\/g, "/");
 }
 
+function isLocalFileMode() {
+  return typeof window !== "undefined" && window.location && window.location.protocol === "file:";
+}
+
 function imageSrc(path) {
   const raw = normalizeImagePath(path);
   if (!raw || raw.startsWith("data:") || /^https?:\/\//i.test(raw) || raw.startsWith("blob:")) return raw;
-  return `./${raw}?v=${IMAGE_VERSION}`;
+  return `./${raw}`;
 }
 
 function getImagePackFiles(rawPath) {
@@ -1197,7 +1227,7 @@ function loadImagePack(file) {
   if (loadedImagePackPromises.has(file)) return loadedImagePackPromises.get(file);
   const promise = new Promise((resolve) => {
     const script = document.createElement("script");
-    script.src = `./${file}?v=${IMAGE_VERSION}`;
+    script.src = isLocalFileMode() ? `./${file}` : `./${file}?v=${IMAGE_VERSION}`;
     script.onload = () => {
       window.QB_IMAGE_PACKS = window.QB_IMAGE_PACKS || {};
       if (window.IMAGE_PACKS && typeof window.IMAGE_PACKS === "object") {
@@ -1254,7 +1284,7 @@ window.handleQuestionImageError = async function handleQuestionImageError(img) {
   if (/\.jpg$/i.test(raw)) fallbackCandidates.push(raw.replace(/\.jpg$/i, ".webp"), raw.replace(/\.jpg$/i, ".png"));
   if (/\.webp$/i.test(raw)) fallbackCandidates.push(raw.replace(/\.webp$/i, ".jpg"), raw.replace(/\.webp$/i, ".png"));
   const next = fallbackCandidates.find((candidate) => candidate && candidate !== raw);
-  img.src = next ? `./${next}?v=${IMAGE_VERSION}` : `./${raw}`;
+  img.src = next ? `./${next}` : `./${raw}`;
 };
 
 function renderImages(images, label = "原题图片") {
