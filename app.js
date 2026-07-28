@@ -6,8 +6,9 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260727-v50-mobile-math-compact";
+const FORCE_CLEAN_VERSION = "20260728-v53-mobile-backup-fix";
 const FORCE_EMPTY_BANK = false;
+const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
 const MISTAKE_REASON_KEY = "zsb-question-bank-empty-v34:mistake-reasons-v29";
 const CONCEPT_WRONG_STREAK_KEY = "zsb-question-bank-empty-v34:concept-wrong-streak-v29";
@@ -112,7 +113,7 @@ const state = {
   selectedId: "",
   studyMode: localStorage.getItem(STUDY_MODE_KEY) === "single",
   questionView: localStorage.getItem(QUESTION_VIEW_KEY) === "text" ? "text" : "image",
-  autoHideMastered: localStorage.getItem(AUTO_HIDE_MASTERED_KEY) === "1",
+  autoHideMastered: localStorage.getItem(AUTO_HIDE_MASTERED_KEY) !== "0",
   mobileTab: localStorage.getItem(MOBILE_TAB_KEY) || "quiz",
   filtersOpen: false,
   timerSecondsRemaining: Number(localStorage.getItem(TIMER_REMAINING_KEY) || TIMER_DEFAULT_SECONDS) || TIMER_DEFAULT_SECONDS,
@@ -392,8 +393,12 @@ async function ensureBundledQuestionsCurrent() {
   if (savedCleanVersion !== FORCE_CLEAN_VERSION || !sameQuestionSet) {
     await replaceQuestions(expectedQuestions, { silent: true });
     await pruneProgressForMissingQuestions();
+    state.autoHideMastered = true;
+    localStorage.setItem(AUTO_HIDE_MASTERED_KEY, "1");
+    await normalizeCompletedProgressForOneCorrect();
+    state.selectedId = "";
     localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
-    showToast(`题库已更新：新增题目已导入，重复题已省略，手动题源设置已保留`);
+    showToast(`题库已更新：已开启“做对一次即完成”，完成题不再进入刷题和复习`);
     return true;
   }
 
@@ -464,6 +469,7 @@ function applyFilters() {
   const source = els.sourceFilter ? els.sourceFilter.value : "all";
   const day = els.dayFilter ? els.dayFilter.value : "all";
   const weakKeys = new Set(getWeakChapterStats().map((item) => item.key));
+  const completeSequenceMode = isCompletePracticeSequenceContext() && status === "all";
 
   state.filtered = QuestionBankCore.filterQuestions(state.questions, {
     keyword: els.searchInput.value,
@@ -532,7 +538,7 @@ function renderMobileChrome() {
   }
   if (els.mobileMeAutoHideMasteredButton) {
     els.mobileMeAutoHideMasteredButton.classList.toggle("active", state.autoHideMastered);
-    els.mobileMeAutoHideMasteredButton.textContent = state.autoHideMastered ? "已隐藏熟练题" : "隐藏熟练题";
+    els.mobileMeAutoHideMasteredButton.textContent = state.autoHideMastered ? "已开启：做对一次隐藏" : "做对一次隐藏";
   }
   if (els.mobileMeTimerButton) {
     els.mobileMeTimerButton.classList.toggle("active", state.timerRunning);
@@ -563,7 +569,7 @@ function render() {
   }
   if (els.autoHideMasteredButton) {
     els.autoHideMasteredButton.classList.toggle("active", state.autoHideMastered);
-    els.autoHideMasteredButton.querySelector("span:last-child").textContent = state.autoHideMastered ? "已隐藏熟练题" : "隐藏熟练题";
+    els.autoHideMasteredButton.querySelector("span:last-child").textContent = state.autoHideMastered ? "已开启：做对一次隐藏" : "做对一次隐藏";
   }
   updateTimerUI();
   renderMobileChrome();
@@ -664,7 +670,7 @@ function renderDashboard() {
         <button type="button" class="review-action" id="mobileWeakChapterButton"><strong>${weak.length}</strong><span>薄弱章节</span></button>
         <button type="button" class="review-action" id="mobileWrongRecentButton"><strong>${[...state.progressById.values()].filter((progress) => progress.lastResult === "wrong").length}</strong><span>最近做错</span></button>
         <button type="button" class="review-action" id="mobileWrongBookReviewButton"><strong>${[...state.progressById.values()].filter((progress) => progress.addedToWrongBookAt).length}</strong><span>错题本</span></button>
-        <button type="button" class="review-action" id="mobileMasteredReviewButton"><strong>${state.questions.filter(isMasteredQuestion).length}</strong><span>熟练回顾</span></button>
+        <button type="button" class="review-action" id="mobileMasteredReviewButton"><strong>${state.questions.filter(isMasteredQuestion).length}</strong><span>已完成题</span></button>
       </div>
     </div>
     <div class="dashboard-card mastery-card">
@@ -946,7 +952,7 @@ function renderStatusBadges(progress) {
     badges.push(`<span class="badge book">已进错题本</span>`);
   }
   if (progress && isProgressMastered(progress)) {
-    badges.push(`<span class="badge mastered">熟练</span>`);
+    badges.push(`<span class="badge mastered">已完成</span>`);
   }
   return badges.join("");
 }
@@ -1637,6 +1643,10 @@ async function saveAttempt(questionId, result, options = {}) {
   markStudyToday();
   markDailyAttempt();
   const question = state.questions.find((item) => item.id === questionId);
+  const visibleIndexBefore = state.filtered.findIndex((item) => item.id === questionId);
+  const preferredNextId = result === "correct" && state.autoHideMastered
+    ? String((state.filtered[visibleIndexBefore + 1] || state.filtered[visibleIndexBefore - 1] || {}).id || "")
+    : "";
   const before = getProgress(questionId);
   const reasonInfo = result === "wrong" && !options.skipReason ? askMistakeReason(question) : null;
   let progress = QuestionBankCore.recordAttempt(before, result);
@@ -1655,6 +1665,10 @@ async function saveAttempt(questionId, result, options = {}) {
   };
   progress = scheduleNextReview(progress, result);
   await saveProgress(progress);
+  if (result === "correct" && state.autoHideMastered && progress.addedToWrongBookAt) {
+    await removeFromWrongBook(questionId, { silent: true });
+    progress = getProgress(questionId);
+  }
   const streakInfo = updateConceptWrongStreak(question, result);
   if (result === "wrong") {
     await addToWrongBook(questionId, { silent: true });
@@ -1663,20 +1677,25 @@ async function saveAttempt(questionId, result, options = {}) {
     } else {
       showToast(reasonInfo ? `已记错因：${reasonInfo.label}，并加入错题本` : "已记录做错，已加入错题本");
     }
-  } else if (isProgressMastered(progress)) {
-    showToast("已连续做对3次，已归为熟练题");
+  } else if (state.autoHideMastered && isProgressMastered(progress)) {
+    showToast("已做对1次：该题已完成，之后不再显示和复习");
   } else if (isDueReview(question)) {
     showToast(progress.nextReviewAt ? `已完成今日复习，下次 ${progress.nextReviewAt}` : "已完成今日复习");
   } else {
     showToast(progress.nextReviewAt ? `已记录做对，下次复习 ${progress.nextReviewAt}` : "已记录做对");
   }
   const autoNextId = questionId;
+  if (preferredNextId) {
+    state.selectedId = preferredNextId;
+  }
   applyFilters();
-  window.setTimeout(() => {
-    if (state.selectedId === autoNextId) {
-      selectAdjacentQuestion(1);
-    }
-  }, 500);
+  if (!preferredNextId) {
+    window.setTimeout(() => {
+      if (state.selectedId === autoNextId) {
+        selectAdjacentQuestion(1);
+      }
+    }, 500);
+  }
 }
 
 async function addToWrongBook(questionId, options = {}) {
@@ -1712,16 +1731,132 @@ async function removeFromWrongBook(questionId, options = {}) {
 
 
 
-function downloadTextFile(filename, content, type = "application/json") {
-  const blob = new Blob([content], { type: `${type};charset=utf-8` });
+function isMobileBackupEnvironment() {
+  const ua = String(navigator.userAgent || "");
+  return /Android|iPhone|iPad|iPod|Mobile|MicroMessenger|QQ\//i.test(ua) ||
+    (window.matchMedia && window.matchMedia("(max-width: 820px)").matches);
+}
+
+function makeDownloadBlob(content, type = "application/json") {
+  const normalizedType = String(type || "application/octet-stream");
+  const finalType = /charset=/i.test(normalizedType) ? normalizedType : `${normalizedType};charset=utf-8`;
+  return new Blob([content], { type: finalType });
+}
+
+function triggerBlobDownload(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.rel = "noopener";
+  link.style.display = "none";
   document.body.appendChild(link);
   link.click();
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  // iOS/Safari 需要等下载或预览真正开始后才能释放，立即 revoke 会导致“点了没反应”。
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return url;
+}
+
+function downloadTextFile(filename, content, type = "application/json") {
+  return triggerBlobDownload(filename, makeDownloadBlob(content, type));
+}
+
+async function copyBackupText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  const copied = document.execCommand("copy");
+  textarea.remove();
+  return copied;
+}
+
+function closeBackupExportDialog() {
+  const overlay = document.querySelector("#backupExportOverlay");
+  const url = overlay?.dataset?.backupUrl || "";
+  if (url) URL.revokeObjectURL(url);
+  overlay?.remove();
+}
+
+function openBackupExportDialog(filename, content, blob) {
+  closeBackupExportDialog();
+  const objectUrl = URL.createObjectURL(blob);
+  const overlay = document.createElement("div");
+  overlay.className = "wrong-planner-overlay backup-export-overlay";
+  overlay.id = "backupExportOverlay";
+  overlay.dataset.backupUrl = objectUrl;
+  overlay.innerHTML = `
+    <section class="wrong-planner-dialog backup-export-dialog" role="dialog" aria-modal="true" aria-label="手机备份导出">
+      <header class="wrong-planner-head">
+        <div><p class="eyebrow">Mobile Backup</p><h2>手机备份导出</h2><p>优先选择“保存到文件”。在微信或QQ内打开时，可先点“打开备份文件”，再使用浏览器分享菜单保存。</p></div>
+        <button type="button" class="icon-button secondary" data-close-backup-export>关闭</button>
+      </header>
+      <div class="backup-export-actions">
+        <button type="button" class="primary-button" data-backup-download>下载 JSON 备份</button>
+        <button type="button" class="secondary-button" data-backup-open>打开备份文件</button>
+        <button type="button" class="secondary-button" data-backup-copy>复制备份文本</button>
+      </div>
+      <p class="backup-export-filename">文件名：${escapeHtml(filename)}</p>
+      <details class="backup-export-details">
+        <summary>查看备用文本</summary>
+        <textarea readonly aria-label="备份JSON文本">${escapeHtml(content)}</textarea>
+      </details>
+    </section>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", async (event) => {
+    if (event.target === overlay || event.target.closest("[data-close-backup-export]")) {
+      closeBackupExportDialog();
+      return;
+    }
+    if (event.target.closest("[data-backup-download]")) {
+      triggerBlobDownload(filename, blob);
+      showToast("已再次发起下载；请在手机“文件/下载”中查看");
+      return;
+    }
+    if (event.target.closest("[data-backup-open]")) {
+      const opened = window.open(objectUrl, "_blank", "noopener");
+      if (!opened) window.location.href = objectUrl;
+      return;
+    }
+    if (event.target.closest("[data-backup-copy]")) {
+      try {
+        const copied = await copyBackupText(content);
+        showToast(copied ? "备份文本已复制" : "复制失败，请展开备用文本后手动复制");
+      } catch (error) {
+        showToast("复制失败，请展开备用文本后手动复制");
+      }
+    }
+  });
+}
+
+async function shareBackupFile(filename, content, blob) {
+  if (typeof navigator.share !== "function" || typeof File !== "function") return "unsupported";
+  const file = new File([blob], filename, { type: "application/json;charset=utf-8", lastModified: Date.now() });
+  try {
+    if (typeof navigator.canShare === "function" && !navigator.canShare({ files: [file] })) {
+      return "unsupported";
+    }
+    await navigator.share({
+      title: "专升本题库本地备份",
+      text: "保存此 JSON 文件，之后可在题库中使用“导入备份”恢复记录。",
+      files: [file]
+    });
+    return "shared";
+  } catch (error) {
+    if (error && error.name === "AbortError") return "cancelled";
+    console.warn("Mobile backup share failed", error);
+    return "failed";
+  }
 }
 
 function markLocalSaved() {
@@ -1738,10 +1873,10 @@ function getLocalLastSaveText() {
   }
 }
 
-function exportLocalBackup() {
-  const payload = {
+function buildLocalBackupPayload() {
+  return {
     schema: LOCAL_BACKUP_SCHEMA,
-    schemaVersion: 39,
+    schemaVersion: 53,
     exportedAt: new Date().toISOString(),
     progress: [...state.progressById.values()],
     wrongBookRecords: QuestionBankCore.loadWrongBookRecords(),
@@ -1765,8 +1900,31 @@ function exportLocalBackup() {
       timerSecondsRemaining: state.timerSecondsRemaining
     }
   };
+}
+
+async function exportLocalBackup() {
+  const payload = buildLocalBackupPayload();
+  const filename = `专升本题库本地备份-${todayISO()}.json`;
+  const content = JSON.stringify(payload, null, 2);
+  const blob = makeDownloadBlob(content, "application/json");
   markLocalSaved();
-  downloadTextFile(`专升本题库本地备份-${todayISO()}.json`, JSON.stringify(payload, null, 2));
+
+  if (isMobileBackupEnvironment()) {
+    const result = await shareBackupFile(filename, content, blob);
+    if (result === "shared") {
+      showToast("备份文件已交给手机分享菜单，请选择“存储到文件”");
+      return;
+    }
+    if (result === "cancelled") {
+      showToast("已取消导出");
+      return;
+    }
+    openBackupExportDialog(filename, content, blob);
+    showToast("已打开手机备份面板");
+    return;
+  }
+
+  downloadTextFile(filename, content, "application/json");
   showToast("本地备份已导出，可用“导入备份”恢复记录");
 }
 
@@ -1847,6 +2005,9 @@ async function importLocalBackupPayload(payload) {
   if (Object.prototype.hasOwnProperty.call(settings, "autoHideMastered")) {
     state.autoHideMastered = Boolean(settings.autoHideMastered);
     localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
+  }
+  if (state.autoHideMastered) {
+    await normalizeCompletedProgressForOneCorrect();
   }
   if (settings.mobileTab) {
     state.mobileTab = String(settings.mobileTab);
@@ -2069,6 +2230,9 @@ async function applyCloudRecord(record) {
     if (record.settings.dailyGoal) {
       localStorage.setItem(DAILY_GOAL_KEY, String(record.settings.dailyGoal));
     }
+  }
+  if (state.autoHideMastered) {
+    await normalizeCompletedProgressForOneCorrect();
   }
   if (record.study && typeof record.study === "object") {
     if (Array.isArray(record.study.studyDays)) {
@@ -2318,12 +2482,12 @@ function getBackupStatus() {
   return { needsBackup: false, title: "本地保存正常", message: `上次本地保存：${getLocalLastSaveText()}。继续刷题即可。` };
 }
 function isProgressMastered(progress) {
-  return Boolean(progress && progress.lastResult === "correct" && (Number(progress.correctStreak || 0) >= 3 || (Number(progress.correct || 0) >= 3 && Number(progress.wrong || 0) === 0)));
+  return Boolean(progress && Number(progress.correct || 0) >= 1);
 }
 
 function isMasteredQuestion(question) {
   const progress = readProgress(question.id);
-  return isProgressMastered(progress) && !isDueReview(question);
+  return isProgressMastered(progress);
 }
 
 function formatTimer(seconds) {
@@ -2400,12 +2564,62 @@ function resetTimer() {
   showToast("倒计时已重置为25分钟");
 }
 
+async function normalizeCompletedProgressForOneCorrect() {
+  const completedIds = new Set();
+  const updates = [];
+  state.progressById.forEach((rawProgress, questionId) => {
+    const progress = enrichProgress(rawProgress, questionId);
+    if (!isProgressMastered(progress)) {
+      return;
+    }
+    completedIds.add(questionId);
+    const next = {
+      ...progress,
+      reviewLevel: 0,
+      nextReviewAt: "",
+      addedToWrongBookAt: ""
+    };
+    state.progressById.set(questionId, next);
+    updates.push(next);
+  });
+  if (updates.length) {
+    await putMany(PROGRESS_STORE, updates);
+  }
+  if (completedIds.size) {
+    const wrongBook = QuestionBankCore.loadWrongBookRecords();
+    QuestionBankCore.saveWrongBookRecords(
+      wrongBook.filter((item) => !completedIds.has(String(item.questionId || item.id || "")))
+    );
+  }
+  markLocalSaved();
+}
+
+async function toggleCorrectOnceCompletionMode() {
+  state.autoHideMastered = !state.autoHideMastered;
+  localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
+  if (state.autoHideMastered) {
+    await normalizeCompletedProgressForOneCorrect();
+    showToast("已开启：任意题做对1次后自动完成，不再显示和复习");
+  } else {
+    showToast("已关闭：做对过的题会重新显示，可再次复习");
+  }
+  queueCloudSync();
+  state.page = 1;
+  state.selectedId = "";
+  applyFilters();
+}
+
 function scheduleNextReview(progress, result) {
   const today = todayISO();
   const next = enrichProgress(progress, progress.questionId);
   if (result === "wrong") {
     next.reviewLevel = 0;
     next.nextReviewAt = addDaysISO(today, REVIEW_INTERVALS[0]);
+    return next;
+  }
+  if (state.autoHideMastered) {
+    next.reviewLevel = 0;
+    next.nextReviewAt = "";
     return next;
   }
   const level = Math.min(Number(next.reviewLevel || 0) + 1, REVIEW_INTERVALS.length - 1);
@@ -2416,6 +2630,9 @@ function scheduleNextReview(progress, result) {
 
 function isDueReview(question) {
   const progress = readProgress(question.id);
+  if (state.autoHideMastered && isProgressMastered(progress)) {
+    return false;
+  }
   if (!progress.attempts && !progress.addedToWrongBookAt) {
     return false;
   }
@@ -2424,6 +2641,19 @@ function isDueReview(question) {
     return progress.lastResult === "wrong";
   }
   return due <= todayISO();
+}
+
+function isCompletePracticeQuestion(question) {
+  return String(question && question.practiceSetId || "") === COMPLETE_PRACTICE_SET_ID;
+}
+
+function isCompletePracticeSequenceContext() {
+  const chapter = String(els.chapterFilter && els.chapterFilter.value || "");
+  const day = String(els.dayFilter && els.dayFilter.value || "");
+  const subject = String(els.subjectFilter && els.subjectFilter.value || "");
+  const source = String(els.sourceFilter && els.sourceFilter.value || "");
+  return chapter.includes("课后练习（完整版）") ||
+    (day === "第11天 · 7.26" && ["all", "高等数学"].includes(subject) && ["all", "蓝色森林"].includes(source));
 }
 
 function sortQuestionsForMode(a, b, status) {
@@ -2441,6 +2671,12 @@ function sortQuestionsForMode(a, b, status) {
     const pa = readProgress(a.id);
     const pb = readProgress(b.id);
     return Number(pb.wrong || 0) - Number(pa.wrong || 0);
+  }
+  const aPracticeSet = String(a.practiceSetId || "");
+  const bPracticeSet = String(b.practiceSetId || "");
+  if (aPracticeSet && aPracticeSet === bPracticeSet) {
+    const practiceDiff = Number(a.practiceOrder || 0) - Number(b.practiceOrder || 0);
+    if (practiceDiff) return practiceDiff;
   }
   const dayDiff = Number(a.studyDay || 0) - Number(b.studyDay || 0);
   if (dayDiff) return dayDiff;
@@ -2758,16 +2994,8 @@ function exportAuditFeedback() {
   showToast("已导出反馈清单");
 }
 
-function downloadTextFile(filename, text, type = "text/plain;charset=utf-8") {
-  const blob = new Blob([text], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+function legacyDownloadTextFile(filename, text, type = "text/plain;charset=utf-8") {
+  return downloadTextFile(filename, text, type);
 }
 
 function getFormulaHints(question) {
@@ -3662,11 +3890,13 @@ function bindEvents() {
     els.chapterFilter.value = "all";
     updateFilters();
     state.page = 1;
+    state.selectedId = "";
     applyFilters();
   });
   [els.assignmentFilter, els.chapterFilter, els.sourceFilter, els.dayFilter, els.statusFilter, els.difficultyFilter].filter(Boolean).forEach((select) => {
     select.addEventListener("change", () => {
       state.page = 1;
+      state.selectedId = "";
       applyFilters();
     });
   });
@@ -3702,13 +3932,7 @@ function bindEvents() {
     els.textModeButton.addEventListener("click", toggleQuestionView);
   }
   if (els.autoHideMasteredButton) {
-    els.autoHideMasteredButton.addEventListener("click", () => {
-      state.autoHideMastered = !state.autoHideMastered;
-      localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
-      queueCloudSync();
-      state.page = 1;
-      applyFilters();
-    });
+    els.autoHideMasteredButton.addEventListener("click", toggleCorrectOnceCompletionMode);
   }
   if (els.timerButton) {
     els.timerButton.addEventListener("click", toggleTimer);
@@ -3756,13 +3980,7 @@ function bindEvents() {
     els.mobileTextModeButton.addEventListener("click", toggleQuestionView);
   }
   if (els.mobileMeAutoHideMasteredButton) {
-    els.mobileMeAutoHideMasteredButton.addEventListener("click", () => {
-      state.autoHideMastered = !state.autoHideMastered;
-      localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
-      queueCloudSync();
-      state.page = 1;
-      applyFilters();
-    });
+    els.mobileMeAutoHideMasteredButton.addEventListener("click", toggleCorrectOnceCompletionMode);
   }
   if (els.mobileMeTimerButton) {
     els.mobileMeTimerButton.addEventListener("click", toggleTimer);

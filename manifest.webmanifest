@@ -1,7 +1,7 @@
 {
-  "name": "专升本题库训练中心 v50 手机公式修复版",
-  "short_name": "题库 v50",
-  "description": "共980道题；本次将蓝色森林第一章第一节函数课后练习64题按原资料完整顺序连续重排。",
+  "name": "专升本题库训练中心 v53 手机备份修复版",
+  "short_name": "题库 v53",
+  "description": "共980道题；新增做对一次即完成：做对过的题自动隐藏，不再进入刷题、错题本和复习队列。",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

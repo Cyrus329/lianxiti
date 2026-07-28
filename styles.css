@@ -2151,3 +2151,16 @@ mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-
   .pure-text-stem{overflow-wrap:anywhere;}
   .pure-text-stem mjx-container[jax="CHTML"],.option-choice mjx-container[jax="CHTML"]{font-size:.96em;max-width:100%;}
 }
+
+/* v53: mobile backup export fallback */
+.backup-export-dialog { width: min(720px, 96vw); }
+.backup-export-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0 12px; }
+.backup-export-filename { margin: 0 0 14px; color: #5c6d77; overflow-wrap: anywhere; }
+.backup-export-details { border: 1px solid #dce7e9; border-radius: 14px; background: #f8fbfb; padding: 12px; }
+.backup-export-details summary { cursor: pointer; font-weight: 700; color: #31535a; }
+.backup-export-details textarea { width: 100%; min-height: 220px; margin-top: 12px; resize: vertical; border: 1px solid #cadadd; border-radius: 12px; padding: 12px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 1.5; background: #fff; }
+@media (max-width: 700px) {
+  .backup-export-actions { grid-template-columns: 1fr; }
+  .backup-export-dialog { width: 100%; }
+  .backup-export-details textarea { min-height: 160px; }
+}

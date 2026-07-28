@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v50 手机公式修复精简版</title>
+  <title>专升本题库训练中心｜v53 手机备份修复版</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260727-v50">
-  <link rel="stylesheet" href="math-prerender.css?v=20260727-v50">
+  <link rel="stylesheet" href="styles.css?v=20260728-v53">
+  <link rel="stylesheet" href="math-prerender.css?v=20260728-v53">
 </head>
 <body>
   <div class="app-shell">
@@ -35,8 +35,8 @@
         <button class="icon-button secondary" id="textModeButton" type="button" title="切换图文版和纯文字版" aria-label="纯文字版">
           <span aria-hidden="true">文</span><span>纯文字版</span>
         </button>
-        <button class="icon-button secondary" id="autoHideMasteredButton" type="button" title="连续做对3次的题自动隐藏" aria-label="隐藏熟练题">
-          <span aria-hidden="true">✓</span><span>隐藏熟练题</span>
+        <button class="icon-button secondary" id="autoHideMasteredButton" type="button" title="任意题做对1次后自动完成，不再出现在刷题和复习中" aria-label="做对一次即完成">
+          <span aria-hidden="true">✓</span><span>做对一次隐藏</span>
         </button>
         <button class="icon-button secondary" id="timerButton" type="button" title="倒计时刷题" aria-label="倒计时刷题">
           <span aria-hidden="true">⏱</span><span>倒计时</span>
@@ -105,7 +105,7 @@
           <option value="all">全部</option>
           <option value="dueReview">今日复习</option>
           <option value="weakChapter">薄弱章节</option>
-          <option value="mastered">熟练题</option>
+          <option value="mastered">已完成（做对过）</option>
           <option value="answerReview">待核对题库</option>
           <option value="auditQueue">解析核查模式</option>
           <option value="auditFeedback">我标记的问题</option>
@@ -162,7 +162,7 @@
         <strong id="dailyProgressCount">0/80</strong>
       </div>
       <div class="stat-tile">
-        <span>熟练题</span>
+        <span>已完成</span>
         <strong id="masteredCount">0</strong>
       </div>
       <div class="stat-tile">
@@ -199,7 +199,7 @@
         <div class="mobile-me-grid">
           <button class="secondary-button" id="mobileMeStudyModeButton" type="button">单题模式</button>
           <button class="secondary-button" id="mobileTextModeButton" type="button">纯文字版</button>
-          <button class="secondary-button" id="mobileMeAutoHideMasteredButton" type="button">隐藏熟练题</button>
+          <button class="secondary-button" id="mobileMeAutoHideMasteredButton" type="button">做对一次隐藏</button>
           <button class="secondary-button" id="mobileMeTimerButton" type="button">开始倒计时</button>
           <button class="secondary-button reset-all-choice-trigger" id="mobileResetAllChoicesButton" type="button">重置全部选项</button>
           <button class="secondary-button" id="mobileWrongPlannerButton" type="button">错题规划与类似题</button>
@@ -247,11 +247,11 @@
 
   <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
 
-  <script src="math-render-cache.js?v=20260727-v50"></script>
-  <script src="core.js"></script>
+  <script src="math-render-cache.js?v=20260727-v51"></script>
+  <script src="core.js?v=20260728-v53"></script>
   <script src="image-pack-summer.js"></script>
   <script src="image-pack-bf-math-function.js"></script>
-  <script src="question-bank-data.js?v=20260727-v50-mobile-math"></script>
-  <script src="app.js?v=20260727-v50-mobile-math"></script>
+  <script src="question-bank-data.js?v=20260727-v51-order-lock"></script>
+  <script src="app.js?v=20260728-v53-mobile-backup"></script>
 </body>
 </html>
