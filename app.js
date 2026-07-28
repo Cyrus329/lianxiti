@@ -6,7 +6,7 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260728-v53-mobile-backup-fix";
+const FORCE_CLEAN_VERSION = "20260728-v54-homework-complete-import";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -1192,8 +1192,9 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260727-v50-mobile-math-compact";
+const IMAGE_VERSION = "20260728-v54-homework-complete";
 const IMAGE_PACK_SCRIPTS = [
+  { prefix: "question-images/day-13-0728-homework-complete/", file: "image-pack-homework-v54.js" },
   { prefix: "question-images/day-11-0726-bf-math-function/", file: "image-pack-bf-math-function.js" },
   { prefix: "question-images/day-06-0721-summer/", file: "image-pack-summer.js" },
   { prefix: "question-images/official-answer-crops/comp_scan/", file: "image-pack-comp.js" },
@@ -1876,7 +1877,7 @@ function getLocalLastSaveText() {
 function buildLocalBackupPayload() {
   return {
     schema: LOCAL_BACKUP_SCHEMA,
-    schemaVersion: 53,
+    schemaVersion: 54,
     exportedAt: new Date().toISOString(),
     progress: [...state.progressById.values()],
     wrongBookRecords: QuestionBankCore.loadWrongBookRecords(),
