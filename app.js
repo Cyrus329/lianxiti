@@ -6,7 +6,7 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260728-v54-homework-complete-import";
+const FORCE_CLEAN_VERSION = "20260729-v56-current-range-quick-browse";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -51,6 +51,7 @@ const els = {
   assignmentFilter: document.querySelector("#assignmentFilter"),
   subjectFilter: document.querySelector("#subjectFilter"),
   chapterFilter: document.querySelector("#chapterFilter"),
+  typeFilter: document.querySelector("#typeFilter"),
   sourceFilter: document.querySelector("#sourceFilter"),
   dayFilter: document.querySelector("#dayFilter"),
   statusFilter: document.querySelector("#statusFilter"),
@@ -93,6 +94,14 @@ const els = {
   reviewQueueButton: document.querySelector("#reviewQueueButton"),
   wrongBookModeButton: document.querySelector("#wrongBookModeButton"),
   wrongPlannerButton: document.querySelector("#wrongPlannerButton"),
+  quickBrowseButton: document.querySelector("#quickBrowseButton"),
+  mobileQuickBrowseButton: document.querySelector("#mobileQuickBrowseButton"),
+  quickBrowseModal: document.querySelector("#quickBrowseModal"),
+  quickBrowseCloseButton: document.querySelector("#quickBrowseCloseButton"),
+  quickBrowseGroupSelect: document.querySelector("#quickBrowseGroupSelect"),
+  quickBrowseSearchInput: document.querySelector("#quickBrowseSearchInput"),
+  quickBrowseSummary: document.querySelector("#quickBrowseSummary"),
+  quickBrowseContent: document.querySelector("#quickBrowseContent"),
   auditModeButton: document.querySelector("#auditModeButton"),
   studyModeButton: document.querySelector("#studyModeButton"),
   textModeButton: document.querySelector("#textModeButton"),
@@ -235,6 +244,143 @@ function getQuestionDisplayNo(question) {
 
 function getQuestionDayLabel(question) {
   return String(question && question.dayLabel || (question && question.studyDate) || "").trim();
+}
+
+function getQuestionSequenceLabel(question) {
+  const section = String(question && (question.sectionLabel || question.practiceSection || question.type) || "题目").trim();
+  const no = getQuestionDisplayNo(question);
+  return `${section} ${no}`.trim();
+}
+
+function getQuickBrowseGroupKey(question) {
+  if (!question) return "";
+  return String(question.practiceSetId || [question.assignmentGroup || "课后作业", question.subject || "", question.chapter || "", question.studyDay || ""].join("||"));
+}
+
+function getCurrentQuickBrowseScope() {
+  const selectedQuestion = state.questions.find((question) => question.id === state.selectedId) || state.filtered[0] || null;
+  if (!selectedQuestion) {
+    return { questions: [], selectedQuestion: null, label: "当前范围", assignment: "", subject: "", dayLabel: "" };
+  }
+
+  const selectedKey = getQuickBrowseGroupKey(selectedQuestion);
+  let questions = state.questions.filter((question) => getQuickBrowseGroupKey(question) === selectedKey);
+
+  // Some older imported sets did not carry a consistent practiceSetId. In that case,
+  // use the exact current filtered range instead of exposing the whole question bank.
+  if (questions.length <= 1 && state.filtered.length) {
+    questions = state.filtered.slice();
+  }
+
+  questions.sort((a, b) => {
+    const practiceDiff = Number(a.practiceOrder || 0) - Number(b.practiceOrder || 0);
+    if (practiceDiff) return practiceDiff;
+    return sortQuestionsForMode(a, b, "all");
+  });
+
+  return {
+    questions,
+    selectedQuestion,
+    label: String(selectedQuestion.practiceSetTitle || selectedQuestion.chapter || selectedQuestion.titleLabel || "当前题组"),
+    assignment: String(selectedQuestion.assignmentGroup || "课后作业"),
+    subject: String(selectedQuestion.subject || ""),
+    dayLabel: getQuestionDayLabel(selectedQuestion)
+  };
+}
+
+function renderQuickBrowseContent() {
+  if (!els.quickBrowseContent) return;
+  const scope = getCurrentQuickBrowseScope();
+  if (!scope.questions.length) {
+    els.quickBrowseContent.innerHTML = `<div class="hidden-solution">当前范围没有可查阅题目</div>`;
+    if (els.quickBrowseSummary) els.quickBrowseSummary.innerHTML = "";
+    return;
+  }
+
+  const keyword = String(els.quickBrowseSearchInput && els.quickBrowseSearchInput.value || "").trim().toLowerCase();
+  const items = scope.questions.filter((question) => {
+    if (!keyword) return true;
+    const haystack = [
+      getQuestionDisplayNo(question),
+      question.type,
+      question.sectionLabel,
+      question.practiceSection,
+      question.stem,
+      question.titleLabel
+    ].join(" ").toLowerCase();
+    return haystack.includes(keyword);
+  });
+
+  const completedCount = scope.questions.filter(isMasteredQuestion).length;
+  const remainingCount = Math.max(0, scope.questions.length - completedCount);
+  if (els.quickBrowseSummary) {
+    els.quickBrowseSummary.innerHTML = `
+      <div class="quick-current-range-title">
+        <span>当前题组</span>
+        <strong>${escapeHtml(scope.label)}</strong>
+      </div>
+      <div class="quick-current-range-stats">
+        <span>${escapeHtml(scope.assignment)} · ${escapeHtml(scope.subject)}${scope.dayLabel ? ` · ${escapeHtml(scope.dayLabel)}` : ""}</span>
+        <b>共 ${scope.questions.length} 题</b>
+        <b>待做 ${remainingCount} 题</b>
+        <b>已完成 ${completedCount} 题</b>
+      </div>`;
+  }
+
+  const sections = new Map();
+  items.forEach((question) => {
+    const section = String(question.sectionLabel || question.practiceSection || question.type || "题目");
+    if (!sections.has(section)) sections.set(section, []);
+    sections.get(section).push(question);
+  });
+
+  els.quickBrowseContent.innerHTML = [...sections.entries()].map(([section, sectionQuestions]) => `
+    <section class="quick-section-block">
+      <header><strong>${escapeHtml(section)}</strong><span>${sectionQuestions.length}题</span></header>
+      <div class="quick-question-grid">
+        ${sectionQuestions.map((question) => {
+          const completed = isMasteredQuestion(question);
+          const active = question.id === state.selectedId;
+          return `<button type="button" class="quick-question-button${active ? " active" : ""}${completed ? " completed" : ""}" data-quick-question-id="${escapeHtml(question.id)}" ${completed ? "disabled" : ""}>
+            <b>${escapeHtml(getQuestionDisplayNo(question))}</b>
+            <span>${escapeHtml(question.type)}${completed ? " · 已完成" : ""}</span>
+            <small>${escapeHtml(String(question.stem || "").slice(0, 58))}</small>
+          </button>`;
+        }).join("")}
+      </div>
+    </section>`).join("") || `<div class="hidden-solution">当前题组中没有符合关键词的题</div>`;
+
+  els.quickBrowseContent.querySelectorAll("[data-quick-question-id]:not(:disabled)").forEach((button) => {
+    button.addEventListener("click", () => jumpToQuestionFromQuickBrowse(button.dataset.quickQuestionId));
+  });
+}
+
+function openQuickBrowse() {
+  if (!els.quickBrowseModal) return;
+  if (els.quickBrowseSearchInput) els.quickBrowseSearchInput.value = "";
+  renderQuickBrowseContent();
+  els.quickBrowseModal.hidden = false;
+  document.body.classList.add("quick-browse-open");
+  window.requestAnimationFrame(() => els.quickBrowseSearchInput && els.quickBrowseSearchInput.focus());
+}
+
+function closeQuickBrowse() {
+  if (!els.quickBrowseModal) return;
+  els.quickBrowseModal.hidden = true;
+  document.body.classList.remove("quick-browse-open");
+}
+
+function jumpToQuestionFromQuickBrowse(questionId) {
+  const index = state.filtered.findIndex((item) => item.id === questionId);
+  if (index < 0) {
+    showToast("这道题不在当前待做范围内");
+    return;
+  }
+  state.page = Math.floor(index / PAGE_SIZE) + 1;
+  state.selectedId = questionId;
+  render();
+  closeQuickBrowse();
+  scrollDetailPanelIntoView();
 }
 
 function renderSourceClassifier(question) {
@@ -435,6 +581,13 @@ function updateFilters() {
   const selectedSubject = els.subjectFilter.value || "all";
   refillSelect(els.chapterFilter, ["all", ...QuestionBankCore.availableChapters(state.questions, selectedSubject)], "全部");
   const selectedChapter = els.chapterFilter.value || "all";
+  if (els.typeFilter) {
+    const typeValues = state.questions
+      .filter((question) => selectedSubject === "all" || question.subject === selectedSubject)
+      .filter((question) => selectedChapter === "all" || question.chapter === selectedChapter)
+      .map((question) => question.type || "题目");
+    refillSelect(els.typeFilter, ["all", ...QuestionBankCore.uniqueValues(typeValues)], "全部题型");
+  }
   const sourceValues = state.questions
     .filter((question) => selectedSubject === "all" || question.subject === selectedSubject)
     .filter((question) => selectedChapter === "all" || question.chapter === selectedChapter)
@@ -466,6 +619,7 @@ function applyFilters() {
   const coreStatus = ["dueReview", "weakChapter", "mastered", "answerReview", ...auditStatusList].includes(status) ? "all" : status;
   const difficulty = els.difficultyFilter ? els.difficultyFilter.value : "all";
   const assignment = els.assignmentFilter ? els.assignmentFilter.value : "all";
+  const type = els.typeFilter ? els.typeFilter.value : "all";
   const source = els.sourceFilter ? els.sourceFilter.value : "all";
   const day = els.dayFilter ? els.dayFilter.value : "all";
   const weakKeys = new Set(getWeakChapterStats().map((item) => item.key));
@@ -479,6 +633,7 @@ function applyFilters() {
     progressById: state.progressById
   })
     .filter((question) => assignment === "all" || String(question.assignmentGroup || "课后作业") === assignment)
+    .filter((question) => type === "all" || String(question.type || "题目") === type)
     .filter((question) => source === "all" || String(question.source || "题库") === source)
     .filter((question) => day === "all" || getQuestionDayLabel(question) === day)
     .filter((question) => difficulty === "all" || String(question.difficulty) === difficulty)
@@ -856,7 +1011,7 @@ function renderList(page) {
       previousAssignment = assignment;
       previousPracticeSection = "";
     }
-    const practiceSection = String(question.practiceSection || "");
+    const practiceSection = String(question.practiceSection || question.sectionLabel || question.type || "");
     if (question.practiceSetId && practiceSection && practiceSection !== previousPracticeSection) {
       const sectionHeading = document.createElement("div");
       sectionHeading.className = "practice-section-heading";
@@ -878,7 +1033,7 @@ function renderList(page) {
         <span>${escapeHtml(question.source)}</span>
         <span>${escapeHtml(getQuestionDayLabel(question))}</span>
       </div>
-      <h3>原题 ${escapeHtml(getQuestionDisplayNo(question))} ${renderRichText(question.titleLabel || "")}</h3>
+      <h3><span class="sequence-chip">${escapeHtml(getQuestionSequenceLabel(question))}</span>${renderRichText(question.titleLabel || "")}</h3>
       <div class="tag-line">
         ${renderStatusBadges(progress)}
         ${renderAnalysisAuditPill(question)}
@@ -1047,7 +1202,7 @@ function renderDetail() {
     <article class="question-detail">
       <header class="detail-header">
         <p class="eyebrow">${escapeHtml(question.assignmentGroup || "课后作业")} · ${escapeHtml(question.source)} · ${escapeHtml(getQuestionDayLabel(question))} · ${escapeHtml(question.subject)} · ${escapeHtml(question.chapter)}</p>
-        <h2><span class="desktop-question-title">原题 ${escapeHtml(getQuestionDisplayNo(question))} · ${escapeHtml(question.type)}</span><span class="mobile-question-title">第 ${currentPosition} 题</span></h2>
+        <h2><span class="desktop-question-title">${escapeHtml(getQuestionSequenceLabel(question))}</span><span class="mobile-question-title">${escapeHtml(getQuestionSequenceLabel(question))}</span></h2>
         <div class="mobile-question-topnav">
           <button class="secondary-button nav-button" id="mobilePrevQuestionButton" type="button" aria-label="上一题"${canGoPrev ? "" : " disabled"}>←</button>
           <span class="detail-position">${currentPosition} / ${position.total}</span>
@@ -1192,8 +1347,9 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260728-v54-homework-complete";
+const IMAGE_VERSION = "20260729-v56-current-range-quick-browse";
 const IMAGE_PACK_SCRIPTS = [
+  { prefix: "question-images/day-13-0728-homework-binary-427/", file: "image-pack-homework-v55.js" },
   { prefix: "question-images/day-13-0728-homework-complete/", file: "image-pack-homework-v54.js" },
   { prefix: "question-images/day-11-0726-bf-math-function/", file: "image-pack-bf-math-function.js" },
   { prefix: "question-images/day-06-0721-summer/", file: "image-pack-summer.js" },
@@ -3894,7 +4050,7 @@ function bindEvents() {
     state.selectedId = "";
     applyFilters();
   });
-  [els.assignmentFilter, els.chapterFilter, els.sourceFilter, els.dayFilter, els.statusFilter, els.difficultyFilter].filter(Boolean).forEach((select) => {
+  [els.assignmentFilter, els.chapterFilter, els.typeFilter, els.sourceFilter, els.dayFilter, els.statusFilter, els.difficultyFilter].filter(Boolean).forEach((select) => {
     select.addEventListener("change", () => {
       state.page = 1;
       state.selectedId = "";
@@ -3918,6 +4074,24 @@ function bindEvents() {
   if (els.wrongPlannerButton) {
     els.wrongPlannerButton.addEventListener("click", openWrongPlanner);
   }
+  if (els.quickBrowseButton) {
+    els.quickBrowseButton.addEventListener("click", openQuickBrowse);
+  }
+  if (els.mobileQuickBrowseButton) {
+    els.mobileQuickBrowseButton.addEventListener("click", openQuickBrowse);
+  }
+  if (els.quickBrowseCloseButton) {
+    els.quickBrowseCloseButton.addEventListener("click", closeQuickBrowse);
+  }
+  if (els.quickBrowseSearchInput) {
+    els.quickBrowseSearchInput.addEventListener("input", debounce(renderQuickBrowseContent));
+  }
+  if (els.quickBrowseModal) {
+    els.quickBrowseModal.querySelectorAll("[data-quick-close]").forEach((item) => item.addEventListener("click", closeQuickBrowse));
+  }
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && els.quickBrowseModal && !els.quickBrowseModal.hidden) closeQuickBrowse();
+  });
   if (els.auditModeButton) {
     els.auditModeButton.addEventListener("click", () => enterAuditMode());
   }

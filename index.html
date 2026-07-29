@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v54 作业完整导入版</title>
+  <title>专升本题库训练中心｜v56 当前范围快速查阅版</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260728-v54">
-  <link rel="stylesheet" href="math-prerender.css?v=20260728-v54">
+  <link rel="stylesheet" href="styles.css?v=20260728-v55">
+  <link rel="stylesheet" href="math-prerender.css?v=20260728-v55">
 </head>
 <body>
   <div class="app-shell">
@@ -25,6 +25,9 @@
         </button>
         <button class="icon-button secondary" id="wrongPlannerButton" type="button" title="按错因规划并生成类似题" aria-label="错题规划">
           <span aria-hidden="true">▦</span><span>错题规划</span>
+        </button>
+        <button class="icon-button secondary" id="quickBrowseButton" type="button" title="快速查看当前正在做的完整题组" aria-label="当前题组快速查阅">
+          <span aria-hidden="true">⌕</span><span>快速查阅</span>
         </button>
         <button class="icon-button secondary" id="auditModeButton" type="button" title="进入解析核查模式" aria-label="解析核查模式">
           <span aria-hidden="true">⚑</span><span>核查模式</span>
@@ -58,6 +61,7 @@
         <strong>专升本题库</strong>
       </div>
       <div class="mobile-top-actions">
+        <button class="mobile-pill" id="mobileQuickBrowseButton" type="button">查题</button>
         <button class="mobile-pill" id="mobileFilterToggle" type="button">筛选</button>
         <button class="mobile-pill timer-pill" id="mobileTimerPill" type="button">25:00</button>
       </div>
@@ -84,6 +88,12 @@
         <span>章节</span>
         <select id="chapterFilter">
           <option value="all">全部</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>题型</span>
+        <select id="typeFilter">
+          <option value="all">全部题型</option>
         </select>
       </label>
 
@@ -231,7 +241,7 @@
         <div class="empty-detail">
           <p class="eyebrow">Detail</p>
           <h2>当前题库为空</h2>
-          <p>题库共980道；在v47全量复核基础上，新增蓝色森林第一章第一节函数课后练习55题，另有9题与既有题库匹配并复核答案解析。</p>
+          <p>题库已按课后作业、暑假集训和额外题库统一整理；可使用“快速查阅”按题组、题型和原序号直接跳转。</p>
         </div>
       </section>
     </main>
@@ -245,14 +255,34 @@
     <button class="mobile-tab-button" type="button" data-mobile-tab="me"><span>我的</span></button>
   </nav>
 
+  <div class="quick-browse-modal" id="quickBrowseModal" hidden>
+    <div class="quick-browse-backdrop" data-quick-close></div>
+    <section class="quick-browse-sheet" role="dialog" aria-modal="true" aria-labelledby="quickBrowseTitle">
+      <header class="quick-browse-head">
+        <div>
+          <p class="eyebrow">Quick Browse</p>
+          <h2 id="quickBrowseTitle">快速查阅题目</h2>
+        </div>
+        <button class="small-button" id="quickBrowseCloseButton" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="quick-browse-controls current-range-only">
+        <div class="quick-scope-note"><strong>仅显示当前题组</strong><span>自动跟随你正在做的范围，不再列出全部题库。</span></div>
+        <label class="field"><span>在当前题组内查找</span><input id="quickBrowseSearchInput" type="search" placeholder="输入题号、题型或关键词"></label>
+      </div>
+      <div class="quick-browse-summary" id="quickBrowseSummary"></div>
+      <div class="quick-browse-content" id="quickBrowseContent"></div>
+    </section>
+  </div>
+
   <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
 
   <script src="math-render-cache.js?v=20260727-v51"></script>
-  <script src="core.js?v=20260728-v54"></script>
+  <script src="core.js?v=20260728-v55"></script>
   <script src="image-pack-summer.js"></script>
   <script src="image-pack-homework-v54.js"></script>
+  <script src="image-pack-homework-v55.js"></script>
   <script src="image-pack-bf-math-function.js"></script>
-  <script src="question-bank-data.js?v=20260727-v51-order-lock"></script>
-  <script src="app.js?v=20260728-v54-mobile-backup"></script>
+  <script src="question-bank-data.js?v=20260728-v55-sequence"></script>
+  <script src="app.js?v=20260729-v56-current-range"></script>
 </body>
 </html>
