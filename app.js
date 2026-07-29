@@ -6,7 +6,7 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260729-v56-current-range-quick-browse";
+const FORCE_CLEAN_VERSION = "20260729-v58-complete-subject-status";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -45,6 +45,8 @@ const CLOUD_SYNC_ENABLED = false;
 const SOURCE_OVERRIDE_KEY = "zsb-question-bank-v35:source-overrides";
 const QUESTION_VIEW_KEY = "zsb-question-bank-v36:question-view";
 const GENERATED_VARIANTS_KEY = "zsb-question-bank-v38:generated-variants";
+const ACTIVE_COMPLETE_SET_KEY = "zsb-question-bank-v57:active-complete-set";
+const ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY = "zsb-question-bank-v58:active-complete-set-wrong-only";
 
 const els = {
   searchInput: document.querySelector("#searchInput"),
@@ -94,6 +96,19 @@ const els = {
   reviewQueueButton: document.querySelector("#reviewQueueButton"),
   wrongBookModeButton: document.querySelector("#wrongBookModeButton"),
   wrongPlannerButton: document.querySelector("#wrongPlannerButton"),
+  completeSetsButton: document.querySelector("#completeSetsButton"),
+  mobileCompleteSetsButton: document.querySelector("#mobileCompleteSetsButton"),
+  completeSetsModal: document.querySelector("#completeSetsModal"),
+  completeSetsCloseButton: document.querySelector("#completeSetsCloseButton"),
+  completeSetsSearchInput: document.querySelector("#completeSetsSearchInput"),
+  completeSetsSummary: document.querySelector("#completeSetsSummary"),
+  completeSetsSubjectTabs: document.querySelector("#completeSetsSubjectTabs"),
+  completeSetsContent: document.querySelector("#completeSetsContent"),
+  completeSetActiveBar: document.querySelector("#completeSetActiveBar"),
+  completeSetActiveTitle: document.querySelector("#completeSetActiveTitle"),
+  completeSetActiveMeta: document.querySelector("#completeSetActiveMeta"),
+  completeSetQuickButton: document.querySelector("#completeSetQuickButton"),
+  completeSetExitButton: document.querySelector("#completeSetExitButton"),
   quickBrowseButton: document.querySelector("#quickBrowseButton"),
   mobileQuickBrowseButton: document.querySelector("#mobileQuickBrowseButton"),
   quickBrowseModal: document.querySelector("#quickBrowseModal"),
@@ -131,7 +146,10 @@ const state = {
   studyTimeTickerId: 0,
   studyTimeUnsavedSeconds: 0,
   cloudSyncTimer: 0,
-  cloudSaving: false
+  cloudSaving: false,
+  activeCompleteSetId: localStorage.getItem(ACTIVE_COMPLETE_SET_KEY) || "",
+  activeCompleteSetWrongOnly: localStorage.getItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY) === "1",
+  completeSetSubject: ""
 };
 
 function openDatabase() {
@@ -238,8 +256,179 @@ async function setQuestionSource(questionId, source) {
   showToast(`已手动识别为${source}`);
 }
 
+
+function getCompleteSetRegistry() {
+  const data = globalThis.BUNDLED_QUESTION_BANK;
+  const list = data && Array.isArray(data.completeSetRegistry) ? data.completeSetRegistry : [];
+  return list.filter((item) => item && item.id && Array.isArray(item.items));
+}
+
+function getCompleteSetById(setId) {
+  return getCompleteSetRegistry().find((item) => String(item.id) === String(setId || "")) || null;
+}
+
+function getActiveCompleteSet() {
+  const set = getCompleteSetById(state.activeCompleteSetId);
+  if (!set && state.activeCompleteSetId) {
+    state.activeCompleteSetId = "";
+    localStorage.removeItem(ACTIVE_COMPLETE_SET_KEY);
+  }
+  return set;
+}
+
+function getActiveCompleteSetItem(questionId) {
+  const set = getActiveCompleteSet();
+  if (!set) return null;
+  return set.items.find((item) => String(item.questionId) === String(questionId || "")) || null;
+}
+
+function getCompleteSetQuestions(set) {
+  if (!set) return [];
+  const byId = new Map(state.questions.map((question) => [String(question.id), question]));
+  return set.items.map((item) => byId.get(String(item.questionId))).filter(Boolean);
+}
+
+function getCompleteSetSectionSummary(set) {
+  const counts = new Map();
+  (set && set.items || []).forEach((item) => {
+    const section = String(item.section || "题目");
+    counts.set(section, Number(counts.get(section) || 0) + 1);
+  });
+  return [...counts.entries()].map(([section, count]) => `${section}${count}题`).join(" · ");
+}
+
+function getCompleteSetSubjectCategory(setOrQuestion) {
+  const subject = String(setOrQuestion && setOrQuestion.subject || "");
+  if (subject.includes("数学")) return "数学";
+  if (subject.includes("计算机")) return "计算机";
+  if (subject.includes("英语")) return "英语";
+  return subject || "其他";
+}
+
+function isAttemptedQuestion(question) {
+  const progress = question ? readProgress(question.id) : null;
+  return Boolean(progress && (Number(progress.attempts || 0) > 0 || ["correct", "wrong"].includes(String(progress.lastResult || ""))));
+}
+
+function isWrongQuestion(question) {
+  const progress = question ? readProgress(question.id) : null;
+  return Boolean(progress && String(progress.lastResult || "") === "wrong");
+}
+
+function renderCompleteSetsContent() {
+  if (!els.completeSetsContent) return;
+  const allRegistry = getCompleteSetRegistry();
+  const categories = ["数学", "计算机", "英语"].filter((category) => allRegistry.some((set) => getCompleteSetSubjectCategory(set) === category));
+  if (!categories.includes(state.completeSetSubject)) state.completeSetSubject = categories[0] || "";
+  if (els.completeSetsSubjectTabs) {
+    els.completeSetsSubjectTabs.innerHTML = categories.map((category) => {
+      const count = allRegistry.filter((set) => getCompleteSetSubjectCategory(set) === category).length;
+      return `<button type="button" class="complete-subject-tab${state.completeSetSubject === category ? " active" : ""}" data-complete-subject="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong><span>${count}套</span></button>`;
+    }).join("");
+    els.completeSetsSubjectTabs.querySelectorAll("[data-complete-subject]").forEach((button) => button.addEventListener("click", () => {
+      state.completeSetSubject = button.dataset.completeSubject || "";
+      renderCompleteSetsContent();
+    }));
+  }
+  const keyword = String(els.completeSetsSearchInput && els.completeSetsSearchInput.value || "").trim().toLowerCase();
+  const registry = allRegistry.filter((set) => getCompleteSetSubjectCategory(set) === state.completeSetSubject).filter((set) => {
+    if (!keyword) return true;
+    return [set.title, set.subject, set.source, set.dayLabel, getCompleteSetSectionSummary(set)].join(" ").toLowerCase().includes(keyword);
+  });
+  const totalQuestions = registry.reduce((sum, set) => sum + Number(set.questionCount || set.items.length || 0), 0);
+  const totalPages = registry.reduce((sum, set) => sum + Number(set.pageCount || 0), 0);
+  if (els.completeSetsSummary) {
+    els.completeSetsSummary.innerHTML = `<strong>${escapeHtml(state.completeSetSubject || "完整")}题组 ${registry.length} 套</strong><span>合计 ${totalQuestions} 个题目单元 · ${totalPages} 页原资料</span>`;
+  }
+  els.completeSetsContent.innerHTML = registry.map((set) => {
+    const questions = getCompleteSetQuestions(set);
+    const completed = questions.filter(isAttemptedQuestion).length;
+    const wrong = questions.filter(isWrongQuestion).length;
+    const remaining = Math.max(0, questions.length - completed);
+    const active = String(set.id) === String(state.activeCompleteSetId);
+    const wrongActive = active && state.activeCompleteSetWrongOnly;
+    return `<article class="complete-set-card${active ? " active" : ""}${wrongActive ? " wrong-active" : ""}">
+      <div class="complete-set-card-head"><span>${escapeHtml(getCompleteSetSubjectCategory(set))}</span><b>${Number(set.pageCount || 0)}页</b></div>
+      <h3>${escapeHtml(set.title || "完整题组")}</h3>
+      <p>${escapeHtml(set.source || "蓝色森林")} · ${escapeHtml(set.dayLabel || set.studyDate || "")} · 共 ${Number(set.questionCount || set.items.length || 0)} 题</p>
+      <div class="complete-set-sections">${escapeHtml(getCompleteSetSectionSummary(set))}</div>
+      <div class="complete-set-progress"><i style="width:${questions.length ? Math.round(completed / questions.length * 100) : 0}%"></i></div>
+      <div class="complete-set-status-line"><span>已完成 ${completed}/${questions.length}</span><span>未做 ${remaining}</span><b>错题 ${wrong}</b></div>
+      <footer class="complete-set-card-actions"><button type="button" class="primary-button" data-open-complete-set="${escapeHtml(set.id)}">${active && !wrongActive ? "继续整套" : "打开整套"}</button><button type="button" class="secondary-button complete-wrong-button" data-open-complete-set-wrong="${escapeHtml(set.id)}" ${wrong ? "" : "disabled"}>${wrongActive ? "继续错题" : "只看错题"}</button></footer>
+    </article>`;
+  }).join("") || `<div class="hidden-solution">当前大类没有找到符合关键词的完整题组</div>`;
+  els.completeSetsContent.querySelectorAll("[data-open-complete-set]").forEach((button) => {
+    button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSet, false));
+  });
+  els.completeSetsContent.querySelectorAll("[data-open-complete-set-wrong]:not(:disabled)").forEach((button) => {
+    button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSetWrong, true));
+  });
+}
+
+function openCompleteSets() {
+  if (!els.completeSetsModal) return;
+  if (els.completeSetsSearchInput) els.completeSetsSearchInput.value = "";
+  const activeSet = getActiveCompleteSet();
+  const selectedQuestion = state.questions.find((question) => question.id === state.selectedId) || null;
+  state.completeSetSubject = getCompleteSetSubjectCategory(activeSet || selectedQuestion || getCompleteSetRegistry()[0]);
+  renderCompleteSetsContent();
+  els.completeSetsModal.hidden = false;
+  document.body.classList.add("quick-browse-open");
+}
+
+function closeCompleteSets() {
+  if (!els.completeSetsModal) return;
+  els.completeSetsModal.hidden = true;
+  document.body.classList.remove("quick-browse-open");
+}
+
+function resetVisibleFiltersForCompleteSet() {
+  if (els.searchInput) els.searchInput.value = "";
+  [els.assignmentFilter, els.subjectFilter, els.chapterFilter, els.typeFilter, els.sourceFilter, els.dayFilter, els.statusFilter, els.difficultyFilter].filter(Boolean).forEach((control) => { control.value = "all"; });
+}
+
+function activateCompleteSet(setId, wrongOnly = false) {
+  const set = getCompleteSetById(setId);
+  if (!set) return;
+  state.activeCompleteSetId = String(set.id);
+  state.activeCompleteSetWrongOnly = Boolean(wrongOnly);
+  localStorage.setItem(ACTIVE_COMPLETE_SET_KEY, state.activeCompleteSetId);
+  localStorage.setItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY, state.activeCompleteSetWrongOnly ? "1" : "0");
+  resetVisibleFiltersForCompleteSet();
+  state.page = 1;
+  state.selectedId = "";
+  state.mobileTab = "quiz";
+  localStorage.setItem(MOBILE_TAB_KEY, "quiz");
+  closeCompleteSets();
+  applyFilters();
+  showToast(`${state.activeCompleteSetWrongOnly ? "已打开本套错题：" : "已打开完整题组："}${set.title}`);
+}
+
+function clearActiveCompleteSet() {
+  const current = getActiveCompleteSet();
+  state.activeCompleteSetId = "";
+  state.activeCompleteSetWrongOnly = false;
+  localStorage.removeItem(ACTIVE_COMPLETE_SET_KEY);
+  localStorage.removeItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY);
+  state.page = 1;
+  state.selectedId = "";
+  applyFilters();
+  if (current) showToast("已退出完整题组模式");
+}
+
+function renderCompleteSetActiveBar() {
+  if (!els.completeSetActiveBar) return;
+  const set = getActiveCompleteSet();
+  els.completeSetActiveBar.hidden = !set;
+  document.body.classList.toggle("complete-set-mode", Boolean(set));
+  if (!set) return;
+  if (els.completeSetActiveTitle) els.completeSetActiveTitle.textContent = set.title || "完整题组";
+  if (els.completeSetActiveMeta) els.completeSetActiveMeta.textContent = `${state.activeCompleteSetWrongOnly ? "只看错题 · " : ""}${Number(set.pageCount || 0)}页 · ${Number(set.questionCount || set.items.length || 0)}题 · ${getCompleteSetSectionSummary(set)}`;
+}
+
 function getQuestionDisplayNo(question) {
-  return String(question && question.originalNo || question && question.id || "").trim();
+  const activeItem = question ? getActiveCompleteSetItem(question.id) : null;
+  return String(activeItem && activeItem.displayNo || question && question.originalNo || question && question.id || "").trim();
 }
 
 function getQuestionDayLabel(question) {
@@ -247,7 +436,8 @@ function getQuestionDayLabel(question) {
 }
 
 function getQuestionSequenceLabel(question) {
-  const section = String(question && (question.sectionLabel || question.practiceSection || question.type) || "题目").trim();
+  const activeItem = question ? getActiveCompleteSetItem(question.id) : null;
+  const section = String(activeItem && activeItem.section || question && (question.sectionLabel || question.practiceSection || question.type) || "题目").trim();
   const no = getQuestionDisplayNo(question);
   return `${section} ${no}`.trim();
 }
@@ -258,6 +448,13 @@ function getQuickBrowseGroupKey(question) {
 }
 
 function getCurrentQuickBrowseScope() {
+  const activeSet = getActiveCompleteSet();
+  if (activeSet) {
+    const allQuestions = getCompleteSetQuestions(activeSet);
+    const questions = state.activeCompleteSetWrongOnly ? allQuestions.filter(isWrongQuestion) : allQuestions;
+    const selectedQuestion = state.questions.find((question) => question.id === state.selectedId) || questions[0] || null;
+    return { questions, selectedQuestion, label: String(activeSet.title || "当前完整题组"), assignment: String(activeSet.assignmentGroup || "课后作业"), subject: String(activeSet.subject || ""), dayLabel: String(activeSet.dayLabel || activeSet.studyDate || "") };
+  }
   const selectedQuestion = state.questions.find((question) => question.id === state.selectedId) || state.filtered[0] || null;
   if (!selectedQuestion) {
     return { questions: [], selectedQuestion: null, label: "当前范围", assignment: "", subject: "", dayLabel: "" };
@@ -311,7 +508,8 @@ function renderQuickBrowseContent() {
     return haystack.includes(keyword);
   });
 
-  const completedCount = scope.questions.filter(isMasteredQuestion).length;
+  const completedCount = scope.questions.filter(isAttemptedQuestion).length;
+  const wrongCount = scope.questions.filter(isWrongQuestion).length;
   const remainingCount = Math.max(0, scope.questions.length - completedCount);
   if (els.quickBrowseSummary) {
     els.quickBrowseSummary.innerHTML = `
@@ -322,14 +520,16 @@ function renderQuickBrowseContent() {
       <div class="quick-current-range-stats">
         <span>${escapeHtml(scope.assignment)} · ${escapeHtml(scope.subject)}${scope.dayLabel ? ` · ${escapeHtml(scope.dayLabel)}` : ""}</span>
         <b>共 ${scope.questions.length} 题</b>
-        <b>待做 ${remainingCount} 题</b>
+        <b>未做 ${remainingCount} 题</b>
         <b>已完成 ${completedCount} 题</b>
+        <b class="quick-wrong-stat">错题 ${wrongCount} 题</b>
       </div>`;
   }
 
   const sections = new Map();
   items.forEach((question) => {
-    const section = String(question.sectionLabel || question.practiceSection || question.type || "题目");
+    const activeItem = getActiveCompleteSetItem(question.id);
+    const section = String(activeItem && activeItem.section || question.sectionLabel || question.practiceSection || question.type || "题目");
     if (!sections.has(section)) sections.set(section, []);
     sections.get(section).push(question);
   });
@@ -339,11 +539,14 @@ function renderQuickBrowseContent() {
       <header><strong>${escapeHtml(section)}</strong><span>${sectionQuestions.length}题</span></header>
       <div class="quick-question-grid">
         ${sectionQuestions.map((question) => {
-          const completed = isMasteredQuestion(question);
+          const attempted = isAttemptedQuestion(question);
+          const wrong = isWrongQuestion(question);
+          const mastered = isMasteredQuestion(question);
           const active = question.id === state.selectedId;
-          return `<button type="button" class="quick-question-button${active ? " active" : ""}${completed ? " completed" : ""}" data-quick-question-id="${escapeHtml(question.id)}" ${completed ? "disabled" : ""}>
+          const statusLabel = wrong ? "已完成 · 错题" : attempted ? "已完成 · 正确" : "未做";
+          return `<button type="button" class="quick-question-button${active ? " active" : ""}${attempted ? " completed" : ""}${wrong ? " wrong" : ""}" data-quick-question-id="${escapeHtml(question.id)}" ${mastered && !wrong ? "disabled" : ""}>
             <b>${escapeHtml(getQuestionDisplayNo(question))}</b>
-            <span>${escapeHtml(question.type)}${completed ? " · 已完成" : ""}</span>
+            <span>${escapeHtml(question.type)} · ${statusLabel}</span>
             <small>${escapeHtml(String(question.stem || "").slice(0, 58))}</small>
           </button>`;
         }).join("")}
@@ -471,28 +674,28 @@ function questionContentKey(question) {
 function mergeQuestionsPreferBundled(localQuestions, bundledQuestions) {
   const merged = [];
   const seenIds = new Set();
-  const seenContent = new Set();
+  const bundledContent = new Set();
 
-  function addMany(list) {
-    (list || []).forEach((item) => {
-      const question = QuestionBankCore.normalizeQuestion(item);
-      if (!question.id || !question.stem) {
-        return;
-      }
-      const idKey = question.id;
-      const contentKey = questionContentKey(question);
-      if (seenIds.has(idKey) || seenContent.has(contentKey)) {
-        return;
-      }
-      seenIds.add(idKey);
-      seenContent.add(contentKey);
-      merged.push(question);
-    });
-  }
+  // 完整题组可能有相同题干但属于不同完整套题。内置题库按ID完整保留，
+  // 不能再按题干去重，否则会造成整套题缺号、跳题或页数不完整。
+  (bundledQuestions || []).forEach((item) => {
+    const question = QuestionBankCore.normalizeQuestion(item);
+    if (!question.id || !question.stem || seenIds.has(question.id)) return;
+    seenIds.add(question.id);
+    bundledContent.add(questionContentKey(question));
+    merged.push(question);
+  });
 
-  // 内置题库优先，保证已补答案/图片的题能覆盖旧内置题；再追加用户本地已有题。
-  addMany(bundledQuestions);
-  addMany(localQuestions);
+  // 仅对用户本地自动生成题做内容去重，避免刷新后反复追加同一道自动变式题。
+  (localQuestions || []).forEach((item) => {
+    const question = QuestionBankCore.normalizeQuestion(item);
+    if (!question.id || !question.stem || seenIds.has(question.id)) return;
+    const contentKey = questionContentKey(question);
+    if (bundledContent.has(contentKey)) return;
+    seenIds.add(question.id);
+    bundledContent.add(contentKey);
+    merged.push(question);
+  });
   return merged;
 }
 
@@ -574,7 +777,7 @@ async function loadBundledQuestions() {
 
 function updateFilters() {
   if (els.assignmentFilter) {
-    const assignmentValues = QuestionBankCore.uniqueValues(state.questions.map((question) => question.assignmentGroup || "课后作业"));
+    const assignmentValues = QuestionBankCore.uniqueValues(state.questions.flatMap((question) => [question.assignmentGroup || "课后作业", ...(Array.isArray(question.assignmentAliases) ? question.assignmentAliases : [])]));
     refillSelect(els.assignmentFilter, ["all", ...assignmentValues], "全部作业");
   }
   refillSelect(els.subjectFilter, ["all", ...QuestionBankCore.uniqueValues(state.questions.map((question) => question.subject))], "全部");
@@ -596,7 +799,7 @@ function updateFilters() {
     refillSelect(els.sourceFilter, ["all", ...QuestionBankCore.uniqueValues(sourceValues)], "全部题源");
   }
   if (els.dayFilter) {
-    const dayValues = QuestionBankCore.uniqueValues(state.questions.map((question) => getQuestionDayLabel(question)).filter(Boolean));
+    const dayValues = QuestionBankCore.uniqueValues(state.questions.flatMap((question) => [getQuestionDayLabel(question), ...(Array.isArray(question.dayAliases) ? question.dayAliases : [])]).filter(Boolean));
     refillSelect(els.dayFilter, ["all", ...dayValues], "全部日期");
   }
 }
@@ -624,6 +827,8 @@ function applyFilters() {
   const day = els.dayFilter ? els.dayFilter.value : "all";
   const weakKeys = new Set(getWeakChapterStats().map((item) => item.key));
   const completeSequenceMode = isCompletePracticeSequenceContext() && status === "all";
+  const activeCompleteSet = getActiveCompleteSet();
+  const activeCompleteOrder = new Map((activeCompleteSet && activeCompleteSet.items || []).map((item, index) => [String(item.questionId), Number(item.order || index + 1)]));
 
   state.filtered = QuestionBankCore.filterQuestions(state.questions, {
     keyword: els.searchInput.value,
@@ -632,10 +837,10 @@ function applyFilters() {
     status: coreStatus,
     progressById: state.progressById
   })
-    .filter((question) => assignment === "all" || String(question.assignmentGroup || "课后作业") === assignment)
+    .filter((question) => assignment === "all" || String(question.assignmentGroup || "课后作业") === assignment || (Array.isArray(question.assignmentAliases) && question.assignmentAliases.includes(assignment)))
     .filter((question) => type === "all" || String(question.type || "题目") === type)
     .filter((question) => source === "all" || String(question.source || "题库") === source)
-    .filter((question) => day === "all" || getQuestionDayLabel(question) === day)
+    .filter((question) => day === "all" || getQuestionDayLabel(question) === day || (Array.isArray(question.dayAliases) && question.dayAliases.includes(day)))
     .filter((question) => difficulty === "all" || String(question.difficulty) === difficulty)
     .filter((question) => status === "answerReview" ? isUnverifiedAnswer(question) : !isUnverifiedAnswer(question))
     .filter((question) => status !== "auditQueue" || isAuditQueueQuestion(question))
@@ -647,8 +852,10 @@ function applyFilters() {
     .filter((question) => status !== "auditReference" || getAnalysisAuditCategory(question) === "reference_only")
     .filter((question) => status !== "auditAnswerOnly" || getAnalysisAuditCategory(question) === "answer_only")
     .filter((question) => status !== "auditMissing" || getAnalysisAuditCategory(question) === "missing_answer")
-    .filter((question) => !state.autoHideMastered || status === "mastered" || !isMasteredQuestion(question))
-    .sort((a, b) => sortQuestionsForMode(a, b, status));
+    .filter((question) => !activeCompleteSet || activeCompleteOrder.has(String(question.id)))
+    .filter((question) => !activeCompleteSet || !state.activeCompleteSetWrongOnly || isWrongQuestion(question))
+    .filter((question) => !state.autoHideMastered || status === "mastered" || state.activeCompleteSetWrongOnly || !isMasteredQuestion(question))
+    .sort((a, b) => activeCompleteSet ? (Number(activeCompleteOrder.get(String(a.id)) || 0) - Number(activeCompleteOrder.get(String(b.id)) || 0)) : sortQuestionsForMode(a, b, status));
 
   const page = QuestionBankCore.paginate(state.filtered, state.page, PAGE_SIZE);
   state.page = page.page;
@@ -727,6 +934,7 @@ function render() {
     els.autoHideMasteredButton.querySelector("span:last-child").textContent = state.autoHideMastered ? "已开启：做对一次隐藏" : "做对一次隐藏";
   }
   updateTimerUI();
+  renderCompleteSetActiveBar();
   renderMobileChrome();
   renderStats();
   renderDashboard();
@@ -1347,8 +1555,10 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260729-v56-current-range-quick-browse";
+const IMAGE_VERSION = "20260729-v58-complete-subject-status";
 const IMAGE_PACK_SCRIPTS = [
+  { prefix: "question-images/day-14-0729-homework-58/", file: "image-pack-homework-v57.js" },
+  { prefix: "question-images/day-14-0729-homework-supplement/", file: "image-pack-homework-v57.js" },
   { prefix: "question-images/day-13-0728-homework-binary-427/", file: "image-pack-homework-v55.js" },
   { prefix: "question-images/day-13-0728-homework-complete/", file: "image-pack-homework-v54.js" },
   { prefix: "question-images/day-11-0726-bf-math-function/", file: "image-pack-bf-math-function.js" },
@@ -4074,6 +4284,13 @@ function bindEvents() {
   if (els.wrongPlannerButton) {
     els.wrongPlannerButton.addEventListener("click", openWrongPlanner);
   }
+  if (els.completeSetsButton) els.completeSetsButton.addEventListener("click", openCompleteSets);
+  if (els.mobileCompleteSetsButton) els.mobileCompleteSetsButton.addEventListener("click", openCompleteSets);
+  if (els.completeSetsCloseButton) els.completeSetsCloseButton.addEventListener("click", closeCompleteSets);
+  if (els.completeSetsSearchInput) els.completeSetsSearchInput.addEventListener("input", debounce(renderCompleteSetsContent));
+  if (els.completeSetsModal) els.completeSetsModal.querySelectorAll("[data-complete-close]").forEach((item) => item.addEventListener("click", closeCompleteSets));
+  if (els.completeSetQuickButton) els.completeSetQuickButton.addEventListener("click", openQuickBrowse);
+  if (els.completeSetExitButton) els.completeSetExitButton.addEventListener("click", clearActiveCompleteSet);
   if (els.quickBrowseButton) {
     els.quickBrowseButton.addEventListener("click", openQuickBrowse);
   }
@@ -4091,6 +4308,7 @@ function bindEvents() {
   }
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && els.quickBrowseModal && !els.quickBrowseModal.hidden) closeQuickBrowse();
+    if (event.key === "Escape" && els.completeSetsModal && !els.completeSetsModal.hidden) closeCompleteSets();
   });
   if (els.auditModeButton) {
     els.auditModeButton.addEventListener("click", () => enterAuditMode());

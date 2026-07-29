@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v56 当前范围快速查阅版</title>
+  <title>专升本题库训练中心｜v58 完整题组分类与作答状态版</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260728-v55">
-  <link rel="stylesheet" href="math-prerender.css?v=20260728-v55">
+  <link rel="stylesheet" href="styles.css?v=20260729-v57">
+  <link rel="stylesheet" href="math-prerender.css?v=20260729-v57">
 </head>
 <body>
   <div class="app-shell">
@@ -25,6 +25,9 @@
         </button>
         <button class="icon-button secondary" id="wrongPlannerButton" type="button" title="按错因规划并生成类似题" aria-label="错题规划">
           <span aria-hidden="true">▦</span><span>错题规划</span>
+        </button>
+        <button class="icon-button complete-set-entry" id="completeSetsButton" type="button" title="查看已完整上传的蓝色森林整套题目" aria-label="完整题组库">
+          <span aria-hidden="true">▣</span><span>完整题组</span>
         </button>
         <button class="icon-button secondary" id="quickBrowseButton" type="button" title="快速查看当前正在做的完整题组" aria-label="当前题组快速查阅">
           <span aria-hidden="true">⌕</span><span>快速查阅</span>
@@ -61,6 +64,7 @@
         <strong>专升本题库</strong>
       </div>
       <div class="mobile-top-actions">
+        <button class="mobile-pill complete-mobile-pill" id="mobileCompleteSetsButton" type="button">完整</button>
         <button class="mobile-pill" id="mobileQuickBrowseButton" type="button">查题</button>
         <button class="mobile-pill" id="mobileFilterToggle" type="button">筛选</button>
         <button class="mobile-pill timer-pill" id="mobileTimerPill" type="button">25:00</button>
@@ -140,6 +144,11 @@
           <option value="5">难度 5</option>
         </select>
       </label>
+    </section>
+
+    <section class="complete-set-active-bar" id="completeSetActiveBar" hidden>
+      <div><span>完整题组模式</span><strong id="completeSetActiveTitle"></strong><em id="completeSetActiveMeta"></em></div>
+      <div class="complete-set-active-actions"><button class="secondary-button" id="completeSetQuickButton" type="button">题目目录</button><button class="small-button" id="completeSetExitButton" type="button">退出整套</button></div>
     </section>
 
     <section class="stats-grid" aria-label="统计">
@@ -255,6 +264,22 @@
     <button class="mobile-tab-button" type="button" data-mobile-tab="me"><span>我的</span></button>
   </nav>
 
+
+  <div class="quick-browse-modal complete-sets-modal" id="completeSetsModal" hidden>
+    <div class="quick-browse-backdrop" data-complete-close></div>
+    <section class="quick-browse-sheet complete-sets-sheet" role="dialog" aria-modal="true" aria-labelledby="completeSetsTitle">
+      <header class="quick-browse-head">
+        <div><p class="eyebrow">Complete Sets</p><h2 id="completeSetsTitle">蓝色森林完整题组</h2></div>
+        <button class="small-button" id="completeSetsCloseButton" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="complete-sets-intro"><strong>只收完整上传的整套资料</strong><span>按页数、题型和原序号归档。这里是归档副本，作答记录与原题共用，不会重复统计。</span></div>
+      <div class="complete-subject-tabs" id="completeSetsSubjectTabs" aria-label="完整题组科目分类"></div>
+      <div class="quick-browse-controls complete-set-controls"><label class="field"><span>查找当前大类题组</span><input id="completeSetsSearchInput" type="search" placeholder="输入章节或作业名称"></label></div>
+      <div class="quick-browse-summary" id="completeSetsSummary"></div>
+      <div class="complete-sets-content" id="completeSetsContent"></div>
+    </section>
+  </div>
+
   <div class="quick-browse-modal" id="quickBrowseModal" hidden>
     <div class="quick-browse-backdrop" data-quick-close></div>
     <section class="quick-browse-sheet" role="dialog" aria-modal="true" aria-labelledby="quickBrowseTitle">
@@ -277,12 +302,13 @@
   <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
 
   <script src="math-render-cache.js?v=20260727-v51"></script>
-  <script src="core.js?v=20260728-v55"></script>
+  <script src="core.js?v=20260729-v57"></script>
   <script src="image-pack-summer.js"></script>
   <script src="image-pack-homework-v54.js"></script>
   <script src="image-pack-homework-v55.js"></script>
+  <script src="image-pack-homework-v57.js"></script>
   <script src="image-pack-bf-math-function.js"></script>
-  <script src="question-bank-data.js?v=20260728-v55-sequence"></script>
-  <script src="app.js?v=20260729-v56-current-range"></script>
+  <script src="question-bank-data.js?v=20260729-v58-complete-subject-status"></script>
+  <script src="app.js?v=20260729-v58-complete-subject-status"></script>
 </body>
 </html>
