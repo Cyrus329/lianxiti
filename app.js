@@ -6,7 +6,7 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260729-v58-complete-subject-status";
+const FORCE_CLEAN_VERSION = "20260730-v59-encoding-complete-import";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -288,6 +288,11 @@ function getCompleteSetQuestions(set) {
   return set.items.map((item) => byId.get(String(item.questionId))).filter(Boolean);
 }
 
+function getCompleteSetSourceCountLabel(set) {
+  if (!set) return "0页";
+  return String(set.sourceCountLabel || `${Number(set.pageCount || 0)}页`);
+}
+
 function getCompleteSetSectionSummary(set) {
   const counts = new Map();
   (set && set.items || []).forEach((item) => {
@@ -348,7 +353,7 @@ function renderCompleteSetsContent() {
     const active = String(set.id) === String(state.activeCompleteSetId);
     const wrongActive = active && state.activeCompleteSetWrongOnly;
     return `<article class="complete-set-card${active ? " active" : ""}${wrongActive ? " wrong-active" : ""}">
-      <div class="complete-set-card-head"><span>${escapeHtml(getCompleteSetSubjectCategory(set))}</span><b>${Number(set.pageCount || 0)}页</b></div>
+      <div class="complete-set-card-head"><span>${escapeHtml(getCompleteSetSubjectCategory(set))}</span><b>${escapeHtml(getCompleteSetSourceCountLabel(set))}</b></div>
       <h3>${escapeHtml(set.title || "完整题组")}</h3>
       <p>${escapeHtml(set.source || "蓝色森林")} · ${escapeHtml(set.dayLabel || set.studyDate || "")} · 共 ${Number(set.questionCount || set.items.length || 0)} 题</p>
       <div class="complete-set-sections">${escapeHtml(getCompleteSetSectionSummary(set))}</div>
@@ -423,7 +428,7 @@ function renderCompleteSetActiveBar() {
   document.body.classList.toggle("complete-set-mode", Boolean(set));
   if (!set) return;
   if (els.completeSetActiveTitle) els.completeSetActiveTitle.textContent = set.title || "完整题组";
-  if (els.completeSetActiveMeta) els.completeSetActiveMeta.textContent = `${state.activeCompleteSetWrongOnly ? "只看错题 · " : ""}${Number(set.pageCount || 0)}页 · ${Number(set.questionCount || set.items.length || 0)}题 · ${getCompleteSetSectionSummary(set)}`;
+  if (els.completeSetActiveMeta) els.completeSetActiveMeta.textContent = `${state.activeCompleteSetWrongOnly ? "只看错题 · " : ""}${getCompleteSetSourceCountLabel(set)} · ${Number(set.questionCount || set.items.length || 0)}题 · ${getCompleteSetSectionSummary(set)}`;
 }
 
 function getQuestionDisplayNo(question) {
@@ -526,15 +531,16 @@ function renderQuickBrowseContent() {
       </div>`;
   }
 
-  const sections = new Map();
+  const sections = [];
   items.forEach((question) => {
     const activeItem = getActiveCompleteSetItem(question.id);
     const section = String(activeItem && activeItem.section || question.sectionLabel || question.practiceSection || question.type || "题目");
-    if (!sections.has(section)) sections.set(section, []);
-    sections.get(section).push(question);
+    const previous = sections[sections.length - 1];
+    if (!previous || previous.section !== section) sections.push({ section, questions: [] });
+    sections[sections.length - 1].questions.push(question);
   });
 
-  els.quickBrowseContent.innerHTML = [...sections.entries()].map(([section, sectionQuestions]) => `
+  els.quickBrowseContent.innerHTML = sections.map(({ section, questions: sectionQuestions }) => `
     <section class="quick-section-block">
       <header><strong>${escapeHtml(section)}</strong><span>${sectionQuestions.length}题</span></header>
       <div class="quick-question-grid">
@@ -1555,8 +1561,9 @@ function renderOptions(options, question = null, progress = null) {
 
 
 
-const IMAGE_VERSION = "20260729-v58-complete-subject-status";
+const IMAGE_VERSION = "20260730-v59-encoding-complete-import";
 const IMAGE_PACK_SCRIPTS = [
+  { prefix: "question-images/day-15-0730-homework-encoding/", file: "image-pack-homework-v59.js" },
   { prefix: "question-images/day-14-0729-homework-58/", file: "image-pack-homework-v57.js" },
   { prefix: "question-images/day-14-0729-homework-supplement/", file: "image-pack-homework-v57.js" },
   { prefix: "question-images/day-13-0728-homework-binary-427/", file: "image-pack-homework-v55.js" },
