@@ -1366,6 +1366,8 @@ function renderQuestionBody(question, progress) {
           ${renderImages(question.images, "原题")}
         </div>`;
     }
+    const englishDrill = renderEnglishSentenceDrill(question);
+    if (englishDrill) return englishDrill;
     const options = getQuestionTextOptions(question);
     const noOptions = !options.length && !isJudgmentQuestion(question)
       ? `<p class="pure-text-no-options">本题原资料没有选择项，按题目要求作答。</p>`
@@ -1413,7 +1415,7 @@ function renderDetail() {
   const canGoNext = position.index >= 0 && position.index < position.total - 1;
   const grammar = getEnglishGrammarCategory(question);
   els.detailPanel.innerHTML = `
-    <article class="question-detail">
+    <article class="question-detail" data-question-id="${escapeHtml(question.id)}">
       <header class="detail-header">
         <p class="eyebrow">${escapeHtml(question.assignmentGroup || "课后作业")} · ${escapeHtml(question.source)} · ${escapeHtml(getQuestionDayLabel(question))} · ${escapeHtml(question.subject)} · ${escapeHtml(question.chapter)}</p>
         <h2><span class="desktop-question-title">${escapeHtml(getQuestionSequenceLabel(question))}</span><span class="mobile-question-title">${escapeHtml(getQuestionSequenceLabel(question))}</span></h2>
@@ -1558,6 +1560,58 @@ function renderOptions(options, question = null, progress = null) {
     return `<li>${body}</li>`;
   }).join("")}</ul>`;
 }
+
+function getPersonalPhraseEntries(text) {
+  const source = String(text || "").toLowerCase();
+  if (!source || !Array.isArray(window.WORD_MEMORY_WORDS)) return [];
+  const seen = new Set();
+  return window.WORD_MEMORY_WORDS.map((word) => {
+    const clean = (value) => {
+      const raw = String(value || "").split(/[；;，,。、“”"<>]/)[0].trim();
+      return /^[A-Za-z][A-Za-z .'-]*$/.test(raw) && !/[\u4e00-\u9fff]/.test(raw) ? raw.replace(/\.{2,}/g, ".") : "";
+    };
+    const fromPhrase = clean(String(word.phrase || "").match(/[A-Za-z][A-Za-z .'-]*/)?.[0]);
+    return { term: clean(word.term), fallback: fromPhrase };
+  }).flatMap((item) => [item, item.fallback ? { term: item.fallback, meaning: item.meaning } : []])
+    .filter((item) => /\s/.test(item.term) && item.term.length >= 3 && source.includes(item.term.toLowerCase()))
+    .sort((a, b) => b.term.length - a.term.length)
+    .filter((item) => !seen.has(item.term.toLowerCase()) && seen.add(item.term.toLowerCase()))
+    .slice(0, 5);
+}
+
+function highlightPersonalPhrases(text) {
+  let html = escapeHtml(String(text || ""));
+  getPersonalPhraseEntries(text).forEach((item) => {
+    const escaped = item.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    html = html.replace(new RegExp(`\\b(${escaped})\\b`, "gi"), `<mark class="phrase-hit">$1</mark>`);
+  });
+  return html;
+}
+
+function renderEnglishSentenceDrill(question) {
+  if (String(question && question.subject || "") !== "英语") return "";
+  const stem = getQuestionTextStem(question);
+  const chunks = String(stem || "").split(/(?=\s*\d{1,2}[\.．、])/).map((part) => part.trim()).filter(Boolean);
+  if (chunks.length < 3) return "";
+  const instruction = chunks.shift();
+  const completed = JSON.parse(localStorage.getItem(`qb-english-drill-${question.id}`) || "[]");
+  return `<div class="english-micro-drill"><div class="english-drill-intro"><strong>拆分练习</strong><span>${renderRichText(instruction)}</span></div>${chunks.map((sentence, index) => {
+    const phrases = getPersonalPhraseEntries(sentence);
+    const done = completed.includes(index);
+    return `<article class="english-micro-card ${done ? "done" : ""}" data-english-sub="${index}"><div class="english-micro-head"><span>第 ${index + 1} 句</span><button type="button" onclick="toggleEnglishSubQuestion('${escapeHtml(question.id)}',${index},this)">${done ? "已完成 ✓" : "完成本句"}</button></div><div class="english-micro-sentence">${highlightPersonalPhrases(sentence)}</div>${phrases.length ? `<div class="phrase-note">${phrases.map((item) => `<span>${escapeHtml(item.term)}</span>`).join("")}</div>` : ""}</article>`;
+  }).join("")}</div>`;
+}
+
+window.toggleEnglishSubQuestion = function toggleEnglishSubQuestion(questionId, index, button) {
+  const key = `qb-english-drill-${questionId}`;
+  const saved = new Set(JSON.parse(localStorage.getItem(key) || "[]"));
+  if (saved.has(index)) saved.delete(index); else saved.add(index);
+  localStorage.setItem(key, JSON.stringify([...saved]));
+  const card = button.closest(".english-micro-card");
+  const done = saved.has(index);
+  card.classList.toggle("done", done);
+  button.textContent = done ? "已完成 ✓" : "完成本句";
+};
 
 
 
@@ -3676,7 +3730,7 @@ function renderMathSegment(segment) {
 
 function renderLooseTextChunk(value) {
   const text = String(value || "");
-  if (!/\\[A-Za-z]+/.test(text)) return prettifyMathHtml(escapeHtml(text));
+  if (!/\\[A-Za-z]+/.test(text)) return prettifyMathHtml(highlightPersonalPhrases(text));
   return `<span class="math-render-fallback">${renderLatexFallback(text)}</span>`;
 }
 
