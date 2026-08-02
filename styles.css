@@ -2273,3 +2273,93 @@ body.complete-set-mode .complete-set-entry{box-shadow:0 0 0 3px rgba(93,72,216,.
     padding: 0 !important;
   }
 }
+
+
+/* v63: clear homework/summer partition */
+.assignment-zone-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 18px 4px;
+  background: var(--surface, #fff);
+}
+.assignment-zone-tab {
+  border: 1px solid #d7e2e1;
+  border-radius: 16px;
+  min-height: 62px;
+  padding: 10px 14px;
+  background: #fff;
+  color: #24343a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.assignment-zone-tab strong { font-size: 16px; }
+.assignment-zone-tab span {
+  min-width: 34px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef3f3;
+  font-weight: 700;
+  text-align: center;
+}
+.assignment-zone-tab.active {
+  border-color: #147a7e;
+  box-shadow: 0 0 0 2px rgba(20,122,126,.11);
+  background: #eefafa;
+  color: #0d6468;
+}
+.assignment-zone-tab.summer-zone.active { border-color: #6554b8; background: #f4f1ff; color: #4b3d91; box-shadow: 0 0 0 2px rgba(101,84,184,.11); }
+.assignment-zone-tab.extra-zone.active { border-color: #a56b22; background: #fff8eb; color: #805016; box-shadow: 0 0 0 2px rgba(165,107,34,.1); }
+.complete-assignment-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+.complete-assignment-tab {
+  border: 1px solid #d5dddd;
+  border-radius: 16px;
+  background: #fff;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  font: inherit;
+}
+.complete-assignment-tab strong { font-size: 17px; }
+.complete-assignment-tab span { font-size: 13px; color: #66777c; }
+.complete-assignment-tab.active { border-color: #6554b8; background: #f3f0ff; color: #493b8d; box-shadow: 0 0 0 2px rgba(101,84,184,.12); }
+@media (max-width: 720px) {
+  .assignment-zone-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 14px 4px;
+    scrollbar-width: none;
+  }
+  .assignment-zone-tabs::-webkit-scrollbar { display: none; }
+  .assignment-zone-tab {
+    flex: 0 0 auto;
+    min-width: 132px;
+    min-height: 52px;
+    border-radius: 14px;
+    padding: 8px 11px;
+  }
+  .assignment-zone-tab strong { font-size: 15px; }
+  .complete-assignment-tabs { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .complete-assignment-tab { align-items: flex-start; flex-direction: column; padding: 11px 12px; }
+}
+
+
+/* v65 complete homework answer documents */
+.complete-answer-ready{display:inline-flex;align-items:center;gap:6px;margin:8px 0 2px;padding:6px 10px;border:1px solid #1f8f6b;background:#eefaf5;color:#12684e;font-weight:800;font-size:.84rem;border-radius:999px}
+.complete-answer-document,.answer-pdf-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;box-sizing:border-box}
+.analysis-pdf-card{display:grid;gap:10px;margin-top:12px;padding:14px;border:1px solid var(--line);background:var(--panel);border-radius:14px}
+.analysis-pdf-card .answer-pdf-button{width:max-content;max-width:100%}
+@media(max-width:640px){.complete-set-card-actions{display:grid;grid-template-columns:1fr 1fr}.complete-set-card-actions>*{width:100%}.analysis-pdf-card .answer-pdf-button{width:100%}.complete-answer-ready{font-size:.78rem}}
