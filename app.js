@@ -110,6 +110,15 @@ const els = {
   completeSetActiveMeta: document.querySelector("#completeSetActiveMeta"),
   completeSetQuickButton: document.querySelector("#completeSetQuickButton"),
   completeSetExitButton: document.querySelector("#completeSetExitButton"),
+  completeTextModal: document.querySelector("#completeTextModal"),
+  completeTextCloseButton: document.querySelector("#completeTextCloseButton"),
+  completeTextTitle: document.querySelector("#completeTextTitle"),
+  completeTextMeta: document.querySelector("#completeTextMeta"),
+  completeTextTypeTabs: document.querySelector("#completeTextTypeTabs"),
+  completeTextSearchInput: document.querySelector("#completeTextSearchInput"),
+  completeTextToc: document.querySelector("#completeTextToc"),
+  completeTextContent: document.querySelector("#completeTextContent"),
+  completeTextPrintButton: document.querySelector("#completeTextPrintButton"),
   quickBrowseButton: document.querySelector("#quickBrowseButton"),
   mobileQuickBrowseButton: document.querySelector("#mobileQuickBrowseButton"),
   quickBrowseModal: document.querySelector("#quickBrowseModal"),
@@ -152,7 +161,9 @@ const state = {
   activeCompleteSetId: localStorage.getItem(ACTIVE_COMPLETE_SET_KEY) || "",
   activeCompleteSetWrongOnly: localStorage.getItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY) === "1",
   completeSetAssignment: "",
-  completeSetSubject: ""
+  completeSetSubject: "",
+  completeTextSetId: "",
+  completeTextType: "全部"
 };
 
 function openDatabase() {
@@ -383,7 +394,7 @@ function renderCompleteSetsContent() {
     els.completeSetsAssignmentTabs.innerHTML = availableAssignments.map((assignment) => {
       const sets = allRegistry.filter((set) => String(set.assignmentGroup || "课后作业") === assignment);
       const unitCount = sets.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || (set.items || []).length || 0), 0);
-      return `<button type="button" class="complete-assignment-tab${state.completeSetAssignment === assignment ? " active" : ""}" data-complete-assignment="${escapeHtml(assignment)}"><strong>${escapeHtml(getAssignmentDisplayName(assignment))}</strong><span>${sets.length}套 · ${unitCount}题/页单元</span></button>`;
+      return `<button type="button" class="complete-assignment-tab${state.completeSetAssignment === assignment ? " active" : ""}" data-complete-assignment="${escapeHtml(assignment)}"><strong>${escapeHtml(getAssignmentDisplayName(assignment))}</strong><span>${sets.length}套 · ${unitCount}题</span></button>`;
     }).join("");
     els.completeSetsAssignmentTabs.querySelectorAll("[data-complete-assignment]").forEach((button) => button.addEventListener("click", () => {
       state.completeSetAssignment = button.dataset.completeAssignment || "";
@@ -414,7 +425,7 @@ function renderCompleteSetsContent() {
   const totalQuestions = registry.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || set.items.length || 0), 0);
   const totalPages = registry.reduce((sum, set) => sum + Number(set.pageCount || 0), 0);
   if (els.completeSetsSummary) {
-    els.completeSetsSummary.innerHTML = `<strong>${escapeHtml(getAssignmentDisplayName(state.completeSetAssignment))} · ${escapeHtml(state.completeSetSubject || "完整")} ${registry.length}套</strong><span>合计 ${totalQuestions} 个题目/原页单元 · ${totalPages} 页原资料</span>`;
+    els.completeSetsSummary.innerHTML = `<strong>${escapeHtml(getAssignmentDisplayName(state.completeSetAssignment))} · ${escapeHtml(state.completeSetSubject || "完整")} ${registry.length}套</strong><span>合计 ${totalQuestions} 题 · ${totalPages} 页原资料</span>`;
   }
   els.completeSetsContent.innerHTML = registry.map((set) => {
     const questions = getCompleteSetQuestions(set);
@@ -428,22 +439,145 @@ function renderCompleteSetsContent() {
     const answerReady = String(set.answerStatus || "") === "official_complete_set";
     const answerPages = Number(set.answerPageCount || 0);
     const answerDocument = String(set.answerDocument || "").trim();
-    return `<article class="complete-set-card${active ? " active" : ""}${wrongActive ? " wrong-active" : ""}">
-      <div class="complete-set-card-head"><span>${escapeHtml(getCompleteSetSubjectCategory(set))} · ${escapeHtml(set.source || "来源未标")}</span><b>${escapeHtml(getCompleteSetSourceCountLabel(set))}</b></div>${answerReady ? `<div class="complete-answer-ready">答案解析已补齐${answerPages ? ` · ${answerPages}页` : ""}</div>` : ""}
+    const textPending = String(set.textAuditStatus || "") === "pending_manual_transcription";
+    return `<article class="complete-set-card${active ? " active" : ""}${wrongActive ? " wrong-active" : ""}${textPending ? " text-pending" : ""}">
+      <div class="complete-set-card-head"><span>${escapeHtml(getCompleteSetSubjectCategory(set))} · ${escapeHtml(set.source || "来源未标")}</span><b>${escapeHtml(getCompleteSetSourceCountLabel(set))}</b></div>${answerReady ? `<div class="complete-answer-ready">答案解析已补齐${answerPages ? ` · ${answerPages}页` : ""}</div>` : ""}${textPending ? `<div class="complete-text-pending">OCR乱码已撤回 · 纯文字待人工校对</div>` : ""}
       <h3>${escapeHtml(set.title || "完整题组")}</h3>
       <p><strong>${escapeHtml(getAssignmentDisplayName(set.assignmentGroup || "课后作业"))}</strong> · ${escapeHtml(set.source || "蓝色森林")} · ${escapeHtml(set.dayLabel || set.studyDate || "")} · ${pageMode ? `原页 ${Number(set.pageCount || questions.length)} 页${sourceQuestionText}` : `共 ${Number(set.questionCount || set.items.length || 0)} 题`}</p>
       <div class="complete-set-sections">${escapeHtml(getCompleteSetSectionSummary(set))}</div>
       <div class="complete-set-progress"><i style="width:${questions.length ? Math.round(completed / questions.length * 100) : 0}%"></i></div>
       <div class="complete-set-status-line"><span>${pageMode ? "已浏览" : "已完成"} ${completed}/${questions.length}</span><span>${pageMode ? "未浏览" : "未做"} ${remaining}</span>${pageMode ? `<b>原页归档</b>` : `<b>错题 ${wrong}</b>`}</div>
-      <footer class="complete-set-card-actions"><button type="button" class="primary-button" data-open-complete-set="${escapeHtml(set.id)}">${active && !wrongActive ? "继续整套" : "打开整套"}</button>${answerReady && answerDocument ? `<a class="secondary-button complete-answer-document" href="${escapeHtml(answerDocument)}" target="_blank" rel="noopener">整套答案</a>` : ""}${pageMode ? "" : `<button type="button" class="secondary-button complete-wrong-button" data-open-complete-set-wrong="${escapeHtml(set.id)}" ${wrong ? "" : "disabled"}>${wrongActive ? "继续错题" : "只看错题"}</button>`}</footer>
+      <footer class="complete-set-card-actions"><button type="button" class="primary-button" data-open-complete-set="${escapeHtml(set.id)}">${active && !wrongActive ? "继续整套" : "打开整套"}</button><button type="button" class="secondary-button complete-text-button" data-open-complete-text="${escapeHtml(set.id)}">${textPending ? "原题安全查看" : "纯文字整套"}</button>${answerReady && answerDocument ? `<a class="secondary-button complete-answer-document" href="${escapeHtml(answerDocument)}" target="_blank" rel="noopener">整套答案</a>` : ""}${pageMode ? "" : `<button type="button" class="secondary-button complete-wrong-button" data-open-complete-set-wrong="${escapeHtml(set.id)}" ${wrong ? "" : "disabled"}>${wrongActive ? "继续错题" : "只看错题"}</button>`}</footer>
     </article>`;
   }).join("") || `<div class="hidden-solution">当前分区没有找到符合关键词的完整题组</div>`;
   els.completeSetsContent.querySelectorAll("[data-open-complete-set]").forEach((button) => {
     button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSet, false));
   });
+  els.completeSetsContent.querySelectorAll("[data-open-complete-text]").forEach((button) => {
+    button.addEventListener("click", () => openCompleteTextReader(button.dataset.openCompleteText));
+  });
   els.completeSetsContent.querySelectorAll("[data-open-complete-set-wrong]:not(:disabled)").forEach((button) => {
     button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSetWrong, true));
   });
+}
+
+
+function getPureTextTypeLabel(question) {
+  const raw = String(question && (question.sectionLabel || question.practiceSection || question.type) || "题目");
+  if (/选择|单选|多选/.test(raw)) return "选择题";
+  if (/判断|正误/.test(raw)) return "判断题";
+  if (/填空/.test(raw)) return "填空题";
+  if (/汉译英/.test(raw)) return "汉译英";
+  if (/英译汉/.test(raw)) return "英译汉";
+  if (/计算|解答|证明/.test(raw)) return "计算题";
+  if (/原页/.test(raw)) return "原页资料";
+  return raw || "题目";
+}
+
+function splitPureTextLines(value) {
+  let text = String(value || "").replace(/\r/g, "\n").replace(/\u00a0/g, " ").trim();
+  if (!text) return [];
+  text = text.replace(/\s+([A-DＡ-Ｄ])[\.、．]\s*/g, "\n$1. ");
+  text = text.replace(/\s+(答案|解析|句意|考点)[:：]/g, "\n$1：");
+  return text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+}
+
+function renderPureTextStem(question) {
+  const lines = splitPureTextLines(getQuestionTextStem(question));
+  if (!lines.length) return `<p class="paper-missing">本题纯文字题干尚未录入。</p>`;
+  return lines.map((line) => `<p class="paper-stem-line">${renderRichText(line)}</p>`).join("");
+}
+
+function renderPureTextOptions(question) {
+  const options = getQuestionTextOptions(question);
+  const normalized = getQuestionOptions(question, options);
+  if (!normalized.length) {
+    if (getPureTextTypeLabel(question) === "填空题") return `<div class="paper-answer-line"></div>`;
+    return "";
+  }
+  return `<ol class="paper-options">${normalized.map((option, index) => {
+    const raw = String(option || "").trim();
+    const letter = String.fromCharCode(65 + index);
+    const body = raw.replace(/^[A-DＡ-Ｄ][\.、．]\s*/i, "");
+    return `<li><b>${letter}.</b><span>${renderRichText(body)}</span></li>`;
+  }).join("")}</ol>`;
+}
+
+function renderCompleteTextQuestion(question, item, index) {
+  const type = getPureTextTypeLabel(question);
+  const number = String(item && item.displayNo || getQuestionDisplayNo(question) || index + 1);
+  const progress = readProgress(question.id);
+  const status = isAttemptedQuestion(question) ? (isWrongQuestion(question) ? "已完成·错题" : "已完成") : "未做";
+  if (question && question.forceImageTextFallback) {
+    return `<article class="paper-question paper-page-unit paper-text-pending" id="pure-${escapeHtml(question.id)}" data-pure-type="${escapeHtml(type)}">
+      <header><span class="paper-number">${escapeHtml(number)}</span><span class="paper-type">${escapeHtml(type)}</span><em>${status}</em></header>
+      <div class="paper-page-note"><strong>已撤回错误 OCR，不再显示乱码</strong><span>该题尚未完成可靠逐字转写。现阶段显示原题页用于作答和核对，不能把自动识别草稿冒充纯文字正文。</span></div>
+      ${renderImages(question.images || [], "原题页")}
+    </article>`;
+  }
+  if (question.pageArchive || type === "原页资料") {
+    return `<article class="paper-question paper-page-unit" id="pure-${escapeHtml(question.id)}" data-pure-type="${escapeHtml(type)}">
+      <header><span class="paper-number">${escapeHtml(number)}</span><span class="paper-type">${escapeHtml(type)}</span><em>${status}</em></header>
+      <h4>${escapeHtml(question.titleLabel || question.chapter || "原页资料")}</h4>
+      <div class="paper-page-note"><strong>该页尚未拆分成逐题文字</strong><span>为避免错字、漏题和公式识别错误，本页保留原图；后续有清晰文字源时会自动替换为逐题纯文字。</span></div>
+      ${renderImages(question.images || [], "原题")}
+    </article>`;
+  }
+  const sourceImages = Array.isArray(question.images) ? question.images.filter(Boolean) : [];
+  const sourceAssist = sourceImages.length ? `<details class="paper-source-assist"><summary>查看原题图（辅助核对）</summary>${renderImages(sourceImages, "原题辅助图")}</details>` : "";
+  return `<article class="paper-question" id="pure-${escapeHtml(question.id)}" data-pure-type="${escapeHtml(type)}">
+    <header><span class="paper-number">${escapeHtml(number)}</span><span class="paper-type">${escapeHtml(type)}</span><em>${status}</em></header>
+    <div class="paper-stem">${renderPureTextStem(question)}</div>
+    ${renderPureTextOptions(question)}
+    ${sourceAssist}
+  </article>`;
+}
+
+function renderCompleteTextReader() {
+  const set = getCompleteSetById(state.completeTextSetId);
+  if (!set || !els.completeTextContent) return;
+  const byId = new Map(state.questions.map((q) => [String(q.id), q]));
+  const rows = set.items.map((item, index) => ({ item, index, question: byId.get(String(item.questionId)) })).filter((row) => row.question);
+  const types = ["全部", ...new Set(rows.map((row) => getPureTextTypeLabel(row.question)))];
+  if (!types.includes(state.completeTextType)) state.completeTextType = "全部";
+  const keyword = String(els.completeTextSearchInput && els.completeTextSearchInput.value || "").trim().toLowerCase();
+  const visibleRows = rows.filter((row) => {
+    const type = getPureTextTypeLabel(row.question);
+    if (state.completeTextType !== "全部" && type !== state.completeTextType) return false;
+    if (!keyword) return true;
+    return [row.item.displayNo, type, getQuestionTextStem(row.question), ...(getQuestionTextOptions(row.question) || [])].join(" ").toLowerCase().includes(keyword);
+  });
+  if (els.completeTextTitle) els.completeTextTitle.textContent = set.title || "完整纯文字版";
+  if (els.completeTextMeta) els.completeTextMeta.textContent = `${getAssignmentDisplayName(set.assignmentGroup || "课后作业")} · ${set.source || "来源未标"} · ${set.subject || ""} · ${Number(set.sourceQuestionCount || set.questionCount || rows.length)}题`;
+  if (els.completeTextTypeTabs) {
+    els.completeTextTypeTabs.innerHTML = types.map((type) => `<button type="button" class="complete-text-type-tab${state.completeTextType === type ? " active" : ""}" data-pure-type-tab="${escapeHtml(type)}">${escapeHtml(type)}<small>${type === "全部" ? rows.length : rows.filter((row) => getPureTextTypeLabel(row.question) === type).length}</small></button>`).join("");
+    els.completeTextTypeTabs.querySelectorAll("[data-pure-type-tab]").forEach((button) => button.addEventListener("click", () => { state.completeTextType = button.dataset.pureTypeTab || "全部"; renderCompleteTextReader(); }));
+  }
+  const sections = [];
+  visibleRows.forEach((row) => {
+    const section = String(row.item.section || getPureTextTypeLabel(row.question));
+    let group = sections.find((item) => item.name === section);
+    if (!group) { group = { name: section, rows: [] }; sections.push(group); }
+    group.rows.push(row);
+  });
+  if (els.completeTextToc) els.completeTextToc.innerHTML = sections.map((section, i) => `<a href="#paper-section-${i}"><strong>${escapeHtml(section.name)}</strong><span>${section.rows.length}题</span></a>`).join("");
+  if (els.completeTextContent) els.completeTextContent.innerHTML = sections.map((section, i) => `<section class="paper-section" id="paper-section-${i}"><h3>${escapeHtml(section.name)}</h3>${section.rows.map((row) => renderCompleteTextQuestion(row.question, row.item, row.index)).join("")}</section>`).join("") || `<div class="hidden-solution">当前条件下没有题目</div>`;
+}
+
+function openCompleteTextReader(setId) {
+  if (!els.completeTextModal) return;
+  state.completeTextSetId = String(setId || "");
+  state.completeTextType = "全部";
+  if (els.completeTextSearchInput) els.completeTextSearchInput.value = "";
+  renderCompleteTextReader();
+  els.completeTextModal.hidden = false;
+  document.body.classList.add("complete-text-open");
+}
+
+function closeCompleteTextReader() {
+  if (!els.completeTextModal) return;
+  els.completeTextModal.hidden = true;
+  document.body.classList.remove("complete-text-open");
 }
 
 function openCompleteSets() {
@@ -1460,7 +1594,8 @@ function renderQuestionBody(question, progress) {
       : "";
     return `
       <div class="pure-text-question">
-        <div class="pure-text-stem">${renderRichText(getQuestionTextStem(question))}</div>
+        <div class="pure-text-paper-head"><span>${escapeHtml(getQuestionSequenceLabel(question))}</span><b>${escapeHtml(getPureTextTypeLabel(question))}</b></div>
+        <div class="pure-text-stem">${renderPureTextStem(question)}</div>
         ${formulaProof}
         ${renderOptions(options, question, progress)}
         ${noOptions}
@@ -4445,6 +4580,10 @@ function bindEvents() {
   if (els.completeSetsModal) els.completeSetsModal.querySelectorAll("[data-complete-close]").forEach((item) => item.addEventListener("click", closeCompleteSets));
   if (els.completeSetQuickButton) els.completeSetQuickButton.addEventListener("click", openQuickBrowse);
   if (els.completeSetExitButton) els.completeSetExitButton.addEventListener("click", clearActiveCompleteSet);
+  if (els.completeTextCloseButton) els.completeTextCloseButton.addEventListener("click", closeCompleteTextReader);
+  if (els.completeTextSearchInput) els.completeTextSearchInput.addEventListener("input", debounce(renderCompleteTextReader));
+  if (els.completeTextPrintButton) els.completeTextPrintButton.addEventListener("click", () => window.print());
+  if (els.completeTextModal) els.completeTextModal.querySelectorAll("[data-complete-text-close]").forEach((item) => item.addEventListener("click", closeCompleteTextReader));
   if (els.quickBrowseButton) {
     els.quickBrowseButton.addEventListener("click", openQuickBrowse);
   }
@@ -4463,6 +4602,7 @@ function bindEvents() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && els.quickBrowseModal && !els.quickBrowseModal.hidden) closeQuickBrowse();
     if (event.key === "Escape" && els.completeSetsModal && !els.completeSetsModal.hidden) closeCompleteSets();
+    if (event.key === "Escape" && els.completeTextModal && !els.completeTextModal.hidden) closeCompleteTextReader();
   });
   if (els.auditModeButton) {
     els.auditModeButton.addEventListener("click", () => enterAuditMode());

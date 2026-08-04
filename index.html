@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v66 全方位完整套题版</title>
+  <title>专升本题库训练中心｜v69 乱码安全修复版</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260801-v66">
+  <link rel="stylesheet" href="styles.css?v=20260803-v69">
   <link rel="stylesheet" href="math-prerender.css?v=20260729-v57">
 </head>
 <body>
@@ -276,7 +276,7 @@
     <div class="quick-browse-backdrop" data-complete-close></div>
     <section class="quick-browse-sheet complete-sets-sheet" role="dialog" aria-modal="true" aria-labelledby="completeSetsTitle">
       <header class="quick-browse-head">
-        <div><p class="eyebrow">Complete Sets</p><h2 id="completeSetsTitle">蓝色森林完整题组分区</h2></div>
+        <div><p class="eyebrow">Complete Sets</p><h2 id="completeSetsTitle">完整题组分区</h2></div>
         <button class="small-button" id="completeSetsCloseButton" type="button" aria-label="关闭">×</button>
       </header>
       <div class="complete-sets-intro"><strong>只收完整上传的整套资料</strong><span>先分“课后练习 / 暑假作业”，再按数学、计算机、英语查看。重复题共用作答记录，不会生成两份进度。</span></div>
@@ -307,6 +307,22 @@
     </section>
   </div>
 
+  <div class="quick-browse-modal complete-text-modal" id="completeTextModal" hidden>
+    <div class="quick-browse-backdrop" data-complete-text-close></div>
+    <section class="quick-browse-sheet complete-text-sheet" role="dialog" aria-modal="true" aria-labelledby="completeTextTitle">
+      <header class="quick-browse-head complete-text-head">
+        <div><p class="eyebrow">Pure Text Paper</p><h2 id="completeTextTitle">完整纯文字版</h2><p id="completeTextMeta"></p></div>
+        <div class="complete-text-head-actions"><button class="secondary-button" id="completeTextPrintButton" type="button">打印 / 保存PDF</button><button class="small-button" id="completeTextCloseButton" type="button" aria-label="关闭">×</button></div>
+      </header>
+      <div class="complete-text-tools">
+        <div id="completeTextTypeTabs" class="complete-text-type-tabs"></div>
+        <label class="field"><span>本套内查找</span><input id="completeTextSearchInput" type="search" placeholder="输入题号或关键词"></label>
+      </div>
+      <aside class="complete-text-toc" id="completeTextToc"></aside>
+      <main class="complete-text-content" id="completeTextContent"></main>
+    </section>
+  </div>
+
   <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
 
   <script src="math-render-cache.js?v=20260727-v51"></script>
@@ -327,8 +343,10 @@
   <script src="homework-answers-v65.js?v=20260801-v65"></script>
   <script src="image-pack-qfw-v66.js?v=20260801-v66"></script>
   <script src="qfw-complete-v66.js?v=20260801-v66"></script>
+  <script src="complete-text-v68.js?v=20260803-v68"></script>
+  <script src="complete-text-v69-safety-fix.js?v=20260803-v69"></script>
   <script src="word-data.js?v=20260730-personal-phrases"></script>
-  <script src="app.js?v=20260801-v66-qfw-complete-sets"></script>
+  <script src="app.js?v=20260803-v69-garbled-safety"></script>
   <script src="knowledge-link-data.js?v=20260731-linked"></script>
   <script src="knowledge-links.js?v=20260731-linked"></script>
   <script src="core-batch2.js?v=20260731-batch2"></script>
