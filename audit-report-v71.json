@@ -1,0 +1,25 @@
+{
+  "version": "v71",
+  "base": "v67",
+  "questionUnits": 1291,
+  "completeSets": 34,
+  "verifiedTextCompleteSets": 15,
+  "pageArchiveCompleteSets": 19,
+  "pageArchiveUnits": 89,
+  "knownGarbledMatches": 0,
+  "knownGarbledIds": [],
+  "missingQuestionImages": 0,
+  "contentRestore": {
+    "forcedRevision": "20260804-v71-original-v67-text",
+    "preservesProgress": true,
+    "trustedTextSource": "BUNDLED_QUESTION_BANK",
+    "comparesContentNotOnlyIds": true
+  },
+  "syntaxChecks": [
+    "app.js",
+    "question-bank-data.js",
+    "qfw-complete-v66.js",
+    "summer-complete-v60.js"
+  ],
+  "note": "v71 restores v67 trusted question text and blocks stale v68/v69 OCR cache. Page-only archives remain source pages and are not represented as verified pure text."
+}

@@ -1,0 +1,13 @@
+{
+  "version": "v77",
+  "fix": "formula-rendering-repair",
+  "uniqueMathSegments": 1215,
+  "mathJaxRendered": 1215,
+  "mathJaxErrors": 0,
+  "looseRawTexFields": 0,
+  "targetQuestion": "D17-HW-CONT-SEL-06",
+  "targetCacheHit": true,
+  "targetRawTokensAfterRender": false,
+  "questionIdsChanged": false,
+  "progressReset": false
+}

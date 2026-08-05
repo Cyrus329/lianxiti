@@ -1,0 +1,107 @@
+{
+  "version": "v75",
+  "baseline": "question-bank-v67-pure-text-rebuild.zip",
+  "generatedAt": "2026-08-05T09:18:00+08:00",
+  "totalQuestions": 1755,
+  "totalCompleteSets": 34,
+  "repairedEnglishSets": 6,
+  "repairedEnglishCards": 297,
+  "repairedSets": [
+    {
+      "id": "bf-homework-v64-english-adjective-adverb-pages-118-121",
+      "title": "课后练习｜第一章第四节 形容词与副词（完整35题）",
+      "questionCount": 35,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-eng-adjective-adverb",
+      "title": "暑假续接｜第四节 形容词与副词（完整50题）",
+      "questionCount": 50,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-eng-article-number",
+      "title": "暑假续接｜第三节 冠词与数词（完整50题）",
+      "questionCount": 50,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-eng-preposition-conjunction",
+      "title": "暑假续接｜第五节 介词与连词（完整50题）",
+      "questionCount": 50,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-eng-verb",
+      "title": "暑假续接｜第六节 动词（完整50题）",
+      "questionCount": 50,
+      "pageMode": false
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article",
+      "title": "全方位｜第一部分 基础语法：名词与冠词（完整62题）",
+      "questionCount": 62,
+      "pageMode": false
+    }
+  ],
+  "remainingPageModeSets": 6,
+  "remainingSets": [
+    {
+      "id": "bf-summer-v62-comp-system-components",
+      "title": "暑假续接｜第四节 计算机系统组成（完整7页·81题）",
+      "subject": "计算机",
+      "questionCount": 81
+    },
+    {
+      "id": "bf-summer-v62-comp-computational-thinking",
+      "title": "暑假续接｜第五节 计算思维（完整2页·15题）",
+      "subject": "计算机",
+      "questionCount": 15
+    },
+    {
+      "id": "bf-summer-v62-comp-os-basics",
+      "title": "暑假续接｜操作系统基本知识和使用（完整2页·22题）",
+      "subject": "计算机",
+      "questionCount": 22
+    },
+    {
+      "id": "bf-summer-v62-comp-os-functions",
+      "title": "暑假续接｜第二节 操作系统的功能（完整4页·44题）",
+      "subject": "计算机",
+      "questionCount": 44
+    },
+    {
+      "id": "bf-summer-v62-comp-windows-intro",
+      "title": "暑假续接｜第三节 Windows简介（完整4页·41题）",
+      "subject": "计算机",
+      "questionCount": 41
+    },
+    {
+      "id": "qfw-homework-v66-computer-overview",
+      "title": "全方位｜第1章 计算机概述（完整7页·47题）",
+      "subject": "计算机",
+      "questionCount": 47
+    }
+  ],
+  "duplicateQuestionIds": [],
+  "missingRepairedImages": [],
+  "emptyRepairedStems": [],
+  "syntaxChecks": {
+    "appJs": true,
+    "englishCompletePatch": true,
+    "mathCompletePatch": true,
+    "serviceWorker": true
+  },
+  "notes": [
+    "英语题干与选项按原资料逐题校对录入",
+    "原资料中的明显语法或选项重复按原样保留，不擅自改题",
+    "如 brushs 等拼写来自原题选项，已按原资料保留并非OCR乱码",
+    "剩余6套计算机完整题组待继续深修"
+  ],
+  "sourceOriginalAnomalies": [
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-15",
+      "token": "brushs"
+    }
+  ]
+}

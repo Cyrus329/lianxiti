@@ -1,7 +1,7 @@
 {
-  "name": "专升本题库训练中心 v68",
-  "short_name": "题库v68",
-  "description": "完整题组逐题纯文字重构版：19套原页题组已拆分为763道独立题目，原题图仅作辅助核对。",
+  "name": "专升本题库训练中心 v67",
+  "short_name": "题库v67",
+  "description": "课后练习与暑假作业分区；新增全方位英语名词冠词完整9页及计算机概述完整7页，计算机47题官方答案解析21页。",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

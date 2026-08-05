@@ -1,0 +1,139 @@
+{
+  "version": "v74",
+  "baseline": "question-bank-v67-pure-text-rebuild.zip",
+  "generatedAt": "2026-08-05T08:04:00+08:00",
+  "totalQuestions": 1491,
+  "totalCompleteSets": 34,
+  "repairedMathSets": 7,
+  "repairedMathQuestions": 230,
+  "repairedSets": [
+    {
+      "id": "bf-homework-v64-math-limit-pages-7-15",
+      "title": "课后练习｜第二节 极限（完整94题）",
+      "questionCount": 94,
+      "pageMode": false
+    },
+    {
+      "id": "bf-homework-v64-math-continuity-pages-16-21",
+      "title": "课后练习｜第三节 连续与间断（完整39题）",
+      "questionCount": 39,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-math-limit",
+      "title": "暑假续接｜第二节 极限（完整16题）",
+      "questionCount": 16,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-math-continuity",
+      "title": "暑假续接｜第三节 连续与间断（完整6题）",
+      "questionCount": 6,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-math-derivative",
+      "title": "暑假续接｜第一节 导数（完整30题）",
+      "questionCount": 30,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-math-application-mvt",
+      "title": "暑假续接｜导数的应用与微分中值定理（完整30题）",
+      "questionCount": 30,
+      "pageMode": false
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral",
+      "title": "暑假续接｜第一节 不定积分（完整15题）",
+      "questionCount": 15,
+      "pageMode": false
+    }
+  ],
+  "remainingPageModeSets": 12,
+  "remainingSets": [
+    {
+      "id": "bf-homework-v64-english-adjective-adverb-pages-118-121",
+      "title": "课后练习｜第一章第四节 形容词与副词（完整4页）",
+      "subject": "英语",
+      "sourceQuestionCount": 4
+    },
+    {
+      "id": "bf-summer-v62-eng-article-number",
+      "title": "暑假续接｜第三节 冠词与数词（完整5页·50题）",
+      "subject": "英语",
+      "sourceQuestionCount": 50
+    },
+    {
+      "id": "bf-summer-v62-eng-adjective-adverb",
+      "title": "暑假续接｜第四节 形容词与副词（完整5页·50题）",
+      "subject": "英语",
+      "sourceQuestionCount": 50
+    },
+    {
+      "id": "bf-summer-v62-eng-preposition-conjunction",
+      "title": "暑假续接｜第五节 介词与连词（完整5页·50题）",
+      "subject": "英语",
+      "sourceQuestionCount": 50
+    },
+    {
+      "id": "bf-summer-v62-eng-verb",
+      "title": "暑假续接｜第六节 动词（完整5页·50题）",
+      "subject": "英语",
+      "sourceQuestionCount": 50
+    },
+    {
+      "id": "bf-summer-v62-comp-system-components",
+      "title": "暑假续接｜第四节 计算机系统组成（完整7页·81题）",
+      "subject": "计算机",
+      "sourceQuestionCount": 81
+    },
+    {
+      "id": "bf-summer-v62-comp-computational-thinking",
+      "title": "暑假续接｜第五节 计算思维（完整2页·15题）",
+      "subject": "计算机",
+      "sourceQuestionCount": 15
+    },
+    {
+      "id": "bf-summer-v62-comp-os-basics",
+      "title": "暑假续接｜操作系统基本知识和使用（完整2页·22题）",
+      "subject": "计算机",
+      "sourceQuestionCount": 22
+    },
+    {
+      "id": "bf-summer-v62-comp-os-functions",
+      "title": "暑假续接｜第二节 操作系统的功能（完整4页·44题）",
+      "subject": "计算机",
+      "sourceQuestionCount": 44
+    },
+    {
+      "id": "bf-summer-v62-comp-windows-intro",
+      "title": "暑假续接｜第三节 Windows简介（完整4页·41题）",
+      "subject": "计算机",
+      "sourceQuestionCount": 41
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article",
+      "title": "全方位｜第一部分 基础语法：名词与冠词（完整9页）",
+      "subject": "英语",
+      "sourceQuestionCount": 62
+    },
+    {
+      "id": "qfw-homework-v66-computer-overview",
+      "title": "全方位｜第1章 计算机概述（完整7页·47题）",
+      "subject": "计算机",
+      "sourceQuestionCount": 47
+    }
+  ],
+  "duplicateQuestionIds": [],
+  "missingRepairedImages": [],
+  "syntaxChecks": {
+    "appJs": true,
+    "homeworkContinuityPatch": true,
+    "mathCompletePatch": true
+  },
+  "notes": [
+    "v74修正了此前补丁未被index.html加载的问题",
+    "不对剩余英语和计算机页归档资料使用低质量OCR"
+  ]
+}
