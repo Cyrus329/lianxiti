@@ -6,9 +6,9 @@ const BUNDLED_DATA_URL = "question-bank-data.json"; // 轻量版主要使用 que
 const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
-const FORCE_CLEAN_VERSION = "20260805-v77-formula-render-repair";
+const FORCE_CLEAN_VERSION = "20260806-v78-answer-binding-repair";
 const BUNDLED_CONTENT_REVISION_KEY = "zsb-question-bank-empty-v34:bundled-content-revision";
-const BUNDLED_CONTENT_REVISION = "20260805-v77-formula-render-repair";
+const BUNDLED_CONTENT_REVISION = "20260806-v78-answer-binding-repair";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -980,7 +980,7 @@ async function ensureBundledQuestionsCurrent() {
     state.selectedId = "";
     localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
     localStorage.setItem(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
-    showToast(`纯文字题库已恢复：旧版 OCR 乱码正文已被内置可靠文字覆盖，作答进度保留`);
+    showToast(`v78 已重新绑定逐题答案与解析，题目正文和作答进度均保留`);
     return true;
   }
 

@@ -1,0 +1,360 @@
+{
+  "version": "v78",
+  "generatedAt": "2026-08-06T23:58:00+08:00",
+  "questionCount": 1979,
+  "completeSetCount": 34,
+  "answerBindingAudit": {
+    "version": "v78",
+    "matched": 176,
+    "mathLimit": 94,
+    "englishAdjAdv": 35,
+    "qfwComputer": 47,
+    "conflicts": 1,
+    "rule": "题源+题组+题型+原题号匹配；不再把整套PDF提示当作单题答案"
+  },
+  "answeredTotal": 1414,
+  "unansweredTotal": 565,
+  "genericPlaceholdersRemaining": 0,
+  "sets": [
+    {
+      "id": "bf-math-function-ch1-sec1-complete-20260726",
+      "title": "第一章第一节 函数课后练习（完整6页）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 64,
+      "answered": 64,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260728-comp-complete",
+      "title": "第一章 计算机基础知识同步练习（完整11页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 147,
+      "answered": 147,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260728-binary-427-complete",
+      "title": "4.27课后作业｜进制的基础概念+算术逻辑运算（完整5页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 18,
+      "answered": 18,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260729-convert-storage-58-complete",
+      "title": "5.8课后作业｜进制转换+信息存储单位（完整5页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 10,
+      "answered": 10,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260729-ascii-code-supplement-complete",
+      "title": "补充题目｜ASCII、原码与补码（完整9页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 3,
+      "answered": 3,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260730-hanzi-encoding-complete",
+      "title": "汉字编码与字符编码补充题（完整4页·15题）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 15,
+      "answered": 15,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260716-sentence-structure-complete",
+      "title": "第一章第一节 句子结构（完整3页）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260728-noun-complete",
+      "title": "第一章第二节 名词与代词（完整4页）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 35,
+      "answered": 35,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-20260728-article-complete",
+      "title": "第一章第三节 数词与冠词（完整4页）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 35,
+      "answered": 35,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-a",
+      "title": "暑假集训｜计算机基础综合练习（一）（完整5页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-v64-math-limit-pages-7-15",
+      "title": "课后练习｜第二节 极限（完整94题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 94,
+      "answered": 94,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-b",
+      "title": "暑假集训｜进制转换与存储单位练习（二）（完整4页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-c",
+      "title": "暑假集训｜编码、补码与汉字字模练习（三）（完整4页）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-homework-v64-english-adjective-adverb-pages-118-121",
+      "title": "课后练习｜第一章第四节 形容词与副词（完整35题）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 35,
+      "answered": 35,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-20260721-english-noun-pronoun",
+      "title": "暑假集训｜名词与代词综合练习（完整5页·50题）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-20260721-english-sentence-structure",
+      "title": "暑假集训｜句子结构与成分分析（完整2页）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-20260721-math-function",
+      "title": "暑假集训｜函数基础练习（完整2页）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 0,
+      "answered": 0,
+      "unanswered": 0,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-math-limit",
+      "title": "暑假续接｜第二节 极限（完整16题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 16,
+      "answered": 0,
+      "unanswered": 16,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-math-continuity",
+      "title": "暑假续接｜第三节 连续与间断（完整6题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 6,
+      "answered": 0,
+      "unanswered": 6,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-math-derivative",
+      "title": "暑假续接｜第一节 导数（完整30题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 30,
+      "answered": 0,
+      "unanswered": 30,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-math-application-mvt",
+      "title": "暑假续接｜导数的应用与微分中值定理（完整30题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 30,
+      "answered": 0,
+      "unanswered": 30,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral",
+      "title": "暑假续接｜第一节 不定积分（完整15题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 15,
+      "answered": 0,
+      "unanswered": 15,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-eng-article-number",
+      "title": "暑假续接｜第三节 冠词与数词（完整50题）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 50,
+      "answered": 0,
+      "unanswered": 50,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-eng-adjective-adverb",
+      "title": "暑假续接｜第四节 形容词与副词（完整50题）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 50,
+      "answered": 0,
+      "unanswered": 50,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-eng-preposition-conjunction",
+      "title": "暑假续接｜第五节 介词与连词（完整50题）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 50,
+      "answered": 0,
+      "unanswered": 50,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-eng-verb",
+      "title": "暑假续接｜第六节 动词（完整50题）",
+      "subject": "英语",
+      "source": "蓝色森林",
+      "total": 50,
+      "answered": 0,
+      "unanswered": 50,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-comp-system-components",
+      "title": "暑假续接｜第四节 计算机系统组成（完整81题）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 81,
+      "answered": 0,
+      "unanswered": 81,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-comp-computational-thinking",
+      "title": "暑假续接｜第五节 计算思维（完整15题）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 15,
+      "answered": 0,
+      "unanswered": 15,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-comp-os-basics",
+      "title": "暑假续接｜操作系统基本知识和使用（完整22题）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 22,
+      "answered": 0,
+      "unanswered": 22,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-comp-os-functions",
+      "title": "暑假续接｜第二节 操作系统的功能（完整44题）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 44,
+      "answered": 0,
+      "unanswered": 44,
+      "conflicts": 0
+    },
+    {
+      "id": "bf-summer-v62-comp-windows-intro",
+      "title": "暑假续接｜第三节 Windows简介（完整41题）",
+      "subject": "计算机",
+      "source": "蓝色森林",
+      "total": 41,
+      "answered": 0,
+      "unanswered": 41,
+      "conflicts": 0
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article",
+      "title": "全方位｜第一部分 基础语法：名词与冠词（完整62题）",
+      "subject": "英语",
+      "source": "全方位",
+      "total": 62,
+      "answered": 0,
+      "unanswered": 62,
+      "conflicts": 0
+    },
+    {
+      "id": "qfw-homework-v66-computer-overview",
+      "title": "全方位｜第1章 计算机概述（完整47题）",
+      "subject": "计算机",
+      "source": "全方位",
+      "total": 47,
+      "answered": 47,
+      "unanswered": 0,
+      "conflicts": 1
+    },
+    {
+      "id": "bf-homework-v64-math-continuity-pages-16-21",
+      "title": "课后练习｜第三节 连续与间断（完整39题）",
+      "subject": "高等数学",
+      "source": "蓝色森林",
+      "total": 39,
+      "answered": 39,
+      "unanswered": 0,
+      "conflicts": 0
+    }
+  ]
+}
