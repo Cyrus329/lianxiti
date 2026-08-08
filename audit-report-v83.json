@@ -1,0 +1,779 @@
+{
+  "version": "v83",
+  "generatedAt": "2026-08-08T10:33:00+08:00",
+  "summary": {
+    "questions": 1979,
+    "completeSets": 34,
+    "completeSetRefs": 1397,
+    "uniqueCompleteQuestions": 1389,
+    "sharedQuestionRefs": 8,
+    "duplicateQuestionIds": 0,
+    "missingRegisteredQuestions": 0,
+    "emptyStem": 0,
+    "placeholderStem": 0,
+    "choiceMissing": 0,
+    "judgmentOptionErrors": 0,
+    "fillWithoutBlank": 0,
+    "missingImages": 0,
+    "rawLatexOutsideMath": 0,
+    "suspiciousGarbledText": 0,
+    "mathSegments": 1233,
+    "mathCacheMissing": 0,
+    "mathRenderErrors": 0,
+    "answerFilledRefs": 835,
+    "officialAnswerRefs": 578,
+    "answerUnfilledRefs": 562,
+    "rebuiltCompleteSets": 19,
+    "rebuiltSourcePagesAudited": 106,
+    "baselineQuestionsCompared": 1291,
+    "baselineChangedSameId": 25,
+    "unexpectedBaselineChanges": 0,
+    "sourceEvidenceCorrectionsV83": 24,
+    "judgmentOptionsNormalized": 22
+  },
+  "baselineChanges": [
+    {
+      "id": "D06-SUMMER-226",
+      "oldStem": "求函数 \\(y=1+\\ln(x+2)\\) 的反函数。",
+      "newStem": "求函数 \\(y=1+\\ln(x+2)\\) 的反函数________。",
+      "oldOptions": [],
+      "newOptions": []
+    },
+    {
+      "id": "D09-EXTRA-027-B3-IMG28",
+      "oldStem": "计算机中保存和表示信息的基本单位是字节（Byte）。",
+      "newStem": "计算机中保存和表示信息的基本单位是字节（Byte）。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D09-EXTRA-157-B3-IMG162",
+      "oldStem": "计算 \\(\\displaystyle\\lim_{x\\to1}x^{1/(1-x)}\\)。",
+      "newStem": "计算 \\(\\displaystyle\\lim_{x\\to1}x^{\\frac{1}{1-x}}\\)。",
+      "oldOptions": [],
+      "newOptions": []
+    },
+    {
+      "id": "D10-EXTRA-045-B4-IMG049",
+      "oldStem": "对于英文字符来说，标准ASCII编码采用7位二进制进行编码。",
+      "newStem": "对于英文字符来说，标准ASCII编码采用7位二进制进行编码。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D10-EXTRA-059-B4-IMG063",
+      "oldStem": "扩充版ASCII码包含标准ASCII码的所有字符。",
+      "newStem": "扩充版ASCII码包含标准ASCII码的所有字符。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D10-EXTRA-060-B4-IMG064",
+      "oldStem": "扩充版ASCII码在所有计算机系统中表示的字符都完全一致。",
+      "newStem": "扩充版ASCII码在所有计算机系统中表示的字符都完全一致。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D10-EXTRA-078-B4-IMG084",
+      "oldStem": "8位二进制数能表示的有符号数（补码）和无符号数的状态数相同。",
+      "newStem": "8位二进制数能表示的有符号数（补码）和无符号数的状态数相同。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D01-092-BF-MATH-10",
+      "oldStem": "函数 \\(f(x)=\\begin{cases}2x+1,&-1\\le x\\le0\\\\\\frac{x}{2},&0<x<2\\\\e,&x\\ge2\\end{cases}\\) 的定义域为（）。",
+      "newStem": "函数 \\(f(x)=\\begin{cases}2x+1,&-1\\le x\\le0\\\\-\\frac12x,&0<x<2\\\\e,&x\\ge2\\end{cases}\\) 的定义域为（）。",
+      "oldOptions": [
+        "A. \\((-1,0)\\cup(0,+\\infty)\\)",
+        "B. \\([-1,2]\\)",
+        "C. \\((-1,2)\\)",
+        "D. \\([-1,+\\infty)\\)"
+      ],
+      "newOptions": [
+        "A. \\((-1,0)\\cup(0,+\\infty)\\)",
+        "B. \\([-1,2]\\)",
+        "C. \\((-1,2)\\)",
+        "D. \\([-1,+\\infty)\\)"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-132",
+      "oldStem": "图灵提出“凡是可计算的函数都能由图灵机实现”。例如计算8－3×2＝2，遵循运算规则由机器完成符号变换，即可用图灵机模拟计算过程。",
+      "newStem": "图灵提出“凡是可计算的函数都能由图灵机实现”。例如计算8－3×2＝2，遵循运算规则由机器完成符号变换，即可用图灵机模拟计算过程。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-133",
+      "oldStem": "编译方式指：高级语言程序由编译程序翻译生成机器语言表示的目标程序，由计算机执行目标程序，完成运算。",
+      "newStem": "编译方式指：高级语言程序由编译程序翻译生成机器语言表示的目标程序，由计算机执行目标程序，完成运算。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-134",
+      "oldStem": "信息是存储在某种介质上可加以鉴别的符号资料，是数据的载体。",
+      "newStem": "信息是存储在某种介质上可加以鉴别的符号资料，是数据的载体。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-135",
+      "oldStem": "计算机的“运算速度”的含义是指每秒钟能运行多少条操作系统指令。",
+      "newStem": "计算机的“运算速度”的含义是指每秒钟能运行多少条操作系统指令。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-136",
+      "oldStem": "程序必须调入内存才能运行。",
+      "newStem": "程序必须调入内存才能运行。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-137",
+      "oldStem": "巴贝奇设计的分析机包含了现代计算机的五大基本部件雏形。",
+      "newStem": "巴贝奇设计的分析机包含了现代计算机的五大基本部件雏形。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-138",
+      "oldStem": "我国第一台计算机“103机”的运算速度达到每秒千万次级别。",
+      "newStem": "我国第一台计算机“103机”的运算速度达到每秒千万次级别。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-COMP-139",
+      "oldStem": "巴贝奇实际制造出了完整的分析机并投入使用。",
+      "newStem": "巴贝奇实际制造出了完整的分析机并投入使用。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D13-HW-BF-BINARY427-016",
+      "oldStem": "莱布尼茨认为世界上最早的二进制表示法就是中国的八卦。",
+      "newStem": "莱布尼茨认为世界上最早的二进制表示法就是中国的八卦。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D09-EXTRA-095-B3-IMG100",
+      "oldStem": "二进制整数右起第10位上的1相当于2的9次方。",
+      "newStem": "二进制整数右起第10位上的1相当于2的9次方。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D09-EXTRA-092-B3-IMG97",
+      "oldStem": "数字“1028”未标明后缀，但是可以断定它不是一个十六进制数。",
+      "newStem": "数字“1028”未标明后缀，但是可以断定它不是一个十六进制数。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D14-HW-BF-58-024",
+      "oldStem": "判断二进制数奇偶性时，只需看其最高位是否为1。",
+      "newStem": "判断二进制数奇偶性时，只需看其最高位是否为1。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D14-HW-BF-SUP-009",
+      "oldStem": "[X]补是一个正数还是一个负数，是根据[X]补的符号位是“0”还是“1”确定的。",
+      "newStem": "[X]补是一个正数还是一个负数，是根据[X]补的符号位是“0”还是“1”确定的。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D15-HW-BF-ENC-011",
+      "oldStem": "汉字“中”的区位码为 5448，则它对应的国标码为 5650H。",
+      "newStem": "汉字“中”的区位码为 5448，则它对应的国标码为 5650H。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D10-EXTRA-011-B4-IMG012",
+      "oldStem": "汉字“中”字的国标码对应的十六进制为 5650H，则它对应的机内码用十六进制表示为 D6D0H。",
+      "newStem": "汉字“中”字的国标码对应的十六进制为 5650H，则它对应的机内码用十六进制表示为 D6D0H。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D10-EXTRA-004-B4-IMG004",
+      "oldStem": "在计算机中，存储一个汉字和英文一样，需要两个字节的空间。",
+      "newStem": "在计算机中，存储一个汉字和英文一样，需要两个字节的空间。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    },
+    {
+      "id": "D10-EXTRA-026-B4-IMG027",
+      "oldStem": "在计算机内部，对汉字进行传输处理和存储时使用的是汉字的外码。",
+      "newStem": "在计算机内部，对汉字进行传输处理和存储时使用的是汉字的外码。",
+      "oldOptions": [
+        "A. 正确",
+        "B. 错误"
+      ],
+      "newOptions": [
+        "A. 对",
+        "B. 错"
+      ]
+    }
+  ],
+  "unexpectedBaselineChanges": [],
+  "missingItems": [],
+  "duplicateRefs": [
+    {
+      "id": "D13-HW-BF-COMP-014",
+      "count": 2
+    },
+    {
+      "id": "D13-HW-BF-COMP-015",
+      "count": 2
+    },
+    {
+      "id": "D13-HW-BF-COMP-016",
+      "count": 2
+    },
+    {
+      "id": "D13-HW-BF-COMP-017",
+      "count": 2
+    },
+    {
+      "id": "D13-HW-BF-COMP-073",
+      "count": 2
+    },
+    {
+      "id": "D13-HW-BF-COMP-074",
+      "count": 2
+    },
+    {
+      "id": "D06-SUMMER-026",
+      "count": 2
+    },
+    {
+      "id": "D06-SUMMER-143",
+      "count": 2
+    }
+  ],
+  "emptyStem": [],
+  "placeholder": [],
+  "choiceMissing": [],
+  "judgmentBad": [],
+  "fillNoBlank": [],
+  "missingImages": [],
+  "rawLatexOutsideMath": [],
+  "suspiciousGarble": [],
+  "missingMathCache": [],
+  "perSet": [
+    {
+      "id": "bf-math-function-ch1-sec1-complete-20260726",
+      "title": "第一章第一节 函数课后练习（完整6页）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 64,
+      "resolved": 64,
+      "answers": 64,
+      "sourceImages": 64,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260728-comp-complete",
+      "title": "第一章 计算机基础知识同步练习（完整11页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 147,
+      "resolved": 147,
+      "answers": 147,
+      "sourceImages": 147,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260728-binary-427-complete",
+      "title": "4.27课后作业｜进制的基础概念+算术逻辑运算（完整5页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 18,
+      "resolved": 18,
+      "answers": 18,
+      "sourceImages": 18,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260729-convert-storage-58-complete",
+      "title": "5.8课后作业｜进制转换+信息存储单位（完整5页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 28,
+      "resolved": 28,
+      "answers": 28,
+      "sourceImages": 28,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260729-ascii-code-supplement-complete",
+      "title": "补充题目｜ASCII、原码与补码（完整9页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 10,
+      "resolved": 10,
+      "answers": 10,
+      "sourceImages": 7,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260730-hanzi-encoding-complete",
+      "title": "汉字编码与字符编码补充题（完整4页·15题）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 15,
+      "resolved": 15,
+      "answers": 15,
+      "sourceImages": 15,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260716-sentence-structure-complete",
+      "title": "第一章第一节 句子结构（完整3页）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 40,
+      "resolved": 40,
+      "answers": 40,
+      "sourceImages": 40,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260728-noun-complete",
+      "title": "第一章第二节 名词与代词（完整4页）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 35,
+      "resolved": 35,
+      "answers": 35,
+      "sourceImages": 35,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-20260728-article-complete",
+      "title": "第一章第三节 数词与冠词（完整4页）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 35,
+      "resolved": 35,
+      "answers": 35,
+      "sourceImages": 35,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-a",
+      "title": "暑假集训｜计算机基础综合练习（一）（完整5页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 49,
+      "resolved": 49,
+      "answers": 49,
+      "sourceImages": 49,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-v64-math-limit-pages-7-15",
+      "title": "课后练习｜第二节 极限（完整94题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 94,
+      "resolved": 94,
+      "answers": 94,
+      "sourceImages": 94,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-b",
+      "title": "暑假集训｜进制转换与存储单位练习（二）（完整4页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 40,
+      "resolved": 40,
+      "answers": 40,
+      "sourceImages": 40,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-c",
+      "title": "暑假集训｜编码、补码与汉字字模练习（三）（完整4页）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 48,
+      "resolved": 48,
+      "answers": 48,
+      "sourceImages": 48,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-homework-v64-english-adjective-adverb-pages-118-121",
+      "title": "课后练习｜第一章第四节 形容词与副词（完整35题）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 35,
+      "resolved": 35,
+      "answers": 35,
+      "sourceImages": 35,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-20260721-english-noun-pronoun",
+      "title": "暑假集训｜名词与代词综合练习（完整5页·50题）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 50,
+      "resolved": 50,
+      "answers": 50,
+      "sourceImages": 50,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-summer-20260721-english-sentence-structure",
+      "title": "暑假集训｜句子结构与成分分析（完整2页）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 30,
+      "resolved": 30,
+      "answers": 30,
+      "sourceImages": 30,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-summer-20260721-math-function",
+      "title": "暑假集训｜函数基础练习（完整2页）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 11,
+      "resolved": 11,
+      "answers": 11,
+      "sourceImages": 11,
+      "rebuiltSourceAudited": false
+    },
+    {
+      "id": "bf-summer-v62-math-limit",
+      "title": "暑假续接｜第二节 极限（完整16题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 16,
+      "resolved": 16,
+      "answers": 0,
+      "sourceImages": 16,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-math-continuity",
+      "title": "暑假续接｜第三节 连续与间断（完整6题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 6,
+      "resolved": 6,
+      "answers": 0,
+      "sourceImages": 6,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-math-derivative",
+      "title": "暑假续接｜第一节 导数（完整30题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 30,
+      "resolved": 30,
+      "answers": 0,
+      "sourceImages": 30,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-math-application-mvt",
+      "title": "暑假续接｜导数的应用与微分中值定理（完整30题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 30,
+      "resolved": 30,
+      "answers": 0,
+      "sourceImages": 30,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral",
+      "title": "暑假续接｜第一节 不定积分（完整15题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 15,
+      "resolved": 15,
+      "answers": 0,
+      "sourceImages": 15,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-eng-article-number",
+      "title": "暑假续接｜第三节 冠词与数词（完整50题）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 50,
+      "resolved": 50,
+      "answers": 0,
+      "sourceImages": 50,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-eng-adjective-adverb",
+      "title": "暑假续接｜第四节 形容词与副词（完整50题）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 50,
+      "resolved": 50,
+      "answers": 0,
+      "sourceImages": 50,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-eng-preposition-conjunction",
+      "title": "暑假续接｜第五节 介词与连词（完整50题）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 50,
+      "resolved": 50,
+      "answers": 0,
+      "sourceImages": 50,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-eng-verb",
+      "title": "暑假续接｜第六节 动词（完整50题）",
+      "source": "蓝色森林",
+      "subject": "英语",
+      "registered": 50,
+      "resolved": 50,
+      "answers": 0,
+      "sourceImages": 50,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-comp-system-components",
+      "title": "暑假续接｜第四节 计算机系统组成（完整81题）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 81,
+      "resolved": 81,
+      "answers": 0,
+      "sourceImages": 81,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-comp-computational-thinking",
+      "title": "暑假续接｜第五节 计算思维（完整15题）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 15,
+      "resolved": 15,
+      "answers": 0,
+      "sourceImages": 15,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-comp-os-basics",
+      "title": "暑假续接｜操作系统基本知识和使用（完整22题）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 22,
+      "resolved": 22,
+      "answers": 0,
+      "sourceImages": 22,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-comp-os-functions",
+      "title": "暑假续接｜第二节 操作系统的功能（完整44题）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 44,
+      "resolved": 44,
+      "answers": 0,
+      "sourceImages": 44,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-summer-v62-comp-windows-intro",
+      "title": "暑假续接｜第三节 Windows简介（完整41题）",
+      "source": "蓝色森林",
+      "subject": "计算机",
+      "registered": 41,
+      "resolved": 41,
+      "answers": 0,
+      "sourceImages": 41,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article",
+      "title": "全方位｜第一部分 基础语法：名词与冠词（完整62题）",
+      "source": "全方位",
+      "subject": "英语",
+      "registered": 62,
+      "resolved": 62,
+      "answers": 0,
+      "sourceImages": 62,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "qfw-homework-v66-computer-overview",
+      "title": "全方位｜第1章 计算机概述（完整47题）",
+      "source": "全方位",
+      "subject": "计算机",
+      "registered": 47,
+      "resolved": 47,
+      "answers": 47,
+      "sourceImages": 47,
+      "rebuiltSourceAudited": true
+    },
+    {
+      "id": "bf-homework-v64-math-continuity-pages-16-21",
+      "title": "课后练习｜第三节 连续与间断（完整39题）",
+      "source": "蓝色森林",
+      "subject": "高等数学",
+      "registered": 39,
+      "resolved": 39,
+      "answers": 39,
+      "sourceImages": 39,
+      "rebuiltSourceAudited": true
+    }
+  ],
+  "notes": [
+    "19套曾由整页资料重构的完整题组共106张源题页，按原图逐页复核；本版只修改有原图证据的差异。",
+    "v67原有1291条题目做同ID正文+选项回归；所有差异均属于有证据的源题纠错、等价TeX格式化或判断题A对B错统一，无未解释漂移。",
+    "未找到可可靠一一对应的官方答案时继续留空，不使用模型答案或其他题源答案顶替。"
+  ]
+}

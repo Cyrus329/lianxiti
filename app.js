@@ -8,7 +8,7 @@ const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
 const FORCE_CLEAN_VERSION = "20260806-v78-answer-binding-repair";
 const BUNDLED_CONTENT_REVISION_KEY = "zsb-question-bank-empty-v34:bundled-content-revision";
-const BUNDLED_CONTENT_REVISION = "20260806-v78-answer-binding-repair";
+const BUNDLED_CONTENT_REVISION = "20260808-v83-full-source-audit";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -980,7 +980,7 @@ async function ensureBundledQuestionsCurrent() {
     state.selectedId = "";
     localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
     localStorage.setItem(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
-    showToast(`v78 已重新绑定逐题答案与解析，题目正文和作答进度均保留`);
+    showToast(`v83 已完成34套完整题组源题复核，题目正文已更新，作答进度保留`);
     return true;
   }
 
@@ -1910,6 +1910,8 @@ function imageSrc(path) {
 
 function getImagePackFiles(rawPath) {
   const raw = normalizeImagePath(rawPath);
+  const genericPack = window.QB_ASSET_PACK_INDEX && window.QB_ASSET_PACK_INDEX[raw];
+  if (genericPack) return [genericPack];
   const hit = IMAGE_PACK_SCRIPTS.find((item) => raw.startsWith(item.prefix));
   if (!hit) return [];
   if (Array.isArray(hit.files)) return hit.files;

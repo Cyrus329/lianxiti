@@ -1,0 +1,431 @@
+{
+  "version": "v83",
+  "correctedQuestions": 24,
+  "judgmentOptionsNormalized": 22,
+  "corrections": [
+    {
+      "id": "D01-092-BF-MATH-10",
+      "originalNo": "10",
+      "practiceSetId": "bf-math-function-ch1-sec1-complete-20260726",
+      "before": {
+        "stem": "函数 \\(f(x)=\\begin{cases}2x+1,&-1\\le x\\le0\\\\\\frac{x}{2},&0<x<2\\\\e,&x\\ge2\\end{cases}\\) 的定义域为（）。",
+        "options": [
+          "A. \\((-1,0)\\cup(0,+\\infty)\\)",
+          "B. \\([-1,2]\\)",
+          "C. \\((-1,2)\\)",
+          "D. \\([-1,+\\infty)\\)"
+        ]
+      },
+      "after": {
+        "stem": "函数 \\(f(x)=\\begin{cases}2x+1,&-1\\le x\\le0\\\\-\\frac12x,&0<x<2\\\\e,&x\\ge2\\end{cases}\\) 的定义域为（）。",
+        "options": [
+          "A. \\((-1,0)\\cup(0,+\\infty)\\)",
+          "B. \\([-1,2]\\)",
+          "C. \\((-1,2)\\)",
+          "D. \\([-1,+\\infty)\\)"
+        ]
+      },
+      "note": "原图第2页第10题：第二段为 -1/2·x，旧纯文字漏了负号。"
+    },
+    {
+      "id": "bf-summer-v62-math-limit::v74::002",
+      "originalNo": "选择题 2",
+      "practiceSetId": "bf-summer-v62-math-limit",
+      "before": {
+        "stem": "当 \\(x\\to0^+\\) 时，与 \\(x\\) 等价的无穷小量是（ ）。",
+        "options": [
+          "A. \\(\\sin2x\\)",
+          "B. \\(1-\\sqrt{1-x^2}\\)",
+          "C. \\(x^2+\\sin x\\)",
+          "D. \\(\\tan^2x\\)"
+        ]
+      },
+      "after": {
+        "stem": "当 \\(x\\to0\\) 时，与 \\(x\\) 等价的无穷小量是（ ）。",
+        "options": [
+          "A. \\(\\sin2x\\)",
+          "B. \\(1-\\sqrt{1-x^2}\\)",
+          "C. \\(x^2+\\sin x\\)",
+          "D. \\(\\tan^2x\\)"
+        ]
+      },
+      "note": "原图第138页选择题2：趋近条件是 x→0，不带右极限“+”。"
+    },
+    {
+      "id": "bf-summer-v62-math-limit::v74::006",
+      "originalNo": "填空题 3",
+      "practiceSetId": "bf-summer-v62-math-limit",
+      "before": {
+        "stem": "当 \\(x\\to0\\) 时，\\(\\sqrt{1+ax^3}-1\\) 是 \\(\\sin^3x\\) 的等价无穷小，则 \\(a=\\underline{\\hspace{2cm}}\\)。",
+        "options": []
+      },
+      "after": {
+        "stem": "当 \\(x\\to0\\) 时，\\(\\sqrt{1+ax^2}-1\\) 是 \\(\\sin^2x\\) 的等价无穷小，则 \\(a=\\underline{\\hspace{2cm}}\\)。",
+        "options": []
+      },
+      "note": "原图第138页填空题3：根式中为 ax²，比较对象为 sin²x；旧版误写成三次方。"
+    },
+    {
+      "id": "bf-summer-v62-math-derivative::v74::025",
+      "originalNo": "计算题 4（2）",
+      "practiceSetId": "bf-summer-v62-math-derivative",
+      "before": {
+        "stem": "用取对数求导法求函数 \\(y=\\dfrac{\\sqrt{x+e^2}(3-x)^4}{(1+x)^4}\\) 的导数。",
+        "options": []
+      },
+      "after": {
+        "stem": "用取对数求导法求函数 \\(y=\\dfrac{\\sqrt{x+e^2}(3-x)^8}{(1+x)^4}\\) 的导数。",
+        "options": []
+      },
+      "note": "原图第143页计算题4(2)：(3-x) 的指数为 8，旧版误写 4。"
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral::v74::001",
+      "originalNo": "选择题 1",
+      "practiceSetId": "bf-summer-v62-math-indefinite-integral",
+      "before": {
+        "stem": "设 \\(\\int f(x)dx=F(x)+C\\)，则 \\(\\int e^x f(e^x)dx=\\)（ ）。",
+        "options": [
+          "A. \\(F(e^x)+C\\)",
+          "B. \\(-F(e^x)+C\\)",
+          "C. \\(F(e^{-x})+C\\)",
+          "D. \\(\\dfrac{F(e^x)}x+C\\)"
+        ]
+      },
+      "after": {
+        "stem": "设 \\(\\int f(x)dx=F(x)+C\\)，则 \\(\\int e^{-x}f(e^{-x})dx=\\)（ ）。",
+        "options": [
+          "A. \\(F(e^x)+C\\)",
+          "B. \\(-F(e^{-x})+C\\)",
+          "C. \\(F(e^{-x})+C\\)",
+          "D. \\(\\dfrac{F(e^{-x})}{x}+C\\)"
+        ]
+      },
+      "note": "原图第151页选择题1：被积式为 e^{-x}f(e^{-x})；同步校正 B/C/D 中指数。"
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral::v74::002",
+      "originalNo": "选择题 2",
+      "practiceSetId": "bf-summer-v62-math-indefinite-integral",
+      "before": {
+        "stem": "已知 \\(f'(x)=\\dfrac1x\\ (x>0)\\)，则 \\(f(x)=\\)（ ）。",
+        "options": [
+          "A. \\(2x+C\\)",
+          "B. \\(\\ln|x|+C\\)",
+          "C. \\(2\\sqrt{x}+C\\)",
+          "D. \\(-\\dfrac1{\\sqrt{x}}+C\\)"
+        ]
+      },
+      "after": {
+        "stem": "已知 \\(f'(x^2)=\\dfrac1x\\ (x>0)\\)，则 \\(f(x)=\\)（ ）。",
+        "options": [
+          "A. \\(2x+C\\)",
+          "B. \\(\\ln|x|+C\\)",
+          "C. \\(2\\sqrt{x}+C\\)",
+          "D. \\(\\dfrac1{\\sqrt{x}}+C\\)"
+        ]
+      },
+      "note": "原图第151页选择题2：条件是 f'(x²)=1/x；D 项为正 1/√x+C。"
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral::v74::005",
+      "originalNo": "选择题 5",
+      "practiceSetId": "bf-summer-v62-math-indefinite-integral",
+      "before": {
+        "stem": "下列式子错误的是（ ）。",
+        "options": [
+          "A. \\(\\int\\dfrac{d}{dx}(\\sin x)dx=\\sin x\\)",
+          "B. \\(\\int df(x)=f(x)\\)",
+          "C. \\(\\int xdx=x+C\\)",
+          "D. \\(\\int f'(x)dx=f(x)+C\\)"
+        ]
+      },
+      "after": {
+        "stem": "下列式子正确的是（ ）。",
+        "options": [
+          "A. \\(\\dfrac{d}{dx}\\int\\sin x\\,dx=\\sin x\\)",
+          "B. \\(\\int df(x)=f(x)\\)",
+          "C. \\(\\left(\\int x\\,dx\\right)'=x+C\\)",
+          "D. \\(\\int f'(x)\\,dx=f'(x)+C\\)"
+        ]
+      },
+      "note": "原图第151页选择题5：题干为“正确的是”；四个选项按原图恢复。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-1",
+      "originalNo": "名词分类1",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "名词分为哪两大类？",
+        "options": []
+      },
+      "after": {
+        "stem": "名词分为________和________。",
+        "options": []
+      },
+      "note": "原图第1页名词分类1，恢复原始填空形式。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-2",
+      "originalNo": "名词分类2",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "普通名词分为哪四类？",
+        "options": []
+      },
+      "after": {
+        "stem": "普通名词分为________、________、________、________。",
+        "options": []
+      },
+      "note": "原图第1页名词分类2，恢复四个原始空格。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-3",
+      "originalNo": "名词分类3",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "从下列单词中找出专有名词：the Great Wall, book, China, look, beautiful, student, Monday, Spring Festival, hospital, the United Nations, student, Europe。",
+        "options": []
+      },
+      "after": {
+        "stem": "找出下列单词中的专有名词：the Great Wall, book, China, look, beautiful, student, Monday, Spring Festival, hospital, the United Nations, student, Europe。",
+        "options": []
+      },
+      "note": "按原图第1页原题文字恢复。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-4",
+      "originalNo": "名词分类4",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "从下列单词中找出普通名词：Mary, people, kindness, the Forbidden City, piano。",
+        "options": []
+      },
+      "after": {
+        "stem": "找出下列单词中的普通名词：Mary, people, kindness, the Forbidden City, piano。",
+        "options": []
+      },
+      "note": "按原图第1页原题文字恢复。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-5",
+      "originalNo": "名词分类5",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "从下列单词中找出抽象名词：book, courage, table, friendship, knowledge, flower, success, tree, dream, confidence, bus, freedom, television, happiness, school, peace。",
+        "options": []
+      },
+      "after": {
+        "stem": "找出下列单词中的抽象名词：book, courage, table, friendship, knowledge, flower, success, tree, dream, confidence, bus, freedom, television, happiness, school, peace。",
+        "options": []
+      },
+      "note": "按原图第1页原题文字恢复。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-11",
+      "originalNo": "名词的数1",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "________是指能以数目来计算、可以分成个体的人或东西，包括个体名词和集合名词，有单数和复数两种形式。",
+        "options": []
+      },
+      "after": {
+        "stem": "________是指能以数目来计算，可以分成个体的人或东西，包括个体名词和集合名词，有________和________两种形式。",
+        "options": []
+      },
+      "note": "原图第2页名词的数1：旧版把“单数、复数”直接写进题干，现恢复为空格。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-12",
+      "originalNo": "名词的数2",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "________表示无法用具体数字来计算的事物和概念等的普通名词，包括部分物质名词和抽象名词，一般没有复数形式。",
+        "options": []
+      },
+      "after": {
+        "stem": "________表示无法用具体数字来计算的事物和概念等的普通名词，包括部分物质名词和抽象名词，一般没有复数形式。",
+        "options": []
+      },
+      "note": "按原图第2页恢复标点和原始填空。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-13",
+      "originalNo": "名词的数3",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "把下列名词变为复数形式：student, map, class, watch, baby, family, boy, toy, knife, proof, hero, tomato, foot, tooth, means, mouse, child, Chinese, man, woman。",
+        "options": []
+      },
+      "after": {
+        "stem": "把下列名词变为复数形式：student, map, class, watch, baby, family, boy, toy, knife, proof, hero, tomato, foot, tooth, means, mouse, child, Chinese, man, woman。",
+        "options": []
+      },
+      "note": "按原图第2页原题恢复。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-38",
+      "originalNo": "冠词基础1",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "不定冠词分为哪两个？分别用在什么读音开头的单词前？",
+        "options": []
+      },
+      "after": {
+        "stem": "不定冠词分为________、________，用在________前面。________用于辅音音素开头的词前，________用于元音音素开头的词前。",
+        "options": []
+      },
+      "note": "原图第7页冠词练习题1，恢复五处原始填空。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-39",
+      "originalNo": "冠词基础2",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "不定冠词可以表示“一个人或物”，用在什么名词前？相当于 one 或 another 时表达什么含义？",
+        "options": []
+      },
+      "after": {
+        "stem": "不定冠词可以泛指________和________；可以指________某个人或物，用在________前，相当于 another。",
+        "options": []
+      },
+      "note": "原图第7页冠词练习题2，恢复原始填空结构。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-40",
+      "originalNo": "冠词基础3",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "名词前有指示代词等限定词时是否使用冠词？请根据原资料填写。",
+        "options": []
+      },
+      "after": {
+        "stem": "名词前有指示代词________、________、________、________，________时不用冠词。",
+        "options": []
+      },
+      "note": "原图第7页冠词练习题3，旧版为解释式提示，现恢复五处空格。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-41",
+      "originalNo": "冠词基础4",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "名词前有某些限定词修饰时是否使用冠词？请根据原资料填写四类词。",
+        "options": []
+      },
+      "after": {
+        "stem": "名词前有________、________、________、________、________等代词时不用冠词。",
+        "options": []
+      },
+      "note": "原图第7页冠词练习题4，恢复原始空格。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-42",
+      "originalNo": "冠词基础5",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "定冠词只有哪一种形式？",
+        "options": []
+      },
+      "after": {
+        "stem": "定冠词只有________。",
+        "options": []
+      },
+      "note": "原图第7页冠词练习题5，恢复原始填空形式。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-59",
+      "originalNo": "冠词选择题22",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "______ experiment took us five months and turned out ______ great success.",
+        "options": [
+          "A. The; /",
+          "B. a; /",
+          "C. The; a",
+          "D. The; the"
+        ]
+      },
+      "after": {
+        "stem": "______ experiment took us five months and turned out ______ great success.",
+        "options": [
+          "A. The; 不填",
+          "B. a; 不填",
+          "C. The; a",
+          "D. The; the"
+        ]
+      },
+      "note": "原图第9页第22题使用“ 不填 ”字样，按原图恢复。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-61",
+      "originalNo": "冠词选择题24",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "My family have ______ breakfast together every day. This helps us start a day well.",
+        "options": [
+          "A. /",
+          "B. a",
+          "C. an",
+          "D. the"
+        ]
+      },
+      "after": {
+        "stem": "My family have ______ breakfast together every day. This helps us start a day well.",
+        "options": [
+          "A. 不填",
+          "B. a",
+          "C. an",
+          "D. the"
+        ]
+      },
+      "note": "原图第9页第24题 A 项为“不填”。"
+    },
+    {
+      "id": "qfw-homework-v66-english-noun-article::v75-62",
+      "originalNo": "冠词选择题25",
+      "practiceSetId": "qfw-homework-v66-english-noun-article",
+      "before": {
+        "stem": "To tell you ______ truth, with the May Day holiday just around ______ corner, we are planning to take a trip to Hawaii.",
+        "options": [
+          "A. /; a",
+          "B. a; a",
+          "C. the; a",
+          "D. the; the"
+        ]
+      },
+      "after": {
+        "stem": "To tell you ______ truth, with the May Day holiday just around ______ corner, we are planning to take a trip to Hawaii.",
+        "options": [
+          "A. 不填; a",
+          "B. a; a",
+          "C. the; a",
+          "D. the; the"
+        ]
+      },
+      "note": "原图第9页第25题 A 项为“不填; a”。"
+    },
+    {
+      "id": "D06-SUMMER-226",
+      "originalNo": "2",
+      "practiceSetId": "bf-summer-20260721-math-function",
+      "before": {
+        "stem": "求函数 \\(y=1+\\ln(x+2)\\) 的反函数。",
+        "options": []
+      },
+      "after": {
+        "stem": "求函数 \\(y=1+\\ln(x+2)\\) 的反函数________。",
+        "options": []
+      },
+      "note": "原图 q226 在“反函数”后有作答横线，恢复填空线。"
+    }
+  ],
+  "mathSourcePagesChecked": 47,
+  "rebuiltEnglishSourcePagesChecked": 33,
+  "rebuiltComputerSourcePagesChecked": 26,
+  "rebuiltSourcePagesCheckedTotal": 106,
+  "v67BaselineQuestionsCompared": 1291,
+  "v67UnintendedSemanticDriftDetected": 0,
+  "v67IntentionalSourceCorrections": 2,
+  "rule": "19套曾按页重构的完整题组逐页对照原图；其余v67原有题目与唯一基线做同ID正文/选项回归比较。只修有源图证据的差异。"
+}
