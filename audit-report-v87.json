@@ -1,0 +1,60 @@
+{
+  "version": "v87-full-second-audit",
+  "generatedAt": "2026-08-08T22:10:00+08:00",
+  "scope": "当前最终题库全部题目 + 34套完整题组 + 公式缓存 + 图片资源包 + 页面脚本",
+  "summary": {
+    "questions": 1979,
+    "completeSets": 34,
+    "completeSetRefs": 1397,
+    "uniqueCompleteQuestions": 1389,
+    "duplicateQuestionIds": 0,
+    "missingRegisteredQuestions": 0,
+    "completeSetCountMismatch": 0,
+    "choiceAnswerOutOfRange": 0,
+    "emptyStem": 0,
+    "placeholderStem": 0,
+    "stemTextStemMismatch": 0,
+    "optionsTextOptionsMismatch": 0,
+    "judgmentQuestions": 161,
+    "judgmentOptionErrorsAfterFix": 0,
+    "fillQuestions": 321,
+    "fillQuestionsWithoutBlankAfterFix": 0,
+    "mathSegmentsInCurrentQuestions": 1233,
+    "mathCacheEntries": 1235,
+    "mathCacheMiss": 0,
+    "mathRenderedHtmlErrors": 0,
+    "missingMathGlyphClasses": 0,
+    "bareDfracOutsideRenderer": 0,
+    "bareBeginCasesOutsideRenderer": 0,
+    "assetIndexEntries": 1204,
+    "assetPackEntries": 1204,
+    "assetIndexPackMismatch": 0,
+    "invalidPackedImages": 0,
+    "missingQuestionAssetsAfterFix": 0,
+    "javascriptSyntaxErrors": 0,
+    "missingDirectPageRefs": 0,
+    "answerFilledCompleteSetRefs": 835,
+    "officialAnswerCompleteSetRefs": 578,
+    "answerUnfilledCompleteSetRefs": 562,
+    "rebuiltSourcePagesPreviouslySourceAudited": 106,
+    "v83ToV87UnintendedSemanticDrift": 0
+  },
+  "v87Fixes": {
+    "judgmentOptionsNormalized": 77,
+    "brokenBackupAssetRefsRemoved": 16,
+    "fillBlankSourceCorrections": 5,
+    "fillBlankCorrectedIds": [
+      "D07-EXTRA-133-B2-IMG140",
+      "D07-EXTRA-136-B2-IMG143",
+      "D07-EXTRA-175-B2-IMG185",
+      "D07-EXTRA-179-B2-IMG190",
+      "D07-EXTRA-180-B2-IMG191"
+    ],
+    "postV83FormulaEscapeFixesPreserved": [
+      "D17-HW-CONT-FILL-07",
+      "D17-HW-CONT-CALC-01"
+    ]
+  },
+  "answerNote": "562条完整题组引用仍没有满足可靠一一匹配条件的官方答案，本版继续留空，不进行猜测或跨题组硬绑定。",
+  "sourceRegressionNote": "v83已对19套重构完整题组的106张源题页逐页复核，并对v67原有1291题做同ID回归。v87再次对当前最终包做全量结构/公式/资源回归；除已记录的77个判断题显示规范化、5个原图填空线修复、2个LaTeX换行转义修复外，没有发现新的未授权题干/选项漂移。"
+}

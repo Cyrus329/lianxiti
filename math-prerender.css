@@ -1525,3 +1525,24 @@ mjx-container[jax="CHTML"]{max-width:100%;overflow-x:auto;overflow-y:hidden;vert
 mjx-container[jax="CHTML"][display="true"]{display:block;margin:.45em 0;text-align:left;}
 .pure-text-stem mjx-container,.option-choice mjx-container{font-size:1em;}
 .math-render-fallback{font-family:Georgia,"Times New Roman",serif;white-space:normal;}
+
+/* v86: complete missing MathJax glyph rules found by cache-vs-CSS audit */
+mjx-c.mjx-c1D709.TEX-I::before {
+  padding: 0.704em 0.438em 0.205em 0;
+  content: "\3BE";
+}
+
+mjx-c.mjx-c1D703.TEX-I::before {
+  padding: 0.705em 0.469em 0.01em 0;
+  content: "\3B8";
+}
+
+mjx-c.mjx-c21::before {
+  padding: 0.716em 0.278em 0 0;
+  content: "!";
+}
+
+mjx-c.mjx-c2124.TEX-A::before {
+  padding: 0.683em 0.667em 0 0;
+  content: "Z";
+}
