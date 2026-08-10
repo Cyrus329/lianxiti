@@ -8,7 +8,7 @@ const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
 const FORCE_CLEAN_VERSION = "20260806-v78-answer-binding-repair";
 const BUNDLED_CONTENT_REVISION_KEY = "zsb-question-bank-empty-v34:bundled-content-revision";
-const BUNDLED_CONTENT_REVISION = "20260808-v87-full-second-audit";
+const BUNDLED_CONTENT_REVISION = "20260810-v88-derivative-import";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -980,7 +980,7 @@ async function ensureBundledQuestionsCurrent() {
     state.selectedId = "";
     localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
     localStorage.setItem(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
-    showToast(`v83 已完成34套完整题组源题复核，题目正文已更新，作答进度保留`);
+    showToast(`v88 已导入第二章第一节导数66题及逐题官方答案解析，原有作答进度保留`);
     return true;
   }
 

@@ -1,0 +1,48 @@
+{
+  "version": "v88-derivative-import",
+  "base": "v87-full-second-audit",
+  "import": {
+    "source": "蓝色森林",
+    "subject": "高等数学",
+    "chapter": "第二章 导数与微分",
+    "section": "第一节 导数",
+    "studyDate": "2026-08-10",
+    "studyDay": 26,
+    "questions": 66,
+    "choices": 22,
+    "fills": 18,
+    "calculations": 26,
+    "sourcePrintedPages": "22-31",
+    "officialAnalysisPages": 18
+  },
+  "checks": {
+    "newQuestionsLoaded": 66,
+    "completeSetItems": 66,
+    "blankAnswers": 0,
+    "choiceOptionsMissing": 0,
+    "fillUnderlinesMissing": 0,
+    "duplicateQuestionIds": 0,
+    "uniqueImageReferences": 28,
+    "missingAssetPackIndexReferences": 0,
+    "newMathSegments": 251,
+    "missingMathCache": 0,
+    "rawTexOutsideMath": 0,
+    "mathRenderBuildErrors": 0,
+    "packageFileCount": 81
+  },
+  "sourceDiscrepancies": [
+    {
+      "question": "一、选择题12",
+      "detail": "本次用户上传的详细答案解析PDF明确给出 B；原大题册末尾简表给出 A。按用户本次指定的详细解析PDF绑定 B。"
+    },
+    {
+      "question": "一、选择题19",
+      "detail": "原题页印刷为 3x^219，详细解析页对应式显示为 3x^209；题干严格按原题页保留，答案按详细解析PDF绑定 C，不自行修改源题。"
+    }
+  ],
+  "notes": [
+    "所有66题均绑定对应原题页图片和对应官方解析页图片。",
+    "计算题含小题的，按原资料顶层题号保留为一个作答卡，小题顺序不拆乱。",
+    "原有题目ID与作答进度未修改；v88仅新增第二章第一节导数题组并提升内容修订号。"
+  ]
+}
