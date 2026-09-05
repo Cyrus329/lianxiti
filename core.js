@@ -343,7 +343,14 @@
   }
 
   function saveWrongBookRecords(records, storage = globalThis.localStorage) {
-    storage.setItem(WRONG_BOOK_KEY, JSON.stringify(records));
+    try {
+      if (!storage) return false;
+      storage.setItem(WRONG_BOOK_KEY, JSON.stringify(records));
+      return true;
+    } catch (error) {
+      console.warn("v109 wrong-book localStorage write skipped", error && (error.name || error.message || error));
+      return false;
+    }
   }
 
   return {

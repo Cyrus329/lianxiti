@@ -1,0 +1,31 @@
+{
+  "version": "v124-qfw-computer-os-full-import",
+  "base_zip": "question-bank-v123-blueforest-computer-os-flat.zip",
+  "new_import": {
+    "source": "全方位",
+    "subject": "计算机",
+    "chapter": "第四章 操作系统",
+    "question_count": 127,
+    "set_id": "qfw-v124-computer-os-ch4-full"
+  },
+  "new_questions_have_text": 127,
+  "new_questions_have_answer": 127,
+  "new_choice_missing_options": [],
+  "new_image_refs_missing": [],
+  "sections": [
+    "操作系统的概念",
+    "操作系统的分类",
+    "Windows 基础",
+    "Windows 的人机界面",
+    "Windows 的基本操作",
+    "Windows 的设备管理",
+    "Windows 的文件管理",
+    "Windows 的作业管理",
+    "Windows 的存储管理",
+    "综合应用题"
+  ],
+  "notes": [
+    "题目按001-127原顺序拆分；纯文字题干逐题对应；答案来自PDF红色标注或综合题答案区。",
+    "此版补齐全方位操作系统；保留v123蓝色森林操作系统。"
+  ]
+}

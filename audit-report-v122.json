@@ -1,0 +1,60 @@
+{
+  "version": "v122-bf-math-mvt-import",
+  "totalQuestions": 2956,
+  "totalSets": 60,
+  "imported": {
+    "questions": 27,
+    "setItems": 27,
+    "choice": 7,
+    "blank": 3,
+    "proof": 17
+  },
+  "coverage": {
+    "text": 27,
+    "answer": 27,
+    "analysis": 27,
+    "questionImage": 27,
+    "answerImage": 27
+  },
+  "errors": {
+    "duplicateIds": 0,
+    "emptyStem": 0,
+    "placeholders": 0,
+    "selectionMissingOptions": 0,
+    "answerOutOfRange": 0,
+    "newSetMissingRefs": 0,
+    "newSourceMismatch": 0,
+    "newMissingAnswer": 0,
+    "newMissingAnalysis": 0,
+    "newMissingText": 0,
+    "newBadChoiceOptions": 0,
+    "newExactStemOverlapWithOld": 0
+  },
+  "regression": {
+    "computerCh3": 147,
+    "computerCh3Set": 147,
+    "qfwMathApplication": 66,
+    "bfMathApplication": 59,
+    "keepThin": {
+      "id": "QFW-V93-ADJADV-028",
+      "answer": "A",
+      "stem": "Taking ________ exercise and eating ________ food can make you keep thin."
+    },
+    "year1910": {
+      "id": "QFW-V93-ADJADV-046",
+      "answer": "D",
+      "stem": "Today Americans eat ________ vegetables per person as they did in 1910."
+    }
+  },
+  "newSet": {
+    "id": "bf-homework-v122-math-ch2-mvt",
+    "title": "蓝色森林｜第二章第三节 微分中值定理（完整27题）",
+    "source": "蓝色森林",
+    "subject": "高等数学",
+    "sections": [
+      "选择题",
+      "填空题",
+      "证明题"
+    ]
+  }
+}

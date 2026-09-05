@@ -8,7 +8,7 @@ const PAGE_SIZE = QuestionBankCore.PAGE_SIZE;
 const FORCE_CLEAN_VERSION_KEY = "zsb-question-bank-empty-v34:clean-version";
 const FORCE_CLEAN_VERSION = "20260806-v78-answer-binding-repair";
 const BUNDLED_CONTENT_REVISION_KEY = "zsb-question-bank-empty-v34:bundled-content-revision";
-const BUNDLED_CONTENT_REVISION = "20260810-v88-derivative-import";
+const BUNDLED_CONTENT_REVISION = "20260818-v96-source-split-full-import";
 const FORCE_EMPTY_BANK = false;
 const COMPLETE_PRACTICE_SET_ID = "bf-math-function-ch1-sec1-complete-20260726";
 const AUDIT_FEEDBACK_KEY = "zsb-question-bank-empty-v34:audit-feedback-v29";
@@ -43,6 +43,44 @@ const CLOUD_LAST_SYNC_KEY = "zsb-question-bank-empty-v34:cloud-last-sync";
 const LOCAL_LAST_SAVE_KEY = "zsb-question-bank-empty-v34:local-last-save";
 const CLOUD_RECORD_ID = "question_bank_progress_day1_v38";
 const CLOUD_SYNC_DELAY_MS = 2500;
+
+// v109: local file / quota-safe storage wrapper.
+// Core question progress is stored in IndexedDB; localStorage is auxiliary metadata/settings.
+// A localStorage write failure must never block answering a question.
+const volatileLocalState = new Map();
+function safeGetLocal(key) {
+  if (volatileLocalState.has(key)) return volatileLocalState.get(key);
+  try {
+    return globalThis.localStorage ? globalThis.localStorage.getItem(key) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function safeSetLocal(key, value) {
+  const serialized = String(value);
+  volatileLocalState.set(key, serialized);
+  try {
+    if (!globalThis.localStorage) return false;
+    globalThis.localStorage.setItem(key, serialized);
+    return true;
+  } catch (error) {
+    console.warn("v109 localStorage write skipped", key, error && (error.name || error.message || error));
+    return false;
+  }
+}
+
+function safeRemoveLocal(key) {
+  volatileLocalState.delete(key);
+  try {
+    if (!globalThis.localStorage) return false;
+    globalThis.localStorage.removeItem(key);
+    return true;
+  } catch (error) {
+    console.warn("v109 localStorage remove skipped", key, error && (error.name || error.message || error));
+    return false;
+  }
+}
 const CLOUD_SYNC_ENABLED = false;
 const SOURCE_OVERRIDE_KEY = "zsb-question-bank-v35:source-overrides";
 const QUESTION_VIEW_KEY = "zsb-question-bank-v36:question-view";
@@ -100,10 +138,17 @@ const els = {
   wrongPlannerButton: document.querySelector("#wrongPlannerButton"),
   completeSetsButton: document.querySelector("#completeSetsButton"),
   mobileCompleteSetsButton: document.querySelector("#mobileCompleteSetsButton"),
+  cet4SetsButton: document.querySelector("#cet4SetsButton"),
+  mobileCet4SetsButton: document.querySelector("#mobileCet4SetsButton"),
   completeSetsModal: document.querySelector("#completeSetsModal"),
   completeSetsCloseButton: document.querySelector("#completeSetsCloseButton"),
+  completeSetsTitle: document.querySelector("#completeSetsTitle"),
+  completeSetsEyebrow: document.querySelector("#completeSetsEyebrow"),
+  completeSetsIntroStrong: document.querySelector("#completeSetsIntroStrong"),
+  completeSetsIntroText: document.querySelector("#completeSetsIntroText"),
   completeSetsSearchInput: document.querySelector("#completeSetsSearchInput"),
   completeSetsSummary: document.querySelector("#completeSetsSummary"),
+  completeSetsSourceTabs: document.querySelector("#completeSetsSourceTabs"),
   completeSetsAssignmentTabs: document.querySelector("#completeSetsAssignmentTabs"),
   completeSetsSubjectTabs: document.querySelector("#completeSetsSubjectTabs"),
   completeSetsContent: document.querySelector("#completeSetsContent"),
@@ -138,6 +183,19 @@ const els = {
   importBackupButton: document.querySelector("#importBackupButton"),
   backupFileInput: document.querySelector("#backupFileInput"),
   cloudButton: document.querySelector("#cloudButton"),
+  wrongReviewButton: document.querySelector("#wrongReviewButton"),
+  wrongReviewModal: document.querySelector("#wrongReviewModal"),
+  wrongReviewCloseButton: document.querySelector("#wrongReviewCloseButton"),
+  wrongReviewSummary: document.querySelector("#wrongReviewSummary"),
+  wrongReviewMeta: document.querySelector("#wrongReviewMeta"),
+  wrongReviewScope: document.querySelector("#wrongReviewScope"),
+  wrongReviewSubject: document.querySelector("#wrongReviewSubject"),
+  wrongReviewReason: document.querySelector("#wrongReviewReason"),
+  wrongReviewSearch: document.querySelector("#wrongReviewSearch"),
+  wrongReviewList: document.querySelector("#wrongReviewList"),
+  wrongReviewListTitle: document.querySelector("#wrongReviewListTitle"),
+  wrongReviewListCount: document.querySelector("#wrongReviewListCount"),
+  wrongReviewDetail: document.querySelector("#wrongReviewDetail"),
   assignmentZoneTabs: document.querySelector("#assignmentZoneTabs")
 };
 
@@ -148,22 +206,24 @@ const state = {
   filtered: [],
   page: 1,
   selectedId: "",
-  studyMode: localStorage.getItem(STUDY_MODE_KEY) === "single",
-  questionView: localStorage.getItem(QUESTION_VIEW_KEY) === "text" ? "text" : "image",
-  autoHideMastered: localStorage.getItem(AUTO_HIDE_MASTERED_KEY) !== "0",
-  mobileTab: localStorage.getItem(MOBILE_TAB_KEY) || "quiz",
+  studyMode: safeGetLocal(STUDY_MODE_KEY) === "single",
+  questionView: safeGetLocal(QUESTION_VIEW_KEY) === "text" ? "text" : "image",
+  autoHideMastered: safeGetLocal(AUTO_HIDE_MASTERED_KEY) !== "0",
+  mobileTab: safeGetLocal(MOBILE_TAB_KEY) || "quiz",
   filtersOpen: false,
-  timerSecondsRemaining: Number(localStorage.getItem(TIMER_REMAINING_KEY) || TIMER_DEFAULT_SECONDS) || TIMER_DEFAULT_SECONDS,
+  timerSecondsRemaining: Number(safeGetLocal(TIMER_REMAINING_KEY) || TIMER_DEFAULT_SECONDS) || TIMER_DEFAULT_SECONDS,
   timerRunning: false,
   timerId: 0,
   studyTimeTickerId: 0,
   studyTimeUnsavedSeconds: 0,
   cloudSyncTimer: 0,
   cloudSaving: false,
-  activeCompleteSetId: localStorage.getItem(ACTIVE_COMPLETE_SET_KEY) || "",
-  activeCompleteSetWrongOnly: localStorage.getItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY) === "1",
+  activeCompleteSetId: safeGetLocal(ACTIVE_COMPLETE_SET_KEY) || "",
+  activeCompleteSetWrongOnly: safeGetLocal(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY) === "1",
+  completeSetSource: "",
   completeSetAssignment: "",
   completeSetSubject: "",
+  completeSetMode: "standard",
   completeTextSetId: "",
   completeTextType: "全部"
 };
@@ -237,7 +297,7 @@ async function pruneProgressForMissingQuestions() {
 
 function readSourceOverrides() {
   try {
-    const value = JSON.parse(localStorage.getItem(SOURCE_OVERRIDE_KEY) || "{}");
+    const value = JSON.parse(safeGetLocal(SOURCE_OVERRIDE_KEY) || "{}");
     return value && typeof value === "object" ? value : {};
   } catch (error) {
     return {};
@@ -256,7 +316,7 @@ function applySourceOverrides(questions) {
 function writeSourceOverride(questionId, source) {
   const overrides = readSourceOverrides();
   overrides[questionId] = source;
-  localStorage.setItem(SOURCE_OVERRIDE_KEY, JSON.stringify(overrides));
+  safeSetLocal(SOURCE_OVERRIDE_KEY, JSON.stringify(overrides));
 }
 
 async function setQuestionSource(questionId, source) {
@@ -296,7 +356,7 @@ function getAssignmentZoneCount(assignment) {
 function renderAssignmentZoneTabs() {
   if (!els.assignmentZoneTabs) return;
   const current = els.assignmentFilter ? (els.assignmentFilter.value || "all") : "all";
-  const zones = ["all", "课后作业", "暑假集训的作业", "额外题库"];
+  const zones = ["all", "课后作业", "暑假集训的作业", "额外题库", "四级套题"];
   els.assignmentZoneTabs.querySelectorAll("[data-assignment-zone]").forEach((button) => {
     const zone = button.dataset.assignmentZone || "all";
     button.classList.toggle("active", zone === current);
@@ -307,12 +367,12 @@ function renderAssignmentZoneTabs() {
 }
 
 function activateAssignmentZone(zone) {
-  const value = ["课后作业", "暑假集训的作业", "额外题库"].includes(zone) ? zone : "all";
+  const value = ["课后作业", "暑假集训的作业", "额外题库", "四级套题"].includes(zone) ? zone : "all";
   if (state.activeCompleteSetId) {
     state.activeCompleteSetId = "";
     state.activeCompleteSetWrongOnly = false;
-    localStorage.removeItem(ACTIVE_COMPLETE_SET_KEY);
-    localStorage.removeItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY);
+    safeRemoveLocal(ACTIVE_COMPLETE_SET_KEY);
+    safeRemoveLocal(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY);
   }
   if (els.assignmentFilter) els.assignmentFilter.value = value;
   state.page = 1;
@@ -336,7 +396,7 @@ function getActiveCompleteSet() {
   const set = getCompleteSetById(state.activeCompleteSetId);
   if (!set && state.activeCompleteSetId) {
     state.activeCompleteSetId = "";
-    localStorage.removeItem(ACTIVE_COMPLETE_SET_KEY);
+    safeRemoveLocal(ACTIVE_COMPLETE_SET_KEY);
   }
   return set;
 }
@@ -385,83 +445,137 @@ function isWrongQuestion(question) {
   return Boolean(progress && String(progress.lastResult || "") === "wrong");
 }
 
+function isCet4CompleteSet(set) {
+  return Boolean(set && (String(set.collection || "") === "cet4" || String(set.source || "") === "四级" || String(set.cet4Section || "")));
+}
+
+function configureCompleteSetsModal(mode) {
+  const cet4Mode = mode === "cet4";
+  if (els.completeSetsTitle) els.completeSetsTitle.textContent = cet4Mode ? "四级套题中心" : "完整题组分区";
+  if (els.completeSetsEyebrow) els.completeSetsEyebrow.textContent = cet4Mode ? "CET-4 Papers" : "Complete Sets";
+  if (els.completeSetsIntroStrong) els.completeSetsIntroStrong.textContent = cet4Mode ? "大学英语四级资料独立存放" : "只收完整上传的整套资料";
+  if (els.completeSetsIntroText) els.completeSetsIntroText.textContent = cet4Mode
+    ? "四级资料与蓝色森林、全方位彻底分开；按翻译、写作、阅读、听力分类。当前上传内容进入“翻译”。"
+    : "先按机构分“蓝色森林 / 全方位”，再分课后练习、暑假作业和科目。两个机构绝不混在一起。";
+  if (els.completeSetsSearchInput) els.completeSetsSearchInput.placeholder = cet4Mode ? "输入四级主题或题目关键词" : "输入章节或作业名称";
+}
+
 function renderCompleteSetsContent() {
   if (!els.completeSetsContent) return;
-  const allRegistry = getCompleteSetRegistry();
-  const assignmentOrder = ["课后作业", "暑假集训的作业"];
-  const availableAssignments = assignmentOrder.filter((assignment) => allRegistry.some((set) => String(set.assignmentGroup || "课后作业") === assignment));
-  if (!availableAssignments.includes(state.completeSetAssignment)) state.completeSetAssignment = availableAssignments[0] || "";
+  const completeRegistry = getCompleteSetRegistry();
+  const cet4Mode = state.completeSetMode === "cet4";
+  const allRegistry = cet4Mode ? completeRegistry.filter(isCet4CompleteSet) : completeRegistry.filter((set) => !isCet4CompleteSet(set));
+  configureCompleteSetsModal(state.completeSetMode);
+  let registry = [];
 
-  if (els.completeSetsAssignmentTabs) {
-    els.completeSetsAssignmentTabs.innerHTML = availableAssignments.map((assignment) => {
-      const sets = allRegistry.filter((set) => String(set.assignmentGroup || "课后作业") === assignment);
-      const unitCount = sets.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || (set.items || []).length || 0), 0);
-      return `<button type="button" class="complete-assignment-tab${state.completeSetAssignment === assignment ? " active" : ""}" data-complete-assignment="${escapeHtml(assignment)}"><strong>${escapeHtml(getAssignmentDisplayName(assignment))}</strong><span>${sets.length}套 · ${unitCount}题/页单元</span></button>`;
-    }).join("");
-    els.completeSetsAssignmentTabs.querySelectorAll("[data-complete-assignment]").forEach((button) => button.addEventListener("click", () => {
-      state.completeSetAssignment = button.dataset.completeAssignment || "";
-      state.completeSetSubject = "";
-      if (els.completeSetsSearchInput) els.completeSetsSearchInput.value = "";
-      renderCompleteSetsContent();
-    }));
+  if (cet4Mode) {
+    state.completeSetSource = "四级";
+    state.completeSetSubject = "英语";
+    if (els.completeSetsSourceTabs) { els.completeSetsSourceTabs.innerHTML = ""; els.completeSetsSourceTabs.hidden = true; }
+    if (els.completeSetsSubjectTabs) { els.completeSetsSubjectTabs.innerHTML = ""; els.completeSetsSubjectTabs.hidden = true; }
+    const sectionOrder = ["翻译", "写作", "阅读", "听力"];
+    const extraSections = [...new Set(allRegistry.map((set) => String(set.cet4Section || "其他")))].filter((section) => !sectionOrder.includes(section));
+    const availableSections = [...sectionOrder, ...extraSections];
+    if (!availableSections.includes(state.completeSetAssignment)) state.completeSetAssignment = availableSections[0] || "翻译";
+    if (els.completeSetsAssignmentTabs) {
+      els.completeSetsAssignmentTabs.hidden = false;
+      els.completeSetsAssignmentTabs.innerHTML = availableSections.map((section) => {
+        const sets = allRegistry.filter((set) => String(set.cet4Section || "其他") === section);
+        const unitCount = sets.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || (set.items || []).length || 0), 0);
+        return `<button type="button" class="complete-assignment-tab${state.completeSetAssignment === section ? " active" : ""}" data-complete-assignment="${escapeHtml(section)}"><strong>${escapeHtml(section)}</strong><span>${sets.length}套 · ${unitCount}题</span></button>`;
+      }).join("");
+    }
+    const keyword = String(els.completeSetsSearchInput && els.completeSetsSearchInput.value || "").trim().toLowerCase();
+    registry = allRegistry.filter((set) => String(set.cet4Section || "其他") === state.completeSetAssignment).filter((set) => {
+      if (!keyword) return true;
+      return [set.title, set.cet4Section, set.topic, set.dayLabel, getCompleteSetSectionSummary(set)].join(" ").toLowerCase().includes(keyword);
+    });
+    const totalQuestions = registry.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || set.items.length || 0), 0);
+    if (els.completeSetsSummary) {
+      els.completeSetsSummary.innerHTML = `<div class="complete-summary-main"><strong>大学英语四级 · ${escapeHtml(state.completeSetAssignment || "专项")}</strong><span>${registry.length} 套资料</span></div><div class="complete-summary-stats"><span>题目 <b>${totalQuestions}</b></span><span>独立四级专区</span></div>`;
+    }
+  } else {
+    if (els.completeSetsSourceTabs) els.completeSetsSourceTabs.hidden = false;
+    if (els.completeSetsAssignmentTabs) els.completeSetsAssignmentTabs.hidden = false;
+    if (els.completeSetsSubjectTabs) els.completeSetsSubjectTabs.hidden = false;
+    const preferredSources = ["蓝色森林", "全方位"];
+    const extraSources = [...new Set(allRegistry.map((set) => String(set.source || "来源未标")))].filter((source) => !preferredSources.includes(source));
+    const availableSources = [...preferredSources.filter((source) => allRegistry.some((set) => String(set.source || "来源未标") === source)), ...extraSources];
+    if (!availableSources.includes(state.completeSetSource)) state.completeSetSource = availableSources[0] || "";
+    if (els.completeSetsSourceTabs) {
+      els.completeSetsSourceTabs.innerHTML = availableSources.map((source) => {
+        const sets = allRegistry.filter((set) => String(set.source || "来源未标") === source);
+        const unitCount = sets.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || (set.items || []).length || 0), 0);
+        return `<button type="button" class="complete-source-tab${state.completeSetSource === source ? " active" : ""}" data-complete-source="${escapeHtml(source)}"><strong>${escapeHtml(source)}</strong><span>${sets.length}套 · ${unitCount}题</span></button>`;
+      }).join("");
+    }
+    const sourceRegistry = allRegistry.filter((set) => String(set.source || "来源未标") === state.completeSetSource);
+    const assignmentOrder = ["课后作业", "暑假集训的作业"];
+    const availableAssignments = assignmentOrder.filter((assignment) => sourceRegistry.some((set) => String(set.assignmentGroup || "课后作业") === assignment));
+    const extraAssignments = [...new Set(sourceRegistry.map((set) => String(set.assignmentGroup || "课后作业")))].filter((assignment) => !assignmentOrder.includes(assignment));
+    availableAssignments.push(...extraAssignments);
+    if (!availableAssignments.includes(state.completeSetAssignment)) state.completeSetAssignment = availableAssignments[0] || "";
+    if (els.completeSetsAssignmentTabs) {
+      els.completeSetsAssignmentTabs.innerHTML = availableAssignments.map((assignment) => {
+        const sets = sourceRegistry.filter((set) => String(set.assignmentGroup || "课后作业") === assignment);
+        const unitCount = sets.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || (set.items || []).length || 0), 0);
+        return `<button type="button" class="complete-assignment-tab${state.completeSetAssignment === assignment ? " active" : ""}" data-complete-assignment="${escapeHtml(assignment)}"><strong>${escapeHtml(getAssignmentDisplayName(assignment))}</strong><span>${sets.length}套 · ${unitCount}题/页单元</span></button>`;
+      }).join("");
+    }
+    const assignmentRegistry = sourceRegistry.filter((set) => String(set.assignmentGroup || "课后作业") === state.completeSetAssignment);
+    const categories = ["数学", "计算机", "英语"].filter((category) => assignmentRegistry.some((set) => getCompleteSetSubjectCategory(set) === category));
+    if (!categories.includes(state.completeSetSubject)) state.completeSetSubject = categories[0] || "";
+    if (els.completeSetsSubjectTabs) {
+      els.completeSetsSubjectTabs.innerHTML = categories.map((category) => {
+        const count = assignmentRegistry.filter((set) => getCompleteSetSubjectCategory(set) === category).length;
+        return `<button type="button" class="complete-subject-tab${state.completeSetSubject === category ? " active" : ""}" data-complete-subject="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong><span>${count}套</span></button>`;
+      }).join("");
+    }
+    const keyword = String(els.completeSetsSearchInput && els.completeSetsSearchInput.value || "").trim().toLowerCase();
+    registry = assignmentRegistry.filter((set) => getCompleteSetSubjectCategory(set) === state.completeSetSubject).filter((set) => {
+      if (!keyword) return true;
+      return [set.title, set.subject, set.source, set.dayLabel, getCompleteSetSectionSummary(set)].join(" ").toLowerCase().includes(keyword);
+    });
+    const totalQuestions = registry.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || set.items.length || 0), 0);
+    const totalPages = registry.reduce((sum, set) => sum + Number(set.pageCount || 0), 0);
+    if (els.completeSetsSummary) {
+      els.completeSetsSummary.innerHTML = `<div class="complete-summary-main"><strong>${escapeHtml(state.completeSetSource || "来源")} · ${escapeHtml(getAssignmentDisplayName(state.completeSetAssignment))} · ${escapeHtml(state.completeSetSubject || "完整")}</strong><span>${registry.length} 套题组</span></div><div class="complete-summary-stats"><span>题目/原页单元 <b>${totalQuestions}</b></span><span>原资料页 <b>${totalPages}</b></span></div>`;
+    }
   }
 
-  const assignmentRegistry = allRegistry.filter((set) => String(set.assignmentGroup || "课后作业") === state.completeSetAssignment);
-  const categories = ["数学", "计算机", "英语"].filter((category) => assignmentRegistry.some((set) => getCompleteSetSubjectCategory(set) === category));
-  if (!categories.includes(state.completeSetSubject)) state.completeSetSubject = categories[0] || "";
-  if (els.completeSetsSubjectTabs) {
-    els.completeSetsSubjectTabs.innerHTML = categories.map((category) => {
-      const count = assignmentRegistry.filter((set) => getCompleteSetSubjectCategory(set) === category).length;
-      return `<button type="button" class="complete-subject-tab${state.completeSetSubject === category ? " active" : ""}" data-complete-subject="${escapeHtml(category)}"><strong>${escapeHtml(category)}</strong><span>${count}套</span></button>`;
-    }).join("");
-    els.completeSetsSubjectTabs.querySelectorAll("[data-complete-subject]").forEach((button) => button.addEventListener("click", () => {
-      state.completeSetSubject = button.dataset.completeSubject || "";
-      renderCompleteSetsContent();
-    }));
-  }
-  const keyword = String(els.completeSetsSearchInput && els.completeSetsSearchInput.value || "").trim().toLowerCase();
-  const registry = assignmentRegistry.filter((set) => getCompleteSetSubjectCategory(set) === state.completeSetSubject).filter((set) => {
-    if (!keyword) return true;
-    return [set.title, set.subject, set.source, set.dayLabel, getCompleteSetSectionSummary(set)].join(" ").toLowerCase().includes(keyword);
-  });
-  const totalQuestions = registry.reduce((sum, set) => sum + Number(set.sourceQuestionCount || set.questionCount || set.items.length || 0), 0);
-  const totalPages = registry.reduce((sum, set) => sum + Number(set.pageCount || 0), 0);
-  if (els.completeSetsSummary) {
-    els.completeSetsSummary.innerHTML = `<strong>${escapeHtml(getAssignmentDisplayName(state.completeSetAssignment))} · ${escapeHtml(state.completeSetSubject || "完整")} ${registry.length}套</strong><span>合计 ${totalQuestions} 个题目/原页单元 · ${totalPages} 页原资料</span>`;
-  }
   els.completeSetsContent.innerHTML = registry.map((set) => {
     const questions = getCompleteSetQuestions(set);
     const completed = questions.filter(isAttemptedQuestion).length;
     const wrong = questions.filter(isWrongQuestion).length;
     const remaining = Math.max(0, questions.length - completed);
     const pageMode = Boolean(set.pageMode);
-    const sourceQuestionText = Number(set.sourceQuestionCount || 0) ? ` · 原题 ${Number(set.sourceQuestionCount)} 题` : "";
+    const sourceQuestionText = Number(set.sourceQuestionCount || 0) ? `原题 ${Number(set.sourceQuestionCount)} 题` : "";
     const active = String(set.id) === String(state.activeCompleteSetId);
     const wrongActive = active && state.activeCompleteSetWrongOnly;
     const answerReady = String(set.answerStatus || "") === "official_complete_set";
     const answerPages = Number(set.answerPageCount || 0);
     const answerDocument = String(set.answerDocument || "").trim();
-    return `<article class="complete-set-card${active ? " active" : ""}${wrongActive ? " wrong-active" : ""}">
-      <div class="complete-set-card-head"><span>${escapeHtml(getCompleteSetSubjectCategory(set))} · ${escapeHtml(set.source || "来源未标")}</span><b>${escapeHtml(getCompleteSetSourceCountLabel(set))}</b></div>${answerReady ? `<div class="complete-answer-ready">答案解析已补齐${answerPages ? ` · ${answerPages}页` : ""}</div>` : ""}
+    const sectionParts = Array.isArray(set.sections) && set.sections.length ? set.sections : String(getCompleteSetSectionSummary(set) || "").split(/[·、,，]/).map((item) => item.trim()).filter(Boolean);
+    const sectionTags = sectionParts.slice(0, 6).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+    const extraCount = sectionParts.length > 6 ? `<span>+${sectionParts.length - 6}</span>` : "";
+    const progress = questions.length ? Math.round(completed / questions.length * 100) : 0;
+    const cardCategory = cet4Mode ? String(set.cet4Section || "四级") : getCompleteSetSubjectCategory(set);
+    const cardSource = cet4Mode ? "大学英语四级" : String(set.source || "来源未标");
+    const cardClass = cet4Mode ? String(set.cet4Section || "四级专项") : getAssignmentDisplayName(set.assignmentGroup || "课后作业");
+    return `<article class="complete-set-card polished${active ? " active" : ""}${wrongActive ? " wrong-active" : ""}${cet4Mode ? " cet4-card" : ""}">
+      <div class="complete-set-card-top"><div class="complete-set-card-head"><span>${escapeHtml(cardCategory)}</span><b>${escapeHtml(cardSource)}</b></div><div class="complete-set-volume">${escapeHtml(getCompleteSetSourceCountLabel(set))}</div></div>
       <h3>${escapeHtml(set.title || "完整题组")}</h3>
-      <p><strong>${escapeHtml(getAssignmentDisplayName(set.assignmentGroup || "课后作业"))}</strong> · ${escapeHtml(set.source || "蓝色森林")} · ${escapeHtml(set.dayLabel || set.studyDate || "")} · ${pageMode ? `原页 ${Number(set.pageCount || questions.length)} 页${sourceQuestionText}` : `共 ${Number(set.questionCount || set.items.length || 0)} 题`}</p>
-      <div class="complete-set-sections">${escapeHtml(getCompleteSetSectionSummary(set))}</div>
-      <div class="complete-set-progress"><i style="width:${questions.length ? Math.round(completed / questions.length * 100) : 0}%"></i></div>
-      <div class="complete-set-status-line"><span>${pageMode ? "已浏览" : "已完成"} ${completed}/${questions.length}</span><span>${pageMode ? "未浏览" : "未做"} ${remaining}</span>${pageMode ? `<b>原页归档</b>` : `<b>错题 ${wrong}</b>`}</div>
+      <div class="complete-set-meta-grid"><span><small>分类</small><b>${escapeHtml(cardClass)}</b></span><span><small>题量</small><b>${pageMode ? `原页 ${Number(set.pageCount || questions.length)} 页` : `共 ${Number(set.questionCount || set.items.length || 0)} 题`}</b></span><span><small>进度</small><b>${completed}/${questions.length}</b></span><span><small>${pageMode ? "状态" : "错题"}</small><b>${pageMode ? (sourceQuestionText || "原页归档") : `${wrong} 题`}</b></span></div>
+      <div class="complete-set-topic-tags">${sectionTags}${extraCount}</div>
+      <div class="complete-set-progress-wrap"><div class="complete-set-progress"><i style="width:${progress}%"></i></div><span>${progress}%</span></div>
+      <div class="complete-set-status-line"><span>${pageMode ? "已浏览" : "已完成"} ${completed}</span><span>${pageMode ? "未浏览" : "未做"} ${remaining}</span>${answerReady ? `<span class="complete-pill ok">答案已补齐${answerPages ? ` · ${answerPages}页` : ""}</span>` : `<span class="complete-pill">${cet4Mode ? "课堂资料" : "按题库记录作答"}</span>`}</div>
       <footer class="complete-set-card-actions"><button type="button" class="primary-button" data-open-complete-set="${escapeHtml(set.id)}">${active && !wrongActive ? "继续整套" : "打开整套"}</button><button type="button" class="secondary-button complete-text-button" data-open-complete-text="${escapeHtml(set.id)}">纯文字整套</button>${answerReady && answerDocument ? `<a class="secondary-button complete-answer-document" href="${escapeHtml(answerDocument)}" target="_blank" rel="noopener">整套答案</a>` : ""}${pageMode ? "" : `<button type="button" class="secondary-button complete-wrong-button" data-open-complete-set-wrong="${escapeHtml(set.id)}" ${wrong ? "" : "disabled"}>${wrongActive ? "继续错题" : "只看错题"}</button>`}</footer>
     </article>`;
-  }).join("") || `<div class="hidden-solution">当前分区没有找到符合关键词的完整题组</div>`;
-  els.completeSetsContent.querySelectorAll("[data-open-complete-set]").forEach((button) => {
-    button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSet, false));
-  });
-  els.completeSetsContent.querySelectorAll("[data-open-complete-text]").forEach((button) => {
-    button.addEventListener("click", () => openCompleteTextReader(button.dataset.openCompleteText));
-  });
-  els.completeSetsContent.querySelectorAll("[data-open-complete-set-wrong]:not(:disabled)").forEach((button) => {
-    button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSetWrong, true));
-  });
+  }).join("") || `<div class="hidden-solution complete-empty-state"><strong>${cet4Mode ? "这个四级分类暂时还没有题" : "当前分区没有找到题组"}</strong><span>${cet4Mode ? "你后续发来的对应资料会继续放进这里，不会和专升本机构题混在一起。" : "你可以切换机构、作业类型、科目，或重新输入关键词。"}</span></div>`;
+  els.completeSetsContent.querySelectorAll("[data-open-complete-set]").forEach((button) => button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSet, false)));
+  els.completeSetsContent.querySelectorAll("[data-open-complete-text]").forEach((button) => button.addEventListener("click", () => openCompleteTextReader(button.dataset.openCompleteText)));
+  els.completeSetsContent.querySelectorAll("[data-open-complete-set-wrong]:not(:disabled)").forEach((button) => button.addEventListener("click", () => activateCompleteSet(button.dataset.openCompleteSetWrong, true)));
 }
-
 
 function getPureTextTypeLabel(question) {
   const raw = String(question && (question.sectionLabel || question.practiceSection || question.type) || "题目");
@@ -573,13 +687,30 @@ function closeCompleteTextReader() {
 
 function openCompleteSets() {
   if (!els.completeSetsModal) return;
+  state.completeSetMode = "standard";
   if (els.completeSetsSearchInput) els.completeSetsSearchInput.value = "";
   const activeSet = getActiveCompleteSet();
   const selectedQuestion = state.questions.find((question) => question.id === state.selectedId) || null;
-  const seed = activeSet || selectedQuestion || getCompleteSetRegistry()[0] || null;
+  const standardRegistry = getCompleteSetRegistry().filter((set) => !isCet4CompleteSet(set));
+  const rawSeed = activeSet || selectedQuestion || standardRegistry[0] || null;
+  const seed = isCet4CompleteSet(rawSeed) ? (standardRegistry[0] || null) : rawSeed;
+  const seedSource = String(seed && seed.source || "蓝色森林");
   const seedAssignment = String(seed && seed.assignmentGroup || "");
-  state.completeSetAssignment = ["课后作业", "暑假集训的作业"].includes(seedAssignment) ? seedAssignment : "课后作业";
+  state.completeSetSource = seedSource || "蓝色森林";
+  state.completeSetAssignment = ["课后作业", "暑假集训的作业", "额外题库"].includes(seedAssignment) ? seedAssignment : "课后作业";
   state.completeSetSubject = getCompleteSetSubjectCategory(seed);
+  renderCompleteSetsContent();
+  els.completeSetsModal.hidden = false;
+  document.body.classList.add("quick-browse-open");
+}
+
+function openCet4Sets() {
+  if (!els.completeSetsModal) return;
+  state.completeSetMode = "cet4";
+  state.completeSetSource = "四级";
+  state.completeSetAssignment = "翻译";
+  state.completeSetSubject = "英语";
+  if (els.completeSetsSearchInput) els.completeSetsSearchInput.value = "";
   renderCompleteSetsContent();
   els.completeSetsModal.hidden = false;
   document.body.classList.add("quick-browse-open");
@@ -601,13 +732,17 @@ function activateCompleteSet(setId, wrongOnly = false) {
   if (!set) return;
   state.activeCompleteSetId = String(set.id);
   state.activeCompleteSetWrongOnly = Boolean(wrongOnly);
-  localStorage.setItem(ACTIVE_COMPLETE_SET_KEY, state.activeCompleteSetId);
-  localStorage.setItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY, state.activeCompleteSetWrongOnly ? "1" : "0");
+  try {
+    safeSetLocal(ACTIVE_COMPLETE_SET_KEY, state.activeCompleteSetId);
+    safeSetLocal(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY, state.activeCompleteSetWrongOnly ? "1" : "0");
+  } catch (error) {
+    console.warn("v107 complete-set progress key could not be persisted; continuing in memory", error);
+  }
   resetVisibleFiltersForCompleteSet();
   state.page = 1;
   state.selectedId = "";
   state.mobileTab = "quiz";
-  localStorage.setItem(MOBILE_TAB_KEY, "quiz");
+  try { safeSetLocal(MOBILE_TAB_KEY, "quiz"); } catch (error) { console.warn("v107 mobile tab key could not be persisted", error); }
   closeCompleteSets();
   applyFilters();
   showToast(`${state.activeCompleteSetWrongOnly ? "已打开本套错题：" : "已打开完整题组："}${set.title}`);
@@ -617,8 +752,8 @@ function clearActiveCompleteSet() {
   const current = getActiveCompleteSet();
   state.activeCompleteSetId = "";
   state.activeCompleteSetWrongOnly = false;
-  localStorage.removeItem(ACTIVE_COMPLETE_SET_KEY);
-  localStorage.removeItem(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY);
+  safeRemoveLocal(ACTIVE_COMPLETE_SET_KEY);
+  safeRemoveLocal(ACTIVE_COMPLETE_SET_WRONG_ONLY_KEY);
   state.page = 1;
   state.selectedId = "";
   applyFilters();
@@ -823,11 +958,50 @@ async function replaceQuestions(questions, options = {}) {
   }
 }
 
+async function reconcileKnownAnswerCorrections() {
+  // v95：仅修复“题库答案曾录错，导致用户明明选对却被记错”的历史记录。
+  // 不碰其它题的作答历史。
+  const correctedAnswers = new Map([
+    ["QFW-V93-ADJADV-028", "A"]
+  ]);
+  const updates = [];
+  for (const [questionId, correctLetter] of correctedAnswers.entries()) {
+    const progress = state.progressById.get(questionId);
+    if (!progress) continue;
+    const selected = String(progress.lastSelectedOption || "").toUpperCase();
+    if (selected !== correctLetter || String(progress.lastResult || "") !== "wrong") continue;
+    const next = enrichProgress({
+      ...progress,
+      correct: Number(progress.correct || 0) + 1,
+      wrong: Math.max(0, Number(progress.wrong || 0) - 1),
+      lastResult: "correct",
+      lastChoiceCorrect: true,
+      correctStreak: Math.max(1, Number(progress.correctStreak || 0)),
+      addedToWrongBookAt: "",
+      mistakeReason: "",
+      mistakeReasonLabel: ""
+    }, questionId);
+    state.progressById.set(questionId, next);
+    updates.push(next);
+  }
+  if (!updates.length) return 0;
+  await putMany(PROGRESS_STORE, updates);
+  const repairedIds = new Set(updates.map((item) => String(item.questionId)));
+  const wrongRecords = QuestionBankCore.loadWrongBookRecords().filter((record) => !repairedIds.has(String(record && record.questionId || "")));
+  QuestionBankCore.saveWrongBookRecords(wrongRecords);
+  markLocalSaved();
+  return updates.length;
+}
+
 async function loadState() {
   state.questions = applySourceOverrides((await getAll(QUESTION_STORE)).map(QuestionBankCore.normalizeQuestion));
   const progressList = await getAll(PROGRESS_STORE);
   state.progressById = new Map(progressList.map((progress) => [progress.questionId, enrichProgress(progress, progress.questionId)]));
-  if (await ensureBundledQuestionsCurrent()) {
+  const bundledRefreshed = await ensureBundledQuestionsCurrent();
+  await reconcileKnownAnswerCorrections();
+  if (bundledRefreshed) {
+    updateFilters();
+    applyFilters();
     return;
   }
   if (!state.questions.length) {
@@ -926,8 +1100,8 @@ function questionBundledContentKey(question) {
 
 async function ensureBundledQuestionsCurrent() {
   const bundled = await loadBundledQuestions();
-  const savedCleanVersion = localStorage.getItem(FORCE_CLEAN_VERSION_KEY) || "";
-  const savedContentRevision = localStorage.getItem(BUNDLED_CONTENT_REVISION_KEY) || "";
+  const savedCleanVersion = safeGetLocal(FORCE_CLEAN_VERSION_KEY) || "";
+  const savedContentRevision = safeGetLocal(BUNDLED_CONTENT_REVISION_KEY) || "";
 
   // v35 从空白版开始，导入 7.16 第1天题目。
   // 使用独立 IndexedDB 与 localStorage 命名空间，不会破坏原完整版的数据。
@@ -939,11 +1113,11 @@ async function ensureBundledQuestionsCurrent() {
       state.questions = [];
       state.progressById = new Map();
       QuestionBankCore.saveWrongBookRecords([]);
-      localStorage.removeItem(AUDIT_FEEDBACK_KEY);
-      localStorage.removeItem(MISTAKE_REASON_KEY);
-      localStorage.removeItem(CONCEPT_WRONG_STREAK_KEY);
-      localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
-      localStorage.setItem(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
+      safeRemoveLocal(AUDIT_FEEDBACK_KEY);
+      safeRemoveLocal(MISTAKE_REASON_KEY);
+      safeRemoveLocal(CONCEPT_WRONG_STREAK_KEY);
+      safeSetLocal(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
+      safeSetLocal(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
       state.page = 1;
       state.selectedId = "";
       updateFilters();
@@ -975,12 +1149,12 @@ async function ensureBundledQuestionsCurrent() {
     await replaceQuestions(expectedQuestions, { silent: true });
     await pruneProgressForMissingQuestions();
     state.autoHideMastered = true;
-    localStorage.setItem(AUTO_HIDE_MASTERED_KEY, "1");
+    safeSetLocal(AUTO_HIDE_MASTERED_KEY, "1");
     await normalizeCompletedProgressForOneCorrect();
     state.selectedId = "";
-    localStorage.setItem(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
-    localStorage.setItem(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
-    showToast(`v88 已导入第二章第一节导数66题及逐题官方答案解析，原有作答进度保留`);
+    safeSetLocal(FORCE_CLEAN_VERSION_KEY, FORCE_CLEAN_VERSION);
+    safeSetLocal(BUNDLED_CONTENT_REVISION_KEY, BUNDLED_CONTENT_REVISION);
+    showToast(`v96 已导入本轮蓝色森林英语、全方位介词与全方位数学完整题组；原有作答进度保留`);
     return true;
   }
 
@@ -1145,7 +1319,7 @@ function setMobileTab(tab) {
   const safe = ["quiz", "similar", "review", "stats", "me"].includes(tab) ? tab : "quiz";
   state.mobileTab = safe;
   state.filtersOpen = false;
-  localStorage.setItem(MOBILE_TAB_KEY, safe);
+  safeSetLocal(MOBILE_TAB_KEY, safe);
   render();
   window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
 }
@@ -1267,6 +1441,7 @@ function renderDashboard() {
         <button type="button" class="review-action" id="mobileWeakChapterButton"><strong>${weak.length}</strong><span>薄弱章节</span></button>
         <button type="button" class="review-action" id="mobileWrongRecentButton"><strong>${[...state.progressById.values()].filter((progress) => progress.lastResult === "wrong").length}</strong><span>最近做错</span></button>
         <button type="button" class="review-action" id="mobileWrongBookReviewButton"><strong>${[...state.progressById.values()].filter((progress) => progress.addedToWrongBookAt).length}</strong><span>错题本</span></button>
+        <button type="button" class="review-action wrong-review-mobile-action" id="mobileSundayWrongReviewButton"><strong>${getWrongReviewRecords().length}</strong><span>周日错题复盘</span></button>
         <button type="button" class="review-action" id="mobileMasteredReviewButton"><strong>${state.questions.filter(isMasteredQuestion).length}</strong><span>已完成题</span></button>
       </div>
     </div>
@@ -1360,11 +1535,13 @@ function renderDashboard() {
     button.addEventListener("click", () => {
       els.statusFilter.value = status;
       state.mobileTab = "quiz";
-      localStorage.setItem(MOBILE_TAB_KEY, "quiz");
+      safeSetLocal(MOBILE_TAB_KEY, "quiz");
       state.page = 1;
       applyFilters();
     });
   });
+  const mobileSundayWrongReviewButton = els.dashboardPanel.querySelector("#mobileSundayWrongReviewButton");
+  if (mobileSundayWrongReviewButton) mobileSundayWrongReviewButton.addEventListener("click", openWrongReview);
   const weakOnlyButton = els.dashboardPanel.querySelector("#weakOnlyButton");
   if (weakOnlyButton) {
     weakOnlyButton.addEventListener("click", () => {
@@ -1557,7 +1734,7 @@ function renderStatusBadges(progress) {
 
 function setQuestionView(mode) {
   state.questionView = mode === "text" ? "text" : "image";
-  localStorage.setItem(QUESTION_VIEW_KEY, state.questionView);
+  safeSetLocal(QUESTION_VIEW_KEY, state.questionView);
   render();
 }
 
@@ -1608,13 +1785,20 @@ function getQuestionTextOptions(question) {
   return options.filter((item) => !looksLikeGarbledQuestionText(item));
 }
 
-function renderQuestionViewSwitch() {
+function renderQuestionViewSwitch(question = null) {
   const textMode = state.questionView === "text";
+  const textFirst = Boolean(question && question.textFirstQuestionView);
   return `
     <div class="question-view-switch" role="group" aria-label="题目显示方式">
-      <button type="button" class="view-switch-button ${textMode ? "" : "active"}" data-question-view="image">图文版</button>
+      <button type="button" class="view-switch-button ${textMode ? "" : "active"}" data-question-view="image">${textFirst ? "标准题卡" : "图文版"}</button>
       <button type="button" class="view-switch-button ${textMode ? "active" : ""}" data-question-view="text">纯文字版</button>
     </div>`;
+}
+
+function questionNeedsVisualReference(question) {
+  if (!question || !Array.isArray(question.images) || !question.images.length) return false;
+  const stem = String(question.textStem || question.stem || "");
+  return /(如下图|下图|图中|如图|上图|图\（|图所示|示意图|结构图|流程图|连接符号)/.test(stem);
 }
 
 function renderQuestionBody(question, progress) {
@@ -1638,13 +1822,42 @@ function renderQuestionBody(question, progress) {
           ${renderImages([question.textFormulaImage], "公式原式")}
         </div>`
       : "";
+    const visualReference = questionNeedsVisualReference(question)
+      ? `<div class="pure-text-visual-reference"><p>本题必须结合原题图示作答，纯文字模式保留图示：</p>${renderImages(question.images, "题目图示")}</div>`
+      : "";
     return `
       <div class="pure-text-question">
         <div class="pure-text-paper-head"><span>${escapeHtml(getQuestionSequenceLabel(question))}</span><b>${escapeHtml(getPureTextTypeLabel(question))}</b></div>
         <div class="pure-text-stem">${renderPureTextStem(question)}</div>
+        ${visualReference}
         ${formulaProof}
         ${renderOptions(options, question, progress)}
         ${noOptions}
+      </div>`;
+  }
+  if (question && question.textFirstQuestionView) {
+    const options = getQuestionTextOptions(question);
+    const noOptions = !options.length && !isJudgmentQuestion(question)
+      ? `<p class="pure-text-no-options">本题按题目要求直接作答。</p>`
+      : "";
+    const visualReference = questionNeedsVisualReference(question)
+      ? `<div class="pure-text-visual-reference"><p>本题需要结合图示作答：</p>${renderImages(question.images, "题目图示")}</div>`
+      : "";
+    const sourcePageReference = !questionNeedsVisualReference(question) && Array.isArray(question.images) && question.images.length
+      ? `<details class="question-source-page-reference">
+          <summary>查看原题页核对</summary>
+          <p>原题页只用于核对文字；正常做题使用上方这一套题干和选项。</p>
+          ${renderImages(question.images, "原题页")}
+        </details>`
+      : "";
+    return `
+      <div class="pure-text-question text-first-question-card">
+        <div class="pure-text-paper-head"><span>${escapeHtml(getQuestionSequenceLabel(question))}</span><b>${escapeHtml(getPureTextTypeLabel(question))}</b></div>
+        <div class="pure-text-stem">${renderPureTextStem(question)}</div>
+        ${visualReference}
+        ${renderOptions(options, question, progress)}
+        ${noOptions}
+        ${sourcePageReference}
       </div>`;
   }
   return `
@@ -1702,7 +1915,7 @@ function renderDetail() {
       </header>
 
       <section class="stem-box ${state.questionView === "text" ? "text-view-active" : "image-view-active"}">
-        <div class="stem-box-heading"><strong>题目</strong>${renderQuestionViewSwitch()}</div>
+        <div class="stem-box-heading"><strong>题目</strong>${renderQuestionViewSwitch(question)}</div>
         ${renderQuestionBody(question, progress)}
       </section>
 
@@ -1772,9 +1985,6 @@ function renderDetail() {
   });
   els.detailPanel.querySelectorAll("[data-solution-level]").forEach((button) => {
     button.addEventListener("click", () => setSolutionLevel(question.id, button.dataset.solutionLevel));
-  });
-  els.detailPanel.querySelectorAll("[data-option-choice]").forEach((button) => {
-    button.addEventListener("click", () => handleOptionChoice(question.id, button.dataset.optionChoice));
   });
   els.detailPanel.querySelectorAll("[data-similar-id]").forEach((button) => {
     button.addEventListener("click", () => selectQuestion(button.dataset.similarId));
@@ -1851,11 +2061,24 @@ function highlightPersonalPhrases(text) {
 
 function renderEnglishSentenceDrill(question) {
   if (String(question && question.subject || "") !== "英语") return "";
-  const stem = getQuestionTextStem(question);
-  const chunks = String(stem || "").split(/(?=\s*\d{1,2}[\.．、])/).map((part) => part.trim()).filter(Boolean);
-  if (chunks.length < 3) return "";
-  const instruction = chunks.shift();
-  const completed = JSON.parse(localStorage.getItem(`qb-english-drill-${question.id}`) || "[]");
+  const stem = String(getQuestionTextStem(question) || "").replace(/\r/g, "");
+  const lines = stem.split("\n");
+  const marker = /^\s*\d{1,2}[.．、]\s+/;
+  const markerIndexes = lines.map((line, index) => marker.test(line) ? index : -1).filter((index) => index >= 0);
+  // 只有“换行后真正以 1. / 2. / 3. 开头”的成组题才启用拆分练习。
+  // 年份、数值（如 1910.）绝不能再被拆成 1 / 0 两个子题。
+  if (markerIndexes.length < 2) return "";
+  const firstMarker = markerIndexes[0];
+  const instruction = lines.slice(0, firstMarker).join("\n").trim();
+  const chunks = [];
+  for (let i = 0; i < markerIndexes.length; i += 1) {
+    const start = markerIndexes[i];
+    const end = i + 1 < markerIndexes.length ? markerIndexes[i + 1] : lines.length;
+    const sentence = lines.slice(start, end).join("\n").trim();
+    if (sentence) chunks.push(sentence);
+  }
+  if (chunks.length < 2) return "";
+  const completed = JSON.parse(safeGetLocal(`qb-english-drill-${question.id}`) || "[]");
   return `<div class="english-micro-drill"><div class="english-drill-intro"><strong>拆分练习</strong><span>${renderRichText(instruction)}</span></div>${chunks.map((sentence, index) => {
     const phrases = getPersonalPhraseEntries(sentence);
     const done = completed.includes(index);
@@ -1865,9 +2088,9 @@ function renderEnglishSentenceDrill(question) {
 
 window.toggleEnglishSubQuestion = function toggleEnglishSubQuestion(questionId, index, button) {
   const key = `qb-english-drill-${questionId}`;
-  const saved = new Set(JSON.parse(localStorage.getItem(key) || "[]"));
+  const saved = new Set(JSON.parse(safeGetLocal(key) || "[]"));
   if (saved.has(index)) saved.delete(index); else saved.add(index);
-  localStorage.setItem(key, JSON.stringify([...saved]));
+  safeSetLocal(key, JSON.stringify([...saved]));
   const card = button.closest(".english-micro-card");
   const done = saved.has(index);
   card.classList.toggle("done", done);
@@ -2065,7 +2288,10 @@ function renderAnswerQualityNotice(question) {
 function getAnswerAuthorityLabel(question) {
   const authority = String(question && question.answerAuthority || "");
   if (authority === "official") return "官方答案";
+  if (authority === "standard") return "标准答案";
   if (authority === "ai") return "AI整理";
+  if (authority === "teacher_reference") return "课堂参考";
+  if (authority === "user_upload") return "用户资料";
   if (authority === "unverified") return "待核对";
   if (String(question && question.answerStatus || "").startsWith("official")) return "官方答案";
   return "";
@@ -2331,15 +2557,35 @@ async function handleOptionChoice(questionId, letter) {
   if (!question) return;
   const answers = normalizeAnswerLetters(question.answer, question);
   const selected = String(letter || "").toUpperCase();
-  if (answers.size !== 1) {
-    await saveProgress({ ...getProgress(questionId), lastSelectedOption: selected, lastChoiceCorrect: false });
-    showToast(`已选择 ${selected}，答案待补充，暂不判定对错`);
+  if (!selected) return;
+
+  const before = getProgress(questionId);
+  const answerKnown = answers.size === 1;
+  const result = answerKnown && answers.has(selected) ? "correct" : "wrong";
+  const optimistic = {
+    ...before,
+    lastSelectedOption: selected,
+    lastChoiceCorrect: answerKnown ? result === "correct" : false,
+    solutionVisible: answerKnown ? true : before.solutionVisible,
+    solutionLevel: answerKnown ? "analysis" : before.solutionLevel
+  };
+
+  state.progressById.set(questionId, enrichProgress(optimistic, questionId));
+  render();
+
+  try {
+    await saveProgress(optimistic);
+    if (!answerKnown) {
+      showToast(`已选择 ${selected}，答案待补充，暂不判定对错`);
+      return;
+    }
+    await saveAttempt(questionId, result, { selectedOption: selected, viaOption: true });
+  } catch (error) {
+    console.error("v109 option progress persistence failed", error);
+    state.progressById.set(questionId, enrichProgress(optimistic, questionId));
     render();
-    return;
+    showToast(`已选择 ${selected}；作答记录暂存在当前页面`);
   }
-  const result = answers.has(selected) ? "correct" : "wrong";
-  await saveProgress({ ...getProgress(questionId), lastSelectedOption: selected, lastChoiceCorrect: result === "correct", solutionVisible: true, solutionLevel: "analysis" });
-  await saveAttempt(questionId, result, { selectedOption: selected, viaOption: true });
 }
 
 async function saveAttempt(questionId, result, options = {}) {
@@ -2563,11 +2809,11 @@ async function shareBackupFile(filename, content, blob) {
 }
 
 function markLocalSaved() {
-  localStorage.setItem(LOCAL_LAST_SAVE_KEY, new Date().toISOString());
+  safeSetLocal(LOCAL_LAST_SAVE_KEY, new Date().toISOString());
 }
 
 function getLocalLastSaveText() {
-  const last = localStorage.getItem(LOCAL_LAST_SAVE_KEY) || "";
+  const last = safeGetLocal(LOCAL_LAST_SAVE_KEY) || "";
   if (!last) return "暂无本地保存记录";
   try {
     return new Date(last).toLocaleString("zh-CN", { hour12: false });
@@ -2655,7 +2901,7 @@ async function importLocalBackupPayload(payload) {
   }
 
   if (payload.sourceOverrides && typeof payload.sourceOverrides === "object" && !Array.isArray(payload.sourceOverrides)) {
-    localStorage.setItem(SOURCE_OVERRIDE_KEY, JSON.stringify(payload.sourceOverrides));
+    safeSetLocal(SOURCE_OVERRIDE_KEY, JSON.stringify(payload.sourceOverrides));
   }
 
   const importedGenerated = Array.isArray(payload.generatedQuestions)
@@ -2699,29 +2945,29 @@ async function importLocalBackupPayload(payload) {
   const settings = payload.settings && typeof payload.settings === "object" ? payload.settings : {};
   if (Object.prototype.hasOwnProperty.call(settings, "studyMode")) {
     state.studyMode = Boolean(settings.studyMode);
-    localStorage.setItem(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
+    safeSetLocal(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
   }
   if (settings.questionView === "text" || settings.questionView === "image") {
     state.questionView = settings.questionView;
-    localStorage.setItem(QUESTION_VIEW_KEY, settings.questionView);
+    safeSetLocal(QUESTION_VIEW_KEY, settings.questionView);
   }
   if (Object.prototype.hasOwnProperty.call(settings, "autoHideMastered")) {
     state.autoHideMastered = Boolean(settings.autoHideMastered);
-    localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
+    safeSetLocal(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
   }
   if (state.autoHideMastered) {
     await normalizeCompletedProgressForOneCorrect();
   }
   if (settings.mobileTab) {
     state.mobileTab = String(settings.mobileTab);
-    localStorage.setItem(MOBILE_TAB_KEY, state.mobileTab);
+    safeSetLocal(MOBILE_TAB_KEY, state.mobileTab);
   }
   if (settings.dailyGoal) {
-    localStorage.setItem(DAILY_GOAL_KEY, String(Math.min(500, Math.max(10, Number(settings.dailyGoal) || 80))));
+    safeSetLocal(DAILY_GOAL_KEY, String(Math.min(500, Math.max(10, Number(settings.dailyGoal) || 80))));
   }
   if (Number.isFinite(Number(settings.timerSecondsRemaining))) {
     state.timerSecondsRemaining = Math.max(0, Math.floor(Number(settings.timerSecondsRemaining)));
-    localStorage.setItem(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
+    safeSetLocal(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
   }
 
   const study = payload.study && typeof payload.study === "object" ? payload.study : {};
@@ -2790,9 +3036,9 @@ const cloudClient = createSupabaseClient();
 function readCloudProfile(interactive = false) {
   const params = new URLSearchParams(window.location.search);
   const urlSlug = (params.get("edit") || params.get("view") || "").trim().toLowerCase();
-  let slug = (urlSlug || localStorage.getItem(CLOUD_SLUG_KEY) || "").trim().toLowerCase();
-  let pin = localStorage.getItem(CLOUD_PIN_KEY) || "";
-  let displayName = localStorage.getItem(CLOUD_DISPLAY_NAME_KEY) || "";
+  let slug = (urlSlug || safeGetLocal(CLOUD_SLUG_KEY) || "").trim().toLowerCase();
+  let pin = safeGetLocal(CLOUD_PIN_KEY) || "";
+  let displayName = safeGetLocal(CLOUD_DISPLAY_NAME_KEY) || "";
   if (interactive) {
     slug = (window.prompt("公开编号，例如 cyrus329", slug) || "").trim().toLowerCase();
     if (!slug) {
@@ -2808,12 +3054,12 @@ function readCloudProfile(interactive = false) {
   if (!slug) {
     return null;
   }
-  localStorage.setItem(CLOUD_SLUG_KEY, slug);
+  safeSetLocal(CLOUD_SLUG_KEY, slug);
   if (pin) {
-    localStorage.setItem(CLOUD_PIN_KEY, pin);
+    safeSetLocal(CLOUD_PIN_KEY, pin);
   }
   if (displayName) {
-    localStorage.setItem(CLOUD_DISPLAY_NAME_KEY, displayName);
+    safeSetLocal(CLOUD_DISPLAY_NAME_KEY, displayName);
   }
   return { slug, pin, displayName };
 }
@@ -2889,7 +3135,7 @@ async function saveCloudState(options = {}) {
       p_display_name: profile.displayName || profile.slug,
       p_is_public: true
     });
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, new Date().toISOString());
+    safeSetLocal(CLOUD_LAST_SYNC_KEY, new Date().toISOString());
     if (!options.silent) {
       showToast(`已保存到云端：${profile.slug}`);
     }
@@ -2926,12 +3172,12 @@ async function applyCloudRecord(record) {
     state.autoHideMastered = Boolean(record.settings.autoHideMastered);
     state.mobileTab = record.settings.mobileTab || state.mobileTab;
     state.timerSecondsRemaining = Number(record.settings.timerSecondsRemaining || state.timerSecondsRemaining);
-    localStorage.setItem(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
-    localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
-    localStorage.setItem(MOBILE_TAB_KEY, state.mobileTab);
-    localStorage.setItem(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
+    safeSetLocal(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
+    safeSetLocal(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
+    safeSetLocal(MOBILE_TAB_KEY, state.mobileTab);
+    safeSetLocal(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
     if (record.settings.dailyGoal) {
-      localStorage.setItem(DAILY_GOAL_KEY, String(record.settings.dailyGoal));
+      safeSetLocal(DAILY_GOAL_KEY, String(record.settings.dailyGoal));
     }
   }
   if (state.autoHideMastered) {
@@ -3008,12 +3254,12 @@ async function openCloudPanel() {
 
 
 function getTotalStudySeconds() {
-  const raw = Number(localStorage.getItem(STUDY_TOTAL_SECONDS_KEY) || 0);
+  const raw = Number(safeGetLocal(STUDY_TOTAL_SECONDS_KEY) || 0);
   return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 0;
 }
 
 function setTotalStudySeconds(seconds) {
-  localStorage.setItem(STUDY_TOTAL_SECONDS_KEY, String(Math.max(0, Math.floor(Number(seconds || 0)))));
+  safeSetLocal(STUDY_TOTAL_SECONDS_KEY, String(Math.max(0, Math.floor(Number(seconds || 0)))));
 }
 
 function getDailyStudySecondsMap() {
@@ -3096,7 +3342,7 @@ function addDaysISO(dateISO, days) {
 
 function readStudyDays() {
   try {
-    const parsed = JSON.parse(localStorage.getItem(STUDY_DAYS_KEY) || "[]");
+    const parsed = JSON.parse(safeGetLocal(STUDY_DAYS_KEY) || "[]");
     return Array.isArray(parsed) ? [...new Set(parsed.filter(Boolean))].sort() : [];
   } catch (error) {
     return [];
@@ -3104,7 +3350,7 @@ function readStudyDays() {
 }
 
 function saveStudyDays(days) {
-  localStorage.setItem(STUDY_DAYS_KEY, JSON.stringify([...new Set(days)].sort()));
+  safeSetLocal(STUDY_DAYS_KEY, JSON.stringify([...new Set(days)].sort()));
 }
 
 function markStudyToday() {
@@ -3126,7 +3372,7 @@ function getStudyStreak() {
 
 function readJsonMap(key) {
   try {
-    const parsed = JSON.parse(localStorage.getItem(key) || "{}");
+    const parsed = JSON.parse(safeGetLocal(key) || "{}");
     return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
   } catch (error) {
     return {};
@@ -3134,17 +3380,17 @@ function readJsonMap(key) {
 }
 
 function writeJsonMap(key, value) {
-  localStorage.setItem(key, JSON.stringify(value || {}));
+  safeSetLocal(key, JSON.stringify(value || {}));
 }
 
 function getDailyGoal() {
-  const raw = Number(localStorage.getItem(DAILY_GOAL_KEY) || 80);
+  const raw = Number(safeGetLocal(DAILY_GOAL_KEY) || 80);
   return Math.min(500, Math.max(10, Number.isFinite(raw) ? raw : 80));
 }
 
 function setDailyGoal(value) {
   const next = Math.min(500, Math.max(10, Number(value || 80)));
-  localStorage.setItem(DAILY_GOAL_KEY, String(next));
+  safeSetLocal(DAILY_GOAL_KEY, String(next));
   showToast(`每日目标已设为 ${next} 题`);
   queueCloudSync();
 }
@@ -3175,7 +3421,7 @@ function daysBetweenISO(startISO, endISO = todayISO()) {
 
 function getBackupStatus() {
   const attempted = [...state.progressById.values()].some((progress) => Number(progress.attempts || 0) > 0);
-  const last = localStorage.getItem(LOCAL_LAST_SAVE_KEY) || "";
+  const last = safeGetLocal(LOCAL_LAST_SAVE_KEY) || "";
   if (!attempted) {
     return { needsBackup: false, title: "本地自动保存已开启", message: "开始做题后，记录会先保存在本机，不再因为云端数据库报错影响刷题。" };
   }
@@ -3232,7 +3478,7 @@ function startTimer() {
   state.timerRunning = true;
   state.timerId = window.setInterval(() => {
     state.timerSecondsRemaining = Math.max(0, state.timerSecondsRemaining - 1);
-    localStorage.setItem(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
+    safeSetLocal(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
     updateTimerUI();
     if (state.timerSecondsRemaining <= 0) {
       pauseTimer();
@@ -3262,7 +3508,7 @@ function toggleTimer() {
 function resetTimer() {
   pauseTimer();
   state.timerSecondsRemaining = TIMER_DEFAULT_SECONDS;
-  localStorage.setItem(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
+  safeSetLocal(TIMER_REMAINING_KEY, String(state.timerSecondsRemaining));
   updateTimerUI();
   showToast("倒计时已重置为25分钟");
 }
@@ -3299,7 +3545,7 @@ async function normalizeCompletedProgressForOneCorrect() {
 
 async function toggleCorrectOnceCompletionMode() {
   state.autoHideMastered = !state.autoHideMastered;
-  localStorage.setItem(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
+  safeSetLocal(AUTO_HIDE_MASTERED_KEY, state.autoHideMastered ? "1" : "0");
   if (state.autoHideMastered) {
     await normalizeCompletedProgressForOneCorrect();
     showToast("已开启：任意题做对1次后自动完成，不再显示和复习");
@@ -3469,7 +3715,7 @@ function getEnglishGrammarStats() {
 
 function getAuditFeedbackMap() {
   try {
-    const raw = localStorage.getItem(AUDIT_FEEDBACK_KEY) || "{}";
+    const raw = safeGetLocal(AUDIT_FEEDBACK_KEY) || "{}";
     const data = JSON.parse(raw);
     return data && typeof data === "object" ? data : {};
   } catch (error) {
@@ -3478,7 +3724,7 @@ function getAuditFeedbackMap() {
 }
 
 function saveAuditFeedbackMap(map) {
-  localStorage.setItem(AUDIT_FEEDBACK_KEY, JSON.stringify(map || {}));
+  safeSetLocal(AUDIT_FEEDBACK_KEY, JSON.stringify(map || {}));
 }
 
 function getAuditFeedback(questionId) {
@@ -3822,15 +4068,15 @@ function normalizeAnswerLetters(answer, question = null) {
   }
 
   const compact = text.replace(/\s+/g, "");
-  const answerLike = compact.match(/(?:答案|选|正确答案|为|是|：|:)?([A-D](?:[、,，/和及]*[A-D]){0,3})(?:$|[^A-Z])/);
+  const answerLike = compact.match(/(?:答案|选|正确答案|为|是|：|:)?([A-E](?:[、,，/和及]*[A-E]){0,4})(?:$|[^A-Z])/);
   if (answerLike) {
-    answerLike[1].replace(/[A-D]/g, (letter) => {
+    answerLike[1].replace(/[A-E]/g, (letter) => {
       letters.add(letter);
       return letter;
     });
     return letters;
   }
-  text.replace(/(^|[^A-Z])([A-D])([^A-Z]|$)/g, (_, before, letter) => {
+  text.replace(/(^|[^A-Z])([A-E])([^A-Z]|$)/g, (_, before, letter) => {
     letters.add(letter);
     return `${before}${letter}`;
   });
@@ -3839,7 +4085,7 @@ function normalizeAnswerLetters(answer, question = null) {
 
 function extractOptionLetter(option, index) {
   const text = String(option || "").trim();
-  const match = text.match(/^([A-D])\s*[.．、)]/i);
+  const match = text.match(/^([A-E])\s*[.．、)]/i);
   return match ? match[1].toUpperCase() : String.fromCharCode(65 + index);
 }
 
@@ -3995,13 +4241,36 @@ function renderRichText(value) {
 function renderMathSegment(segment) {
   const cache = window.PRE_RENDERED_MATH || {};
   if (cache[segment]) return cache[segment];
-  let inner = String(segment || "");
+  const rawSegment = String(segment || "");
+  const isDisplay = rawSegment.startsWith("\\[");
+  let inner = rawSegment;
   if ((inner.startsWith("\\(") && inner.endsWith("\\)")) || (inner.startsWith("\\[") && inner.endsWith("\\]"))) {
     inner = inner.slice(2, -2);
   } else if (inner.startsWith("$") && inner.endsWith("$")) {
     inner = inner.slice(1, -1);
   }
+  if (/\\begin\{cases\}/.test(inner) && /\\end\{cases\}/.test(inner)) {
+    return renderPiecewiseMath(inner, isDisplay);
+  }
   return `<span class="math-render-fallback">${renderLatexFallback(inner)}</span>`;
+}
+
+function renderPiecewiseMath(value, isDisplay = false) {
+  const source = String(value || "");
+  const match = source.match(/^([\s\S]*?)\\begin\{cases\}([\s\S]*?)\\end\{cases\}([\s\S]*)$/);
+  if (!match) return `<span class="math-render-fallback">${renderLatexFallback(source)}</span>`;
+  const prefix = String(match[1] || "").trim();
+  const body = String(match[2] || "");
+  const suffix = String(match[3] || "").trim();
+  const rows = body.split(/\\\\/).map(row => row.trim()).filter(Boolean).map(row => {
+    const amp = row.indexOf("&");
+    const expr = amp >= 0 ? row.slice(0, amp) : row;
+    const condition = amp >= 0 ? row.slice(amp + 1) : "";
+    return { expr: expr.trim(), condition: condition.trim() };
+  });
+  const rowCount = Math.max(2, Math.min(5, rows.length));
+  const rowHtml = rows.map(row => `<span class="piecewise-row"><span class="piecewise-expr">${renderLatexFallback(row.expr)}</span><span class="piecewise-cond">${renderLatexFallback(row.condition)}</span></span>`).join("");
+  return `<span class="piecewise-math${isDisplay ? " piecewise-display" : ""} piecewise-rows-${rowCount}">${prefix ? `<span class="piecewise-prefix">${renderLatexFallback(prefix)}</span>` : ""}<span class="piecewise-brace" aria-hidden="true">{</span><span class="piecewise-rows">${rowHtml}</span>${suffix ? `<span class="piecewise-suffix">${renderLatexFallback(suffix)}</span>` : ""}</span>`;
 }
 
 function renderLooseTextChunk(value) {
@@ -4010,8 +4279,82 @@ function renderLooseTextChunk(value) {
   return `<span class="math-render-fallback">${renderLatexFallback(text)}</span>`;
 }
 
+function normalizeLatexFractionShorthand(value) {
+  const source = String(value || "");
+
+  function readBalancedGroup(start) {
+    if (source[start] !== "{") return null;
+    let depth = 0;
+    for (let i = start; i < source.length; i += 1) {
+      if (source[i] === "{") depth += 1;
+      else if (source[i] === "}") {
+        depth -= 1;
+        if (depth === 0) return { value: source.slice(start + 1, i), end: i + 1 };
+      }
+    }
+    return null;
+  }
+
+  function readTexArgument(start) {
+    let i = start;
+    while (i < source.length && /\s/.test(source[i])) i += 1;
+    if (i >= source.length) return null;
+
+    if (source[i] === "{") {
+      const group = readBalancedGroup(i);
+      if (!group) return null;
+      return { value: group.value, end: group.end };
+    }
+
+    if (source[i] === "\\") {
+      let j = i + 1;
+      while (j < source.length && /[A-Za-z]/.test(source[j])) j += 1;
+      if (j === i + 1 && j < source.length) j += 1;
+      // Keep an immediately attached braced argument with commands such as \\sqrt{x}.
+      if (source[j] === "{") {
+        const group = readBalancedGroup(j);
+        if (group) j = group.end;
+      }
+      return { value: source.slice(i, j), end: j };
+    }
+
+    const codePoint = source.codePointAt(i);
+    const token = String.fromCodePoint(codePoint);
+    return { value: token, end: i + token.length };
+  }
+
+  let output = "";
+  for (let i = 0; i < source.length;) {
+    let command = "";
+    if (source.startsWith("\\dfrac", i)) command = "\\dfrac";
+    else if (source.startsWith("\\frac", i)) command = "\\frac";
+
+    if (!command) {
+      output += source[i];
+      i += 1;
+      continue;
+    }
+
+    const numerator = readTexArgument(i + command.length);
+    const denominator = numerator ? readTexArgument(numerator.end) : null;
+    if (!numerator || !denominator) {
+      output += command;
+      i += command.length;
+      continue;
+    }
+
+    const top = normalizeLatexFractionShorthand(numerator.value);
+    const bottom = normalizeLatexFractionShorthand(denominator.value);
+    // Private-use markers preserve the exact TeX numerator/denominator boundaries
+    // until prettifyMathHtml converts them into a stacked math fraction.
+    output += `\uE100${top}\uE101${bottom}\uE102`;
+    i = denominator.end;
+  }
+  return output;
+}
+
 function renderLatexFallback(value) {
-  let text = escapeHtml(String(value || ""));
+  let text = escapeHtml(normalizeLatexFractionShorthand(String(value || "")));
   text = text
     .replace(/\\displaystyle\s*/g, "")
     .replace(/\\left|\\right/g, "")
@@ -4041,6 +4384,8 @@ function renderLatexFallback(value) {
     .replace(/\\\\/g, "; ")
     .replace(/\\hspace\{[^{}]*\}/g, " ")
     .replace(/\\operatorname\{([^{}]+)\}/g, "$1")
+    // Preserve grouped exponents before generic brace cleanup.
+    .replace(/\^\{([^{}]+)\}/g, "^($1)")
     .replace(/\\in/g, "∈")
     .replace(/\\sim/g, "∼")
     .replace(/\\approx/g, "≈")
@@ -4070,8 +4415,25 @@ function prettifyMathHtml(html, depth = 0) {
     placeholderPattern.lastIndex = 0;
     return placeholderPattern.test(String(value || ""));
   };
+  const stripOuterGrouping = (value) => {
+    const text = String(value || "").trim();
+    if (text.length < 2) return text;
+    const open = text[0];
+    const close = open === "(" ? ")" : (open === "[" ? "]" : "");
+    if (!close || text[text.length - 1] !== close) return text;
+    let level = 0;
+    for (let i = 0; i < text.length; i += 1) {
+      const char = text[i];
+      if (char === open) level += 1;
+      else if (char === close) {
+        level -= 1;
+        if (level === 0 && i !== text.length - 1) return text;
+      }
+    }
+    return level === 0 ? text.slice(1, -1).trim() : text;
+  };
   const formatOperand = (value) => {
-    const text = String(value || "");
+    const text = stripOuterGrouping(String(value || ""));
     if (hasPlaceholder(text)) {
       placeholderPattern.lastIndex = 0;
       return restorePlaceholders(text);
@@ -4079,6 +4441,8 @@ function prettifyMathHtml(html, depth = 0) {
     return prettifyMathHtml(text, depth + 1);
   };
   const makeFraction = (top, bottom) => makePlaceholder(`<span class="math-frac"><span>${formatOperand(top)}</span><span>${formatOperand(bottom)}</span></span>`);
+  const makeSubscript = (base, sub) => `${base}<sub>${formatOperand(sub)}</sub>`;
+  const makeLimit = (sub) => makePlaceholder(`<span class="math-limit"><span class="math-limit-op">lim</span><span class="math-limit-sub">${formatOperand(sub)}</span></span>`);
   const makeRoot = (symbol, radicand, degree = 2) => makePlaceholder(
     `<span class="math-root ${degree === 3 ? "cube-root" : "square-root"}"><span class="math-root-sign">${symbol}</span><span class="math-radicand">${prettifyMathHtml(radicand, depth + 1)}</span></span>`
   );
@@ -4146,6 +4510,20 @@ function prettifyMathHtml(html, depth = 0) {
       value: text.slice(atomStart, index),
       end: index
     };
+  }
+
+  function convertEncodedFractions(text) {
+    let result = String(text || "");
+    const encodedFraction = /\uE100([^\uE100\uE101\uE102]*)\uE101([^\uE100\uE101\uE102]*)\uE102/g;
+    for (let pass = 0; pass < 20 && result.includes("\uE100"); pass += 1) {
+      let changed = false;
+      result = result.replace(encodedFraction, (_, top, bottom) => {
+        changed = true;
+        return makeFraction(top, bottom);
+      });
+      if (!changed) break;
+    }
+    return result;
   }
 
   function convertRadicals(text) {
@@ -4347,13 +4725,22 @@ function prettifyMathHtml(html, depth = 0) {
     return result;
   }
 
+  output = convertEncodedFractions(output);
   output = convertRadicals(output);
 
-  // Powers first, so x^(3/2) becomes a compact exponent instead of a stacked fraction.
-  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^\(([^()<>\n]{1,60})\)/g, (_, base, exponent) => `${base}<sup>${String(exponent).replace(/\//g, "⁄")}</sup>`);
-  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^\[([^\[\]<>\n]{1,60})\]/g, (_, base, exponent) => `${base}<sup>${String(exponent).replace(/\//g, "⁄")}</sup>`);
-  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^([A-Za-z0-9πφθξαβγ]|-?\d+)/g, "$1<sup>$2</sup>");
+  // Limit operators: display the approaching expression below lim.
+  output = output.replace(/\blim\s*_\{([^{}]{1,80})\}/g, (_, sub) => makeLimit(sub));
+  output = output.replace(/\blim\s*_([A-Za-z0-9π∞φθξαβγ→+\-]+(?:\([^()]{0,40}\))?)/g, (_, sub) => makeLimit(sub));
 
+  // General subscripts such as x_0, f_n, a_{n+1}.
+  output = output.replace(/([A-Za-zα-ωΑ-Ωπφθξ∞]|\)|\])_\{([^{}]{1,60})\}/g, (_, base, sub) => makeSubscript(base, sub));
+  output = output.replace(/([A-Za-zα-ωΑ-Ωπφθξ∞])_([A-Za-z0-9α-ωΑ-Ωπφθξ∞+-]{1,20})/g, (_, base, sub) => makeSubscript(base, sub));
+
+  // Powers first, so grouped exponents like e^{ax}, x^(3/2), (1+x)^{1/h} render as true superscripts.
+  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^\{([^{}<>\n]{1,80})\}/g, (_, base, exponent) => `${base}<sup>${formatOperand(exponent)}</sup>`);
+  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^\(([^()<>\n]{1,80})\)/g, (_, base, exponent) => `${base}<sup>${formatOperand(exponent)}</sup>`);
+  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^\[([^\[\]<>\n]{1,80})\]/g, (_, base, exponent) => `${base}<sup>${formatOperand(exponent)}</sup>`);
+  output = output.replace(/([A-Za-z0-9πφθξαβγ]|\)|\])\^([A-Za-z0-9πφθξαβγ]|-?\d+)/g, "$1<sup>$2</sup>");
   // Common differential quotients such as dy/dx, dy/dt, dx/dt.
   output = output.replace(/\b(d[xyzt])\s*\/\s*(d[xyzt])\b/g, (_, top, bottom) => makeFraction(top, bottom));
 
@@ -4434,6 +4821,563 @@ function getPlanAdvice(group) {
 
 function closeWrongPlanner() {
   document.querySelector("#wrongPlannerOverlay")?.remove();
+}
+
+
+const WRONG_REVIEW_STATE_KEY = "zsb-question-bank-v110:wrong-review-state";
+let wrongReviewSelectedId = "";
+let wrongReviewView = "text";
+let wrongReviewSolutionLevel = "analysis";
+
+function readWrongReviewState() {
+  try {
+    const parsed = JSON.parse(safeGetLocal(WRONG_REVIEW_STATE_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function writeWrongReviewState(value) {
+  safeSetLocal(WRONG_REVIEW_STATE_KEY, JSON.stringify(value || {}));
+}
+
+function wrongReviewWeekRange(now = new Date()) {
+  const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = date.getDay() || 7;
+  const monday = new Date(date);
+  monday.setDate(date.getDate() - day + 1);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const fmt = value => `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+  return { start: fmt(monday), end: fmt(sunday), key: `${fmt(monday)}_${fmt(sunday)}` };
+}
+
+function getWrongReviewSnapshotProgress() {
+  const snapshot = window.WRONG_REVIEW_SNAPSHOT || {};
+  const payload = snapshot.seedPayload;
+  const allowed = new Set(Array.isArray(snapshot.historicalWrongIds) ? snapshot.historicalWrongIds.map(String) : []);
+  const progress = Array.isArray(payload && payload.progress) ? payload.progress : [];
+  return allowed.size ? progress.filter(item => item && allowed.has(String(item.questionId || ""))) : progress;
+}
+
+function mergeMistakeHistory(a, b) {
+  const seen = new Set();
+  return [...(a || []), ...(b || [])].filter(item => {
+    if (!item) return false;
+    const key = `${item.type || ""}|${item.label || ""}|${item.at || ""}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((x, y) => String(x.at || "").localeCompare(String(y.at || "")));
+}
+
+function getWrongReviewProgressMap() {
+  const map = new Map();
+  getWrongReviewSnapshotProgress().forEach(raw => {
+    if (!raw || !raw.questionId || Number(raw.wrong || 0) <= 0) return;
+    map.set(String(raw.questionId), enrichProgress(raw, raw.questionId));
+  });
+  state.progressById.forEach((live, questionId) => {
+    if (!live || Number(live.wrong || 0) <= 0) return;
+    const id = String(questionId);
+    const old = map.get(id);
+    if (!old) {
+      map.set(id, enrichProgress(live, id));
+      return;
+    }
+    map.set(id, enrichProgress({
+      ...old,
+      ...live,
+      attempts: Math.max(Number(old.attempts || 0), Number(live.attempts || 0)),
+      correct: Math.max(Number(old.correct || 0), Number(live.correct || 0)),
+      wrong: Math.max(Number(old.wrong || 0), Number(live.wrong || 0)),
+      mistakeReasonHistory: mergeMistakeHistory(old.mistakeReasonHistory, live.mistakeReasonHistory)
+    }, id));
+  });
+  return map;
+}
+
+function getWrongReviewMistakeDate(questionId, progress) {
+  const history = Array.isArray(progress && progress.mistakeReasonHistory) ? progress.mistakeReasonHistory : [];
+  const historyDates = history.map(item => String(item && item.at || "").slice(0, 10)).filter(Boolean);
+  if (historyDates.length) return historyDates.sort().slice(-1)[0];
+  const snapshotDate = window.WRONG_REVIEW_SNAPSHOT && window.WRONG_REVIEW_SNAPSHOT.wrongDates && window.WRONG_REVIEW_SNAPSHOT.wrongDates[questionId];
+  if (snapshotDate) return String(snapshotDate).slice(0, 10);
+  if (progress && progress.addedToWrongBookAt) return String(progress.addedToWrongBookAt).slice(0, 10);
+  return String(progress && progress.lastAt || "").slice(0, 10);
+}
+
+function normalizeWrongReviewSubject(subject) {
+  const value = String(subject || "");
+  if (value === "高数" || value.includes("数学")) return "高等数学";
+  if (value.includes("计算机")) return "计算机";
+  if (value.includes("英语")) return "英语";
+  return value || "未分类";
+}
+
+function getWrongReviewReason(progress) {
+  const label = String(progress && progress.mistakeReasonLabel || "").trim();
+  if (label) return label;
+  const history = Array.isArray(progress && progress.mistakeReasonHistory) ? progress.mistakeReasonHistory : [];
+  const last = history.length ? history[history.length - 1] : null;
+  return String(last && last.label || "").trim() || "未标注";
+}
+
+function getWrongReviewRecords() {
+  const questions = new Map(state.questions.map(question => [String(question.id), question]));
+  return [...getWrongReviewProgressMap().entries()].map(([id, progress]) => {
+    const question = questions.get(id);
+    if (!question) return null;
+    return {
+      id,
+      question,
+      progress,
+      subject: normalizeWrongReviewSubject(question.subject),
+      wrongDate: getWrongReviewMistakeDate(id, progress),
+      reason: getWrongReviewReason(progress),
+      status: progress.lastResult === "wrong" ? "目前仍错" : "已改对待巩固"
+    };
+  }).filter(Boolean).sort((a, b) => {
+    const dateCompare = String(b.wrongDate || "").localeCompare(String(a.wrongDate || ""));
+    if (dateCompare) return dateCompare;
+    return String(a.id).localeCompare(String(b.id));
+  });
+}
+
+function getWrongReviewStatus(questionId) {
+  const stateMap = readWrongReviewState();
+  const week = wrongReviewWeekRange();
+  const item = stateMap.weeks && stateMap.weeks[week.key] && stateMap.weeks[week.key][questionId];
+  return item && item.status ? item.status : "";
+}
+
+function getWrongReviewNote(questionId) {
+  const stateMap = readWrongReviewState();
+  return String(stateMap.notes && stateMap.notes[questionId] || "");
+}
+
+function setWrongReviewStatus(questionId, status) {
+  const data = readWrongReviewState();
+  const week = wrongReviewWeekRange();
+  data.weeks ||= {};
+  data.weeks[week.key] ||= {};
+  data.weeks[week.key][questionId] = {
+    status,
+    reviewedAt: new Date().toISOString()
+  };
+  writeWrongReviewState(data);
+  renderWrongReview();
+  showToast(`错题复盘：${status}`);
+}
+
+function setWrongReviewNote(questionId, note) {
+  const data = readWrongReviewState();
+  data.notes ||= {};
+  data.notes[questionId] = String(note || "");
+  writeWrongReviewState(data);
+}
+
+function getWrongReviewKnowledge(question) {
+  const bundle = window.WRONG_REVIEW_KNOWLEDGE;
+  const link = bundle && bundle.links && bundle.links[question.id];
+  const manualKey = "zsb-question-bank-v113:wrong-review-knowledge-manual";
+  let manual = {};
+  try { manual = JSON.parse(safeGetLocal(manualKey) || "{}") || {}; } catch (error) {}
+  const selectedIds = Array.isArray(manual[question.id]) && manual[question.id].length
+    ? manual[question.id] : (link && Array.isArray(link.ids) ? link.ids : []);
+  const cards = selectedIds.map(id => bundle && bundle.cards && bundle.cards[id]).filter(Boolean);
+  return cards.length ? {
+    kind: link && link.kind || "对应知识点",
+    confidence: link && link.confidence || "",
+    source: link && link.source || "",
+    cards,
+    allCandidateIds: link && link.ids || selectedIds
+  } : {
+    kind:"暂无法可靠关联",confidence:"题干/知识库缺失",source:"不虚构知识点",cards:[],allCandidateIds:[]
+  };
+}
+
+function getWrongReviewSelectedOptionText(question, progress) {
+  const selected = String(progress && progress.lastSelectedOption || "").trim().toUpperCase();
+  if (!selected) return "";
+  const options = Array.isArray(question.options) ? question.options : [];
+  for (let i = 0; i < options.length; i += 1) {
+    const text = String(options[i] || "");
+    const match = text.match(/^\s*([A-D])[\.、\s]/i);
+    const letter = match ? match[1].toUpperCase() : String.fromCharCode(65 + i);
+    if (letter === selected) return text;
+  }
+  return selected;
+}
+
+function renderWrongReviewDiagnosis(record) {
+  const { question, progress, reason } = record;
+  const selected = getWrongReviewSelectedOptionText(question, progress);
+  const history = Array.isArray(progress.mistakeReasonHistory) ? progress.mistakeReasonHistory : [];
+  const rows = [];
+  if (progress.lastResult === "wrong") {
+    rows.push(selected
+      ? `最近一次错误作答：${selected}`
+      : "最近一次结果仍然是错误；当前存档没有保留可显示的错误作答文本。");
+  } else {
+    rows.push(`这题历史上错过 ${Number(progress.wrong || 0)} 次，后来已经做对；仍保留用于周日防遗忘复盘。`);
+  }
+  if (reason === "未标注") {
+    rows.push("具体错因当时没有标注，所以这里不替你猜。周日重做后再判断是不会、粗心、公式忘了还是概念混淆。");
+  } else {
+    rows.push(`存档错因：${reason}。`);
+  }
+  if (history.length) {
+    rows.push(`错因历史：${history.map(item => `${String(item.at || "").slice(0,10)} ${item.label || item.type || ""}`).join("；")}`);
+  }
+  if (Number(progress.wrong || 0) >= 2) rows.push(`重复错误：累计错 ${progress.wrong} 次，建议列为本周重点题。`);
+  return `<section class="wrong-review-diagnosis">
+    <div class="wrong-review-section-title"><strong>我错在哪里</strong><span>${escapeHtml(reason)}</span></div>
+    <ul>${rows.map(item => `<li>${renderRichText(item)}</li>`).join("")}</ul>
+  </section>`;
+}
+
+function renderWrongReviewKnowledge(record) {
+  const knowledge = getWrongReviewKnowledge(record.question);
+  if (!knowledge.cards.length) {
+    return `<section class="knowledge-link-panel wrong-review-knowledge wrong-review-knowledge-missing">
+      <div class="knowledge-link-head"><div><small>对应知识点</small><h3>暂无法可靠关联</h3></div></div>
+      <div class="knowledge-body" style="display:block;border-top:0;padding-top:0"><p>当前题干或知识库资料不足，所以没有硬配错误知识点。</p></div>
+    </section>`;
+  }
+  const bundle = window.WRONG_REVIEW_KNOWLEDGE;
+  const candidateOptions = (knowledge.allCandidateIds || []).map(id => {
+    const card = bundle && bundle.cards && bundle.cards[id];
+    return card ? `<option value="${escapeHtml(id)}">${escapeHtml(card.title || id)}</option>` : "";
+  }).join("");
+  return `<section class="knowledge-link-panel wrong-review-knowledge">
+    <div class="knowledge-link-head">
+      <div>
+        <small>错题 ↔ 知识点链接 · ${escapeHtml(knowledge.kind)}${knowledge.confidence ? ` · ${escapeHtml(knowledge.confidence)}` : ""}</small>
+        <h3>${knowledge.cards.map(card => escapeHtml(card.title || "对应知识点")).join(" + ")}</h3>
+        ${knowledge.source ? `<p class="source-line">${escapeHtml(knowledge.source)}</p>` : ""}
+      </div>
+      <span class="wrong-review-linked-chip">已链接</span>
+    </div>
+    <div class="knowledge-body wrong-review-knowledge-body" style="display:block">
+      ${knowledge.cards.map(card => `<article class="wrong-review-knowledge-card" data-wr-kid="${escapeHtml(card.id || "")}">
+        <div class="wrong-review-knowledge-card-head">
+          <div><p class="eyebrow">${escapeHtml(card.category || "知识点")}</p><h4>${escapeHtml(card.title || "对应知识点")}</h4></div>
+          <button type="button" class="secondary-button small-button" data-wr-k-open="${escapeHtml(card.id || "")}">查看完整知识点</button>
+        </div>
+        ${card.oneLine ? `<p class="wrong-review-one-line">${renderRichText(card.oneLine)}</p>` : ""}
+        ${Array.isArray(card.mustPatterns) && card.mustPatterns.length ? `<h5>必须记住</h5><ul>${card.mustPatterns.slice(0,6).map(item => `<li>${renderRichText(item)}</li>`).join("")}</ul>` : ""}
+        ${Array.isArray(card.examRefine) && card.examRefine.length ? `<h5>考试提炼</h5><ul>${card.examRefine.slice(0,5).map(item => `<li>${renderRichText(item)}</li>`).join("")}</ul>` : ""}
+        ${card.sourceQuestionId ? `<p class="source-line">补充知识点来源题：${escapeHtml(card.sourceQuestionId)}</p>` : ""}
+      </article>`).join("")}
+    </div>
+    ${candidateOptions ? `<details class="wrong-review-knowledge-adjust"><summary>链接不对？查看候选知识点</summary>
+      <label class="field"><span>候选</span><select data-wr-knowledge-select>${candidateOptions}</select></label>
+      <button type="button" class="secondary-button" data-wr-knowledge-confirm>确认链接到这个知识点</button>
+    </details>` : ""}
+  </section>`;
+}
+
+function getFilteredWrongReviewRecords() {
+  const week = wrongReviewWeekRange();
+  const scope = els.wrongReviewScope ? els.wrongReviewScope.value : "week";
+  const subject = els.wrongReviewSubject ? els.wrongReviewSubject.value : "all";
+  const reason = els.wrongReviewReason ? els.wrongReviewReason.value : "all";
+  const query = String(els.wrongReviewSearch && els.wrongReviewSearch.value || "").trim().toLowerCase();
+
+  return getWrongReviewRecords().filter(record => {
+    const inWeek = record.wrongDate >= week.start && record.wrongDate <= week.end;
+    if (scope === "week" && !inWeek) return false;
+    if (scope === "still" && record.status !== "目前仍错") return false;
+    if (scope === "fixed" && record.status !== "已改对待巩固") return false;
+    if (scope === "unreviewed" && (!inWeek || getWrongReviewStatus(record.id))) return false;
+    if (subject !== "all" && record.subject !== subject) return false;
+    if (reason !== "all" && record.reason !== reason) return false;
+    if (query) {
+      const knowledge = getWrongReviewKnowledge(record.question);
+      const text = [
+        record.id, record.question.stem, record.question.textStem, record.question.chapter, record.question.type,
+        ...(record.question.tags || []),
+        ...knowledge.cards.map(card => `${card.title || ""} ${card.oneLine || ""}`)
+      ].join(" ").toLowerCase();
+      if (!text.includes(query)) return false;
+    }
+    return true;
+  });
+}
+
+function renderWrongReviewList(records) {
+  if (!els.wrongReviewList) return;
+  if (!records.length) {
+    els.wrongReviewList.innerHTML = `<div class="hidden-solution">当前筛选没有错题</div>`;
+    return;
+  }
+  els.wrongReviewList.innerHTML = records.map(record => {
+    const progress = record.progress;
+    const review = getWrongReviewStatus(record.id);
+    const active = record.id === wrongReviewSelectedId;
+    return `<button type="button" class="question-row wrong-review-row${active ? " active" : ""}" data-wr-id="${escapeHtml(record.id)}">
+      <div class="meta-line">
+        <span class="badge">${escapeHtml(record.subject)}</span>
+        <span>${escapeHtml(record.question.chapter || "")}</span>
+        <span>${escapeHtml(record.reason)}</span>
+        <span>${escapeHtml(record.wrongDate || "日期未知")}</span>
+      </div>
+      <h3><span class="sequence-chip">${escapeHtml(getQuestionSequenceLabel(record.question))}</span>${renderRichText(record.question.titleLabel || record.question.stem)}</h3>
+      <div class="tag-line">
+        <span class="badge ${record.status === "目前仍错" ? "wrong" : "correct"}">${escapeHtml(record.status)}</span>
+        <span>累计错 ${Number(progress.wrong || 0)} 次</span>
+        ${review ? `<span class="badge review">本周：${escapeHtml(review)}</span>` : ""}
+      </div>
+    </button>`;
+  }).join("");
+}
+
+function renderWrongReviewBody(question, progress) {
+  const oldView = state.questionView;
+  state.questionView = wrongReviewView;
+  let html = "";
+  try {
+    html = renderQuestionBody(question, progress);
+  } finally {
+    state.questionView = oldView;
+  }
+  return html;
+}
+
+function renderWrongReviewDetail(record) {
+  if (!els.wrongReviewDetail) return;
+  if (!record) {
+    els.wrongReviewDetail.innerHTML = `<div class="empty-detail"><p class="eyebrow">Review</p><h2>选择一道错题开始复盘</h2><p>题目、公式、答案解析全部沿用原题库。</p></div>`;
+    return;
+  }
+  const { question, progress } = record;
+  const review = getWrongReviewStatus(record.id);
+  const solutionProgress = { ...progress, solutionVisible: true, solutionLevel: wrongReviewSolutionLevel };
+  els.wrongReviewDetail.innerHTML = `
+    <article class="question-detail wrong-review-question-detail" data-wr-detail-id="${escapeHtml(record.id)}">
+      <header class="detail-header">
+        <p class="eyebrow">错题复盘 · ${escapeHtml(question.source || "")} · ${escapeHtml(record.subject)} · ${escapeHtml(question.chapter || "")}</p>
+        <h2>${escapeHtml(getQuestionSequenceLabel(question))}</h2>
+        <div class="meta-line">
+          <span class="badge ${record.status === "目前仍错" ? "wrong" : "correct"}">${escapeHtml(record.status)}</span>
+          <span>错题日期 ${escapeHtml(record.wrongDate || "未知")}</span>
+          <span>已做 ${Number(progress.attempts || 0)} 次</span>
+          <span>对 ${Number(progress.correct || 0)} 次</span>
+          <span>错 ${Number(progress.wrong || 0)} 次</span>
+          <span>错因：${escapeHtml(record.reason)}</span>
+        </div>
+      </header>
+
+      <section class="stem-box text-view-active">
+        <div class="stem-box-heading">
+          <strong>原题</strong>
+          <div class="question-view-switch" role="group" aria-label="错题显示方式">
+            <button type="button" class="view-switch-button ${wrongReviewView === "image" ? "" : "active"}" data-wr-view="text">纯文字公式</button>
+            <button type="button" class="view-switch-button ${wrongReviewView === "image" ? "active" : ""}" data-wr-view="image">原题图文</button>
+          </div>
+        </div>
+        ${renderWrongReviewBody(question, progress)}
+      </section>
+
+      ${renderWrongReviewDiagnosis(record)}
+      ${renderSolution(question, solutionProgress)}
+      ${renderWrongReviewKnowledge(record)}
+
+      <section class="wrong-review-sunday-card">
+        <div class="wrong-review-section-title"><strong>本周日复盘</strong><span>${review ? escapeHtml(review) : "未复盘"}</span></div>
+        <div class="detail-actions wrong-review-actions">
+          <button type="button" class="secondary-button ${review === "已复盘" ? "active" : ""}" data-wr-review="已复盘">已复盘</button>
+          <button type="button" class="secondary-button ${review === "仍不会" ? "active" : ""}" data-wr-review="仍不会">仍不会</button>
+          <button type="button" class="primary-button ${review === "已掌握" ? "active" : ""}" data-wr-review="已掌握">已掌握</button>
+          <button type="button" class="secondary-button" data-wr-open-original="${escapeHtml(record.id)}">打开原题重新做</button>
+        </div>
+        <label class="wrong-review-note-label">
+          <span>复盘笔记：以后看到什么条件，就应该想到什么？</span>
+          <textarea id="wrongReviewNoteInput" placeholder="例如：看到“相切” → 函数值相等 + 导数相等。">${escapeHtml(getWrongReviewNote(record.id))}</textarea>
+        </label>
+      </section>
+    </article>`;
+}
+
+function openWrongReviewKnowledgeCard(cardId) {
+  const bundle = window.WRONG_REVIEW_KNOWLEDGE;
+  const card = bundle && bundle.cards && bundle.cards[cardId];
+  if (!card) return;
+  let modal = document.querySelector("#wrongReviewKnowledgeModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "wrongReviewKnowledgeModal";
+    modal.className = "quick-browse-modal wrong-review-knowledge-modal";
+    modal.innerHTML = `<div class="quick-browse-backdrop" data-wrk-close></div><section class="quick-browse-sheet wrong-review-knowledge-sheet" role="dialog" aria-modal="true"><header class="quick-browse-head"><div><p class="eyebrow">Knowledge Point</p><h2 data-wrk-title>对应知识点</h2></div><button class="small-button" data-wrk-close type="button">×</button></header><div class="wrong-review-knowledge-modal-body" data-wrk-body></div></section>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", event => {
+      const node = event.target instanceof Element ? event.target : null;
+      if (node && node.closest("[data-wrk-close]")) {
+        modal.hidden = true;
+        document.body.classList.remove("modal-open");
+      }
+    });
+  }
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+  const title = modal.querySelector("[data-wrk-title]");
+  const body = modal.querySelector("[data-wrk-body]");
+  if (title) title.textContent = card.title || "对应知识点";
+  if (body) body.innerHTML = `
+    <p class="meta-line">${escapeHtml(card.subject || "")} · ${escapeHtml(card.chapter || "")} · ${escapeHtml(card.category || "")}</p>
+    ${card.oneLine ? `<section class="knowledge-card-modal-block"><h3>一句话核心</h3><p>${renderRichText(card.oneLine)}</p></section>` : ""}
+    ${Array.isArray(card.mustPatterns) && card.mustPatterns.length ? `<section class="knowledge-card-modal-block"><h3>必须记住</h3><ul>${card.mustPatterns.map(item => `<li>${renderRichText(item)}</li>`).join("")}</ul></section>` : ""}
+    ${Array.isArray(card.examRefine) && card.examRefine.length ? `<section class="knowledge-card-modal-block"><h3>考试提炼</h3><ul>${card.examRefine.map(item => `<li>${renderRichText(item)}</li>`).join("")}</ul></section>` : ""}
+    ${Array.isArray(card.basicExplain) && card.basicExplain.length ? `<section class="knowledge-card-modal-block"><h3>理解</h3><ul>${card.basicExplain.map(item => `<li>${renderRichText(item)}</li>`).join("")}</ul></section>` : ""}
+    <p class="source-line">知识点 ID：${escapeHtml(card.id || "")}</p>`;
+}
+function setWrongReviewManualKnowledge(questionId, knowledgeId) {
+  const key = "zsb-question-bank-v113:wrong-review-knowledge-manual";
+  let map = {};
+  try { map = JSON.parse(safeGetLocal(key) || "{}") || {}; } catch (error) {}
+  map[questionId] = [knowledgeId];
+  safeSetLocal(key, JSON.stringify(map));
+  renderWrongReview();
+  showToast("已更新错题 ↔ 知识点链接");
+}
+
+function renderWrongReviewSummary(records) {
+  if (!els.wrongReviewSummary) return;
+  const all = getWrongReviewRecords();
+  const week = wrongReviewWeekRange();
+  const weekRecords = all.filter(item => item.wrongDate >= week.start && item.wrongDate <= week.end);
+  const reviewed = weekRecords.filter(item => Boolean(getWrongReviewStatus(item.id))).length;
+  const still = all.filter(item => item.status === "目前仍错").length;
+  const fixed = all.length - still;
+  const percent = weekRecords.length ? Math.round(reviewed / weekRecords.length * 100) : 0;
+  els.wrongReviewSummary.innerHTML = `
+    <div><small>历史曾错</small><strong>${all.length}</strong></div>
+    <div><small>目前仍错</small><strong>${still}</strong></div>
+    <div><small>已改对待巩固</small><strong>${fixed}</strong></div>
+    <div><small>本周错题</small><strong>${weekRecords.length}</strong></div>
+    <div><small>本周已复盘</small><strong>${reviewed}/${weekRecords.length}</strong></div>
+    <div class="wrong-review-progress-cell"><small>${week.start} ～ ${week.end}</small><span class="wrong-review-progress"><i style="width:${percent}%"></i></span><b>${percent}%</b></div>`;
+  if (els.wrongReviewMeta) {
+    els.wrongReviewMeta.textContent = `每一道错题直接调用原题库的题目、选项、答案、官方解析与数学公式渲染。当前筛选 ${records.length} 题。`;
+  }
+}
+
+function renderWrongReview() {
+  if (!els.wrongReviewModal || els.wrongReviewModal.hidden) return;
+  const records = getFilteredWrongReviewRecords();
+  if (!wrongReviewSelectedId || !records.some(item => item.id === wrongReviewSelectedId)) {
+    wrongReviewSelectedId = records[0] ? records[0].id : "";
+  }
+  const selected = records.find(item => item.id === wrongReviewSelectedId) || null;
+  renderWrongReviewSummary(records);
+  renderWrongReviewList(records);
+  renderWrongReviewDetail(selected);
+  if (els.wrongReviewListCount) els.wrongReviewListCount.textContent = `${records.length} 题`;
+  if (els.wrongReviewListTitle) {
+    const scopeLabels = { week:"本周错题", all:"全部历史错题", still:"目前仍错", fixed:"已改对待巩固", unreviewed:"本周未复盘" };
+    els.wrongReviewListTitle.textContent = scopeLabels[els.wrongReviewScope && els.wrongReviewScope.value || "week"] || "错题";
+  }
+  document.querySelectorAll("[data-wr-view]").forEach(button => {
+    button.classList.toggle("active", button.dataset.wrView === wrongReviewView);
+  });
+}
+
+function openWrongReview() {
+  if (!els.wrongReviewModal) return;
+  els.wrongReviewModal.hidden = false;
+  document.body.classList.add("modal-open");
+  if (els.wrongReviewScope) els.wrongReviewScope.value = "week";
+  wrongReviewSolutionLevel = "analysis";
+  renderWrongReview();
+}
+
+function closeWrongReview() {
+  if (!els.wrongReviewModal) return;
+  els.wrongReviewModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+function bindWrongReviewEvents() {
+  if (!els.wrongReviewModal || els.wrongReviewModal.dataset.bound === "1") return;
+  els.wrongReviewModal.dataset.bound = "1";
+  if (els.wrongReviewButton) els.wrongReviewButton.addEventListener("click", openWrongReview);
+  if (els.wrongReviewCloseButton) els.wrongReviewCloseButton.addEventListener("click", closeWrongReview);
+  els.wrongReviewModal.querySelectorAll("[data-wrong-review-close]").forEach(node => node.addEventListener("click", closeWrongReview));
+  [els.wrongReviewScope, els.wrongReviewSubject, els.wrongReviewReason].filter(Boolean).forEach(node => node.addEventListener("change", renderWrongReview));
+  if (els.wrongReviewSearch) els.wrongReviewSearch.addEventListener("input", debounce(renderWrongReview));
+
+  els.wrongReviewModal.addEventListener("click", event => {
+    const node = event.target instanceof Element ? event.target : null;
+    if (!node) return;
+    const row = node.closest("[data-wr-id]");
+    if (row) {
+      wrongReviewSelectedId = row.dataset.wrId || "";
+      renderWrongReview();
+      return;
+    }
+    const view = node.closest("[data-wr-view]");
+    if (view) {
+      wrongReviewView = view.dataset.wrView === "image" ? "image" : "text";
+      renderWrongReview();
+      return;
+    }
+    const level = node.closest("[data-solution-level]");
+    if (level && els.wrongReviewDetail && els.wrongReviewDetail.contains(level)) {
+      wrongReviewSolutionLevel = level.dataset.solutionLevel === "answer" ? "answer" : "analysis";
+      renderWrongReview();
+      return;
+    }
+    const knowledgeOpen = node.closest("[data-wr-k-open]");
+    if (knowledgeOpen) {
+      openWrongReviewKnowledgeCard(knowledgeOpen.dataset.wrKOpen || "");
+      return;
+    }
+    const knowledgeConfirm = node.closest("[data-wr-knowledge-confirm]");
+    if (knowledgeConfirm && wrongReviewSelectedId) {
+      const select = els.wrongReviewDetail && els.wrongReviewDetail.querySelector("[data-wr-knowledge-select]");
+      if (select && select.value) setWrongReviewManualKnowledge(wrongReviewSelectedId, select.value);
+      return;
+    }
+    const review = node.closest("[data-wr-review]");
+    if (review && wrongReviewSelectedId) {
+      setWrongReviewStatus(wrongReviewSelectedId, review.dataset.wrReview || "已复盘");
+      return;
+    }
+    const openOriginal = node.closest("[data-wr-open-original]");
+    if (openOriginal) {
+      const id = openOriginal.dataset.wrOpenOriginal || "";
+      closeWrongReview();
+      if (id) {
+        state.selectedId = id;
+        state.mobileTab = "quiz";
+        safeSetLocal(MOBILE_TAB_KEY, "quiz");
+        render();
+        scrollDetailPanelIntoView();
+      }
+    }
+  });
+
+  els.wrongReviewModal.addEventListener("input", event => {
+    const node = event.target;
+    if (node && node.id === "wrongReviewNoteInput" && wrongReviewSelectedId) {
+      setWrongReviewNote(wrongReviewSelectedId, node.value);
+    }
+  });
+}
+
+async function seedUploadedBackupIfEmpty() {
+  const snapshot = window.WRONG_REVIEW_SNAPSHOT;
+  if (!snapshot || !snapshot.seedPayload || state.progressById.size) return 0;
+  try {
+    const restored = await importLocalBackupPayload(snapshot.seedPayload);
+    showToast(`已自动恢复本次上传存档：${restored} 道题有做题记录`);
+    return restored;
+  } catch (error) {
+    console.warn("v110 auto-seed backup skipped", error);
+    return 0;
+  }
 }
 
 function openWrongPlanner() {
@@ -4629,8 +5573,74 @@ function bindEvents() {
   if (els.wrongPlannerButton) {
     els.wrongPlannerButton.addEventListener("click", openWrongPlanner);
   }
+  bindWrongReviewEvents();
   if (els.completeSetsButton) els.completeSetsButton.addEventListener("click", openCompleteSets);
   if (els.mobileCompleteSetsButton) els.mobileCompleteSetsButton.addEventListener("click", openCompleteSets);
+  if (els.cet4SetsButton) els.cet4SetsButton.addEventListener("click", openCet4Sets);
+  if (els.mobileCet4SetsButton) els.mobileCet4SetsButton.addEventListener("click", openCet4Sets);
+
+  // v107: complete-set modal uses one document-level capture handler.
+  // This is deliberately outside the rebuilt card container, so re-rendering cards
+  // cannot invalidate the action handler. It also covers source/assignment/subject tabs.
+  if (!document.documentElement.dataset.v107CompleteActions) {
+    document.documentElement.dataset.v107CompleteActions = "1";
+    document.addEventListener("click", (event) => {
+      if (!els.completeSetsModal || els.completeSetsModal.hidden) return;
+      const node = event.target instanceof Element ? event.target : null;
+      if (!node) return;
+      const target = node.closest("#completeSetsCloseButton,[data-complete-source],[data-complete-assignment],[data-complete-subject],[data-open-complete-set],[data-open-complete-text],[data-open-complete-set-wrong]");
+      if (!target || !els.completeSetsModal.contains(target) || target.disabled) return;
+
+      const handled = () => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      if (target.id === "completeSetsCloseButton") {
+        handled();
+        closeCompleteSets();
+        return;
+      }
+      if (target.hasAttribute("data-complete-source")) {
+        handled();
+        state.completeSetSource = target.dataset.completeSource || "";
+        state.completeSetAssignment = "";
+        state.completeSetSubject = "";
+        if (els.completeSetsSearchInput) els.completeSetsSearchInput.value = "";
+        renderCompleteSetsContent();
+        return;
+      }
+      if (target.hasAttribute("data-complete-assignment")) {
+        handled();
+        state.completeSetAssignment = target.dataset.completeAssignment || "";
+        state.completeSetSubject = "";
+        if (els.completeSetsSearchInput) els.completeSetsSearchInput.value = "";
+        renderCompleteSetsContent();
+        return;
+      }
+      if (target.hasAttribute("data-complete-subject")) {
+        handled();
+        state.completeSetSubject = target.dataset.completeSubject || "";
+        renderCompleteSetsContent();
+        return;
+      }
+      if (target.hasAttribute("data-open-complete-text")) {
+        handled();
+        openCompleteTextReader(target.dataset.openCompleteText || "");
+        return;
+      }
+      if (target.hasAttribute("data-open-complete-set-wrong")) {
+        handled();
+        activateCompleteSet(target.dataset.openCompleteSetWrong || "", true);
+        return;
+      }
+      if (target.hasAttribute("data-open-complete-set")) {
+        handled();
+        activateCompleteSet(target.dataset.openCompleteSet || "", false);
+      }
+    }, true);
+  }
+
   if (els.completeSetsCloseButton) els.completeSetsCloseButton.addEventListener("click", closeCompleteSets);
   if (els.completeSetsSearchInput) els.completeSetsSearchInput.addEventListener("input", debounce(renderCompleteSetsContent));
   if (els.completeSetsModal) els.completeSetsModal.querySelectorAll("[data-complete-close]").forEach((item) => item.addEventListener("click", closeCompleteSets));
@@ -4666,7 +5676,7 @@ function bindEvents() {
   if (els.studyModeButton) {
     els.studyModeButton.addEventListener("click", () => {
       state.studyMode = !state.studyMode;
-      localStorage.setItem(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
+      safeSetLocal(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
       queueCloudSync();
       render();
     });
@@ -4714,7 +5724,7 @@ function bindEvents() {
   if (els.mobileMeStudyModeButton) {
     els.mobileMeStudyModeButton.addEventListener("click", () => {
       state.studyMode = !state.studyMode;
-      localStorage.setItem(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
+      safeSetLocal(STUDY_MODE_KEY, state.studyMode ? "single" : "list");
       queueCloudSync();
       render();
     });
@@ -4733,6 +5743,23 @@ function bindEvents() {
   }
   if (els.mobileWrongPlannerButton) {
     els.mobileWrongPlannerButton.addEventListener("click", openWrongPlanner);
+  }
+
+  // v109: keep stable answer-choice event delegation on the persistent detail panel.
+  if (els.detailPanel && !els.detailPanel.dataset.v109OptionDelegate) {
+    els.detailPanel.dataset.v109OptionDelegate = "1";
+    els.detailPanel.addEventListener("click", (event) => {
+      const node = event.target instanceof Element ? event.target : null;
+      const option = node ? node.closest("[data-option-choice]") : null;
+      if (!option || !els.detailPanel.contains(option) || option.disabled) return;
+      const detail = option.closest("[data-question-id]");
+      const questionId = String(detail && detail.dataset.questionId || state.selectedId || "");
+      const letter = String(option.dataset.optionChoice || "");
+      if (!questionId || !letter) return;
+      event.preventDefault();
+      event.stopPropagation();
+      handleOptionChoice(questionId, letter);
+    });
   }
   els.prevPageButton.addEventListener("click", () => {
     state.page -= 1;
@@ -4785,6 +5812,7 @@ async function init() {
   bindEvents();
   state.db = await openDatabase();
   await loadState();
+  await seedUploadedBackupIfEmpty();
   repairWrongBookOptionsFromProgress();
   if (new URLSearchParams(window.location.search).has("view")) {
     await loadCloudState({ silent: true });

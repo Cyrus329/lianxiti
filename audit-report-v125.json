@@ -1,0 +1,27 @@
+{
+  "version": "v125-qfw-computer-os-layout-category-fix",
+  "baseline": "v124-qfw-computer-os-full-import",
+  "totalQuestions": 3159,
+  "completeSets": 62,
+  "qfwComputerChapter4": {
+    "setId": "qfw-v124-computer-os-ch4-full",
+    "questions": 127,
+    "assignmentGroup": "额外题库",
+    "catalogOrder": 94,
+    "textFirstQuestionCards": 127,
+    "textStemComplete": 127,
+    "answerComplete": 127,
+    "missingAssets": 0
+  },
+  "blueForestComputerChapter2": {
+    "setId": "bf-v123-computer-operating-system",
+    "questions": 76,
+    "textFirstQuestionCards": 76,
+    "choiceQuestionsWithCompleteOptions": "39/39",
+    "question8OptionsRestored": true
+  },
+  "duplicateQuestionIds": 0,
+  "scriptReferenceMissing": 0,
+  "javascriptSyntaxErrors": 0,
+  "entriesSynchronized": true
+}
