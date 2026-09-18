@@ -1,0 +1,7 @@
+/* Keep the existing question-group layout; render precise offline formulas. */
+.pure-text-stem math,.paper-stem math,.solution-box math,.analysis-box math {font-family: "Cambria Math", "STIX Two Math", math; font-size:1.12em; max-width:100%;}
+.pure-text-stem,.paper-stem,.solution-box,.analysis-box {overflow-wrap:anywhere;}
+.pure-text-stem math,.paper-stem math {display:inline-block;overflow-x:auto;vertical-align:middle;padding:.45em .15em;}
+.integral-review-note {padding:14px 18px;border:1px solid #e3bc79;border-radius:10px;background:#fff8e9;color:#71501a;line-height:1.7;}
+.practice-section-heading{margin:18px 0 10px;padding:13px 16px;border:1px solid #cfe0ec;border-radius:14px;background:linear-gradient(110deg,#f2f8ff,#f8fffc);display:flex;align-items:center;gap:10px;flex-wrap:wrap}.practice-section-heading span{font-size:.78rem;color:#6e8b9d}.practice-section-heading strong{font-size:1.05rem;color:#174d68}.practice-section-heading em{width:100%;font-style:normal;font-size:.8rem;color:#728897}.paper-section>h3{position:sticky;top:0;z-index:3;margin:0 0 14px;padding:14px 18px;border-radius:14px;background:rgba(235,247,253,.96);color:#154f6b;box-shadow:0 4px 14px rgba(33,88,112,.08)}
+@media(max-width:700px){.pure-text-stem math,.paper-stem math {font-size:1em;}}

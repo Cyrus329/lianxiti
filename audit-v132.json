@@ -1,0 +1,18 @@
+{
+  "baselineQuestions": 3335,
+  "totalQuestions": 3468,
+  "addedQuestions": 133,
+  "totalSets": 66,
+  "qfwChoice": 92,
+  "qfwTable": 1,
+  "bfChoice": 30,
+  "bfTranslationWriting": 10,
+  "oldQuestionsUnchanged": 3335,
+  "oldSetsUnchanged": 64,
+  "selectableCardsTested": 122,
+  "cardModesTested": 2,
+  "progressRecoveryTests": "passed: missing-only, exact IDs, no overwrite, no duplicate accumulation, wrong schema, invalid counts, unknown IDs, empty records, no store clear",
+  "jsSyntaxFiles": 59,
+  "browserVisualQA": "not available in this runtime",
+  "realVerbHistoryRecovered": 0
+}

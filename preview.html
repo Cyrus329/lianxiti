@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#147a7e">
-  <title>专升本题库训练中心｜v124 全方位计算机操作系统导入版</title>
+  <title>专升本题库训练中心｜v136 全方位英语非谓语逐题导入</title>
   <link rel="manifest" href="manifest.webmanifest?v=20260818-v97">
   <link rel="stylesheet" href="styles.css?v=20260826-v115">
   <link rel="stylesheet" href="math-prerender.css?v=20260815-v90">
+  <link rel="stylesheet" href="integral-repair-v129.css">
 </head>
 <body>
   <div class="app-shell">
@@ -47,7 +48,7 @@
         <button class="icon-button secondary" id="textModeButton" type="button" title="切换图文版和纯文字版" aria-label="纯文字版">
           <span aria-hidden="true">文</span><span>纯文字版</span>
         </button>
-        <button class="icon-button secondary" id="autoHideMasteredButton" type="button" title="任意题做对1次后自动完成，不再出现在刷题和复习中" aria-label="做对一次即完成">
+        <button class="icon-button secondary" id="autoHideMasteredButton" type="button" title="普通刷题可隐藏做对过的题；完整题组始终保留" aria-label="普通刷题隐藏已做对题">
           <span aria-hidden="true">✓</span><span>做对一次隐藏</span>
         </button>
         <button class="icon-button secondary" id="timerButton" type="button" title="倒计时刷题" aria-label="倒计时刷题">
@@ -55,6 +56,9 @@
         </button>
         <button class="icon-button secondary reset-all-choice-trigger" id="resetAllChoicesButton" type="button" title="一键清除全部题目的已选标识，保留统计和错题本" aria-label="重置全部选项">
           <span aria-hidden="true">↺</span><span>重置作答</span>
+        </button>
+        <button class="icon-button secondary" id="verbHistoryRecoveryButton" type="button" title="从旧备份补回缺失的动词记录，不覆盖当前进度">
+          <span aria-hidden="true">↶</span><span>补回动词记录</span>
         </button>
         <button class="icon-button secondary" id="importBackupButton" type="button" title="导入以前导出的本地备份，恢复做题记录" aria-label="导入备份">
           <span aria-hidden="true">⬆</span><span>导入备份</span>
@@ -163,7 +167,7 @@
 
     <section class="complete-set-active-bar" id="completeSetActiveBar" hidden>
       <div><span>完整题组模式</span><strong id="completeSetActiveTitle"></strong><em id="completeSetActiveMeta"></em></div>
-      <div class="complete-set-active-actions"><button class="secondary-button" id="completeSetQuickButton" type="button">题目目录</button><button class="small-button" id="completeSetExitButton" type="button">退出整套</button></div>
+      <div class="complete-set-active-actions"><button class="secondary-button" id="completeSetShowAllButton" type="button">显示本套全部题</button><button class="secondary-button" id="completeSetQuickButton" type="button">题目目录</button><button class="small-button" id="completeSetExitButton" type="button">退出整套</button></div>
     </section>
 
     <section class="stats-grid" aria-label="统计">
@@ -402,6 +406,7 @@
   </div>
 
   <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
+  <input id="verbHistoryFileInput" type="file" accept=".json,application/json" hidden>
 
   <script src="asset-pack-index.js?v=20260821-v105"></script>
   <script src="core.js?v=20260815-v90"></script>
@@ -448,7 +453,20 @@
   <script src="computer-os-import-v123.js?v=20260901-v123"></script>
   <script src="qfw-computer-os-import-v124.js?v=20260905-v124"></script>
   <script src="qfw-computer-os-fix-v125.js?v=20260905-v125"></script>
-  <script src="app.js?v=20260905-v125"></script>
+  <script src="math-indefinite-import-v126.js?v=20260908-v126"></script>
+  <script src="math-indefinite-complete-v127.js?v=20260908-v127"></script>
+  <script src="bf-repair-data-v129.js"></script>
+  <script src="integral-repair-v129.js"></script>
+  <script src="integral-math-v129.js"></script>
+  <script src="english-tense-voice-v132.js?v=20260911-v132"></script>
+  <script src="computer-office-import-v133.js?v=20260912-v133"></script>
+  <script src="computer-qfw-pdf-import-v134.js?v=20260913-v134"></script>
+  <script src="computer-blueforest-ppt-import-v135.js?v=20260914-v135"></script>
+  <script src="english-nonfinite-v136.js?v=20260917-v137"></script>
+  <script src="verb-history-recovery-v132.js?v=20260911-v132"></script>
+  <script src="math-v137.js"></script>
+  <script src="four-sets-v137.js"></script>
+  <script src="app.js?v=20260917-v137"></script>
   <script src="knowledge-link-data.js?v=20260815-v90"></script>
   <script src="knowledge-links.js?v=20260815-v90"></script>
   <script src="core-batch2.js?v=20260815-v90"></script>

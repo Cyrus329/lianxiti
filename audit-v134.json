@@ -1,0 +1,12 @@
+{
+  "version": "v134",
+  "added": 101,
+  "set": "qfw-v134-computer-word-ch10",
+  "source": "全方位",
+  "chapter": "第10章 字处理软件",
+  "oneCardPerQuestion": true,
+  "textAndAnswerOneToOne": true,
+  "types": {"选择题": 68, "填空题": 11, "判断题": 15, "综合应用题": 7},
+  "sourcePages": 23,
+  "answerSource": "用户上传题目与答案同页 PDF"
+}

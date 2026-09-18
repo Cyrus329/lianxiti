@@ -1,0 +1,31 @@
+{
+  "version": 133,
+  "baseline": 132,
+  "totalQuestions": 3582,
+  "added": 114,
+  "totalSets": 68,
+  "qfw": {
+    "choice": 41,
+    "judgment": 9,
+    "fill": 13,
+    "application": 1,
+    "total": 64
+  },
+  "blueForest": {
+    "choice": 25,
+    "judgment": 7,
+    "fill": 18,
+    "total": 50
+  },
+  "allCardsTextAndAnswer": true,
+  "originalOrderPreserved": true,
+  "questionSideAnswerPages": 0,
+  "sourceChapterPreserved": true,
+  "syntaxFiles": 60,
+  "renderFunctionModes": [
+    "text",
+    "image"
+  ],
+  "browserVisualQA": "not run; browser unavailable",
+  "notes": "Source answers preserved; no official per-question explanations supplied."
+}

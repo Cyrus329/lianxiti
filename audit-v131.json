@@ -1,0 +1,460 @@
+{
+  "questionCards": 3335,
+  "sets": [
+    {
+      "id": "bf-math-function-ch1-sec1-complete-20260726",
+      "title": "第一章第一节 函数课后练习（完整6页）",
+      "registered": 64,
+      "beforeVisible": 64,
+      "afterVisible": 64
+    },
+    {
+      "id": "bf-homework-20260728-comp-complete",
+      "title": "第一章 计算机基础知识同步练习（完整11页）",
+      "registered": 147,
+      "beforeVisible": 147,
+      "afterVisible": 147
+    },
+    {
+      "id": "bf-homework-20260728-binary-427-complete",
+      "title": "4.27课后作业｜进制的基础概念+算术逻辑运算（完整5页）",
+      "registered": 18,
+      "beforeVisible": 18,
+      "afterVisible": 18
+    },
+    {
+      "id": "bf-homework-20260729-convert-storage-58-complete",
+      "title": "5.8课后作业｜进制转换+信息存储单位（完整5页）",
+      "registered": 28,
+      "beforeVisible": 28,
+      "afterVisible": 28
+    },
+    {
+      "id": "bf-homework-20260729-ascii-code-supplement-complete",
+      "title": "补充题目｜ASCII、原码与补码（完整9页）",
+      "registered": 10,
+      "beforeVisible": 10,
+      "afterVisible": 10
+    },
+    {
+      "id": "bf-homework-20260730-hanzi-encoding-complete",
+      "title": "汉字编码与字符编码补充题（完整4页·15题）",
+      "registered": 15,
+      "beforeVisible": 15,
+      "afterVisible": 15
+    },
+    {
+      "id": "bf-homework-20260716-sentence-structure-complete",
+      "title": "第一章第一节 句子结构（完整3页）",
+      "registered": 40,
+      "beforeVisible": 40,
+      "afterVisible": 40
+    },
+    {
+      "id": "bf-homework-20260728-noun-complete",
+      "title": "第一章第二节 名词与代词（完整4页）",
+      "registered": 35,
+      "beforeVisible": 35,
+      "afterVisible": 35
+    },
+    {
+      "id": "bf-homework-20260728-article-complete",
+      "title": "第一章第三节 数词与冠词（完整4页）",
+      "registered": 35,
+      "beforeVisible": 35,
+      "afterVisible": 35
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-a",
+      "title": "暑假集训｜计算机基础综合练习（一）（完整5页）",
+      "registered": 49,
+      "beforeVisible": 49,
+      "afterVisible": 49
+    },
+    {
+      "id": "bf-homework-v64-math-limit-pages-7-15",
+      "title": "课后练习｜第二节 极限（完整94题）",
+      "registered": 94,
+      "beforeVisible": 94,
+      "afterVisible": 94
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-b",
+      "title": "暑假集训｜进制转换与存储单位练习（二）（完整4页）",
+      "registered": 40,
+      "beforeVisible": 40,
+      "afterVisible": 40
+    },
+    {
+      "id": "bf-homework-v64-math-continuity-pages-16-21",
+      "title": "课后练习｜第三节 连续与间断（完整39题）",
+      "registered": 39,
+      "beforeVisible": 39,
+      "afterVisible": 39
+    },
+    {
+      "id": "bf-summer-20260721-computer-set-c",
+      "title": "暑假集训｜编码、补码与汉字字模练习（三）（完整4页）",
+      "registered": 48,
+      "beforeVisible": 48,
+      "afterVisible": 48
+    },
+    {
+      "id": "bf-homework-v64-english-adjective-adverb-pages-118-121",
+      "title": "课后练习｜第一章第四节 形容词与副词（完整35题）",
+      "registered": 35,
+      "beforeVisible": 35,
+      "afterVisible": 35
+    },
+    {
+      "id": "bf-homework-20260810-math-ch2-sec1-derivative",
+      "title": "第二章 导数与微分｜第一节 导数（完整66题）",
+      "registered": 66,
+      "beforeVisible": 66,
+      "afterVisible": 66
+    },
+    {
+      "id": "bf-summer-20260721-english-noun-pronoun",
+      "title": "暑假集训｜名词与代词综合练习（完整5页·50题）",
+      "registered": 50,
+      "beforeVisible": 50,
+      "afterVisible": 50
+    },
+    {
+      "id": "bf-summer-20260721-english-sentence-structure",
+      "title": "暑假集训｜句子结构与成分分析（完整2页）",
+      "registered": 30,
+      "beforeVisible": 30,
+      "afterVisible": 30
+    },
+    {
+      "id": "bf-summer-20260721-math-function",
+      "title": "暑假集训｜函数基础练习（完整2页）",
+      "registered": 11,
+      "beforeVisible": 11,
+      "afterVisible": 11
+    },
+    {
+      "id": "bf-summer-v62-math-limit",
+      "title": "暑假续接｜第二节 极限（完整16题）",
+      "registered": 16,
+      "beforeVisible": 16,
+      "afterVisible": 16
+    },
+    {
+      "id": "bf-summer-v62-math-continuity",
+      "title": "暑假续接｜第三节 连续与间断（完整6题）",
+      "registered": 6,
+      "beforeVisible": 6,
+      "afterVisible": 6
+    },
+    {
+      "id": "bf-summer-v62-math-derivative",
+      "title": "暑假续接｜第一节 导数（完整30题）",
+      "registered": 30,
+      "beforeVisible": 30,
+      "afterVisible": 30
+    },
+    {
+      "id": "bf-summer-v62-math-application-mvt",
+      "title": "暑假续接｜导数的应用与微分中值定理（完整30题）",
+      "registered": 30,
+      "beforeVisible": 30,
+      "afterVisible": 30
+    },
+    {
+      "id": "bf-summer-v62-math-indefinite-integral",
+      "title": "暑假续接｜第一节 不定积分（完整15题）",
+      "registered": 15,
+      "beforeVisible": 15,
+      "afterVisible": 15
+    },
+    {
+      "id": "bf-summer-v62-eng-article-number",
+      "title": "暑假续接｜第三节 冠词与数词（完整50题）",
+      "registered": 50,
+      "beforeVisible": 50,
+      "afterVisible": 50
+    },
+    {
+      "id": "bf-summer-v62-eng-adjective-adverb",
+      "title": "暑假续接｜第四节 形容词与副词（完整50题）",
+      "registered": 50,
+      "beforeVisible": 50,
+      "afterVisible": 50
+    },
+    {
+      "id": "bf-summer-v62-eng-preposition-conjunction",
+      "title": "暑假续接｜第五节 介词与连词（完整50题）",
+      "registered": 50,
+      "beforeVisible": 50,
+      "afterVisible": 50
+    },
+    {
+      "id": "bf-summer-v62-eng-verb",
+      "title": "暑假续接｜第六节 动词（完整50题）",
+      "registered": 50,
+      "beforeVisible": 50,
+      "afterVisible": 50
+    },
+    {
+      "id": "bf-summer-v62-comp-system-components",
+      "title": "暑假续接｜第四节 计算机系统组成（完整81题）",
+      "registered": 81,
+      "beforeVisible": 81,
+      "afterVisible": 81
+    },
+    {
+      "id": "bf-summer-v62-comp-computational-thinking",
+      "title": "暑假续接｜第五节 计算思维（完整15题）",
+      "registered": 15,
+      "beforeVisible": 15,
+      "afterVisible": 15
+    },
+    {
+      "id": "bf-summer-v62-comp-os-basics",
+      "title": "暑假续接｜操作系统基本知识和使用（完整22题）",
+      "registered": 22,
+      "beforeVisible": 22,
+      "afterVisible": 22
+    },
+    {
+      "id": "bf-summer-v62-comp-os-functions",
+      "title": "暑假续接｜第二节 操作系统的功能（完整44题）",
+      "registered": 44,
+      "beforeVisible": 44,
+      "afterVisible": 44
+    },
+    {
+      "id": "bf-summer-v62-comp-windows-intro",
+      "title": "暑假续接｜第三节 Windows简介（完整41题）",
+      "registered": 41,
+      "beforeVisible": 41,
+      "afterVisible": 41
+    },
+    {
+      "id": "bf-homework-v104-math-ch2-application",
+      "title": "蓝色森林｜第二章第二节 导数的应用（完整59题）",
+      "registered": 59,
+      "beforeVisible": 59,
+      "afterVisible": 59
+    },
+    {
+      "id": "qfw-homework-v66-computer-overview",
+      "title": "全方位｜第1章 计算机概述（完整47题）",
+      "registered": 47,
+      "beforeVisible": 47,
+      "afterVisible": 47
+    },
+    {
+      "id": "qfw-homework-20260814-computer-ch2-info-code",
+      "title": "全方位｜第2章 信息表示与编码（完整70题）",
+      "registered": 70,
+      "beforeVisible": 70,
+      "afterVisible": 70
+    },
+    {
+      "id": "qfw-homework-v105-computer-ch3-system-composition",
+      "title": "全方位｜第3章 计算机系统组成（完整147题）",
+      "registered": 147,
+      "beforeVisible": 147,
+      "afterVisible": 147
+    },
+    {
+      "id": "qfw-homework-v92-english-noun",
+      "title": "全方位｜名词练习题（完整46题）",
+      "registered": 46,
+      "beforeVisible": 46,
+      "afterVisible": 46
+    },
+    {
+      "id": "qfw-homework-v92-english-article",
+      "title": "全方位｜冠词练习题（完整25题）",
+      "registered": 25,
+      "beforeVisible": 25,
+      "afterVisible": 25
+    },
+    {
+      "id": "qfw-homework-v92-english-pronoun",
+      "title": "全方位｜代词练习题（完整49题）",
+      "registered": 49,
+      "beforeVisible": 49,
+      "afterVisible": 49
+    },
+    {
+      "id": "qfw-homework-v92-english-numeral",
+      "title": "全方位｜数词练习题（完整25题）",
+      "registered": 25,
+      "beforeVisible": 25,
+      "afterVisible": 25
+    },
+    {
+      "id": "qfw-homework-v92-english-adjective-adverb",
+      "title": "全方位｜形容词副词练习题（完整54题）",
+      "registered": 54,
+      "beforeVisible": 54,
+      "afterVisible": 54
+    },
+    {
+      "id": "qfw-homework-v92-english-sentence-components",
+      "title": "全方位｜句子成分练习题（完整42题）",
+      "registered": 42,
+      "beforeVisible": 42,
+      "afterVisible": 42
+    },
+    {
+      "id": "qfw-homework-v92-english-sentence-types",
+      "title": "全方位｜句子类型练习题（完整26题卡）",
+      "registered": 26,
+      "beforeVisible": 26,
+      "afterVisible": 26
+    },
+    {
+      "id": "bf-homework-v96-english-preposition-conjunction",
+      "title": "蓝色森林｜第五节 介词与连词（完整35题）",
+      "registered": 35,
+      "beforeVisible": 35,
+      "afterVisible": 35
+    },
+    {
+      "id": "qfw-homework-v96-english-preposition",
+      "title": "全方位｜六、介词练习题（完整46题）",
+      "registered": 46,
+      "beforeVisible": 46,
+      "afterVisible": 46
+    },
+    {
+      "id": "qfw-homework-v96-math-ch1-function",
+      "title": "全方位｜第一章第一节 函数（完整43题）",
+      "registered": 43,
+      "beforeVisible": 43,
+      "afterVisible": 43
+    },
+    {
+      "id": "qfw-homework-v96-math-ch1-limit",
+      "title": "全方位｜第一章第二节 极限（完整78题）",
+      "registered": 78,
+      "beforeVisible": 78,
+      "afterVisible": 78
+    },
+    {
+      "id": "qfw-homework-v96-math-ch1-continuity",
+      "title": "全方位｜第一章第三节 连续与间断（完整17题）",
+      "registered": 17,
+      "beforeVisible": 17,
+      "afterVisible": 17
+    },
+    {
+      "id": "qfw-homework-v96-math-ch2-derivative",
+      "title": "全方位｜第二章第一节 导数与微分（完整87题）",
+      "registered": 87,
+      "beforeVisible": 87,
+      "afterVisible": 87
+    },
+    {
+      "id": "qfw-homework-v104-math-ch2-application",
+      "title": "全方位｜第二章第二节 导数的应用（完整66题）",
+      "registered": 66,
+      "beforeVisible": 66,
+      "afterVisible": 66
+    },
+    {
+      "id": "cet4-v115-translation-red-envelope-money",
+      "title": "四级翻译 001｜压岁钱（Red Envelope Money）",
+      "registered": 1,
+      "beforeVisible": 1,
+      "afterVisible": 1
+    },
+    {
+      "id": "qfw-v117-english-verb-practice-p31-p35",
+      "title": "全方位｜七、动词练习题（P31–P35）",
+      "registered": 34,
+      "beforeVisible": 34,
+      "afterVisible": 34
+    },
+    {
+      "id": "qfw-v117-modal-verb-true-test",
+      "title": "全方位｜情态动词真题再现",
+      "registered": 5,
+      "beforeVisible": 5,
+      "afterVisible": 5
+    },
+    {
+      "id": "bf-v117-english-section6-verbs-40",
+      "title": "蓝色森林｜第六节 动词（完整40题）",
+      "registered": 40,
+      "beforeVisible": 40,
+      "afterVisible": 40
+    },
+    {
+      "id": "cet4-v118-translation-mid-autumn-festival",
+      "title": "四级翻译 002｜中秋节（The Mid-Autumn Festival）",
+      "registered": 1,
+      "beforeVisible": 1,
+      "afterVisible": 1
+    },
+    {
+      "id": "cet4-v118-translation-winter-solstice",
+      "title": "四级翻译 003｜冬至（The Winter Solstice）",
+      "registered": 1,
+      "beforeVisible": 1,
+      "afterVisible": 1
+    },
+    {
+      "id": "cet4-v120-translation-tieguanyin",
+      "title": "四级翻译 004｜铁观音（Tieguanyin）",
+      "registered": 1,
+      "beforeVisible": 1,
+      "afterVisible": 1
+    },
+    {
+      "id": "cet4-v121-translation-chinese-knots",
+      "title": "四级翻译 005｜中国结（Chinese Knots）",
+      "registered": 1,
+      "beforeVisible": 1,
+      "afterVisible": 1
+    },
+    {
+      "id": "bf-homework-v122-math-ch2-mvt",
+      "title": "蓝色森林｜第二章第三节 微分中值定理（完整27题）",
+      "registered": 27,
+      "beforeVisible": 27,
+      "afterVisible": 27
+    },
+    {
+      "id": "bf-v123-computer-operating-system",
+      "title": "蓝色森林｜第二章 操作系统（完整题组）",
+      "registered": 76,
+      "beforeVisible": 76,
+      "afterVisible": 76
+    },
+    {
+      "id": "qfw-v124-computer-os-ch4-full",
+      "title": "全方位｜第4章 操作系统（完整127题）",
+      "registered": 127,
+      "beforeVisible": 127,
+      "afterVisible": 127
+    },
+    {
+      "id": "bf-v127-math-indefinite-complete",
+      "title": "蓝色森林｜课后练习｜高等数学｜第三章 一元函数积分学｜第一节 不定积分（79题）",
+      "registered": 79,
+      "beforeVisible": 76,
+      "afterVisible": 79
+    },
+    {
+      "id": "qfw-v127-math-indefinite-complete",
+      "title": "全方位｜课后练习｜高等数学｜第三章 一元函数积分学｜第一节 不定积分（待核对）",
+      "registered": 97,
+      "beforeVisible": 0,
+      "afterVisible": 97
+    }
+  ],
+  "migration": {
+    "localOnlyQuestionsKept": 2,
+    "progressUnchanged": true,
+    "hiddenPreferencePreserved": true,
+    "secondLoadDoesNotRewrite": true
+  },
+  "pendingChoiceNotGraded": true
+}

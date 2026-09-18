@@ -98,7 +98,7 @@
       ...source,
       id,
       subject,
-      chapter: normalizeChapter(subject, source.chapter),
+      chapter: source.preserveSourceChapter ? String(source.chapter || "未分章").trim() : normalizeChapter(subject, source.chapter),
       type: String(source.type || source.questionType || "练习题").trim(),
       stem: String(source.stem || source.question || source.title || "").trim(),
       options: Array.isArray(source.options) ? source.options.map((option) => String(option).trim()).filter(Boolean) : [],
